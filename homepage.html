@@ -3,309 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Network - Referral Mining Matrix</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>VIP Level Rankings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- Dark Premium Theme Palette Variable Links --- */
         :root {
             --bg-body: #05060a;
-            --bg-surface: #0c0e17;
             --panel-card: rgba(18, 20, 32, 0.75);
             --accent-neon: #00ffcc;
-            --accent-hover: #00b38f;
             --text-main: #f1f3f9;
-            --text-muted: #8a94a6;
+            --text-muted: #6b7280;
             --card-border: rgba(255, 255, 255, 0.04);
-            --input-bg: #1a1d30;
-            --line-color: rgba(0, 255, 204, 0.25);
+            --vip-gold: #fbbf24;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
-            position: relative;
-            padding: 40px 20px;
-        }
-
-        /* Custom Scrollbar Elements */
-        ::-webkit-scrollbar { width: 6px; height: 5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; user-select: none; }
+        body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding: 40px 20px; }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg-body); }
         ::-webkit-scrollbar-thumb { background: #1a1d30; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
 
-        /* --- BACKGROUND INFINITE NETWORK MAP CANVAS --- */
-        #network-canvas-map {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0.25;
-        }
+        #network-canvas-map { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.15; }
+        .content-terminal-layer { position: relative; z-index: 10; max-width: 960px; margin: 0 auto; }
 
-        /* --- CONTENT LAYER HOOKS --- */
-        .content-terminal-layer {
-            position: relative;
-            z-index: 10;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+        .hero-section { background: var(--panel-card); backdrop-filter: blur(20px); border: 1px solid var(--card-border); padding: 30px 28px; border-radius: 22px; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--vip-gold); background: rgba(251, 191, 36, 0.08); padding: 6px 14px; border-radius: 30px; border: 1px solid rgba(251, 191, 36, 0.12); margin-bottom: 16px; }
+        .pulse-dot { width: 6px; height: 6px; background: var(--vip-gold); border-radius: 50%; box-shadow: 0 0 8px var(--vip-gold); animation: pulseFlash 1.5s infinite alternate; }
+        @keyframes pulseFlash { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        .hero-section h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, #fff 30%, var(--vip-gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-section > p { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
 
-        /* --- HERO HEADLINE AREA --- */
-        .hero-section {
-            background: var(--panel-card);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--card-border);
-            padding: 40px 35px;
-            border-radius: 24px;
-            margin-bottom: 35px;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.4);
-        }
-        .network-meta-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: var(--accent-neon);
-            background: rgba(0, 255, 204, 0.05);
-            padding: 6px 14px;
-            border-radius: 30px;
-            border: 1px solid rgba(0, 255, 204, 0.1);
-            margin-bottom: 20px;
-        }
-        .pulse-dot-indicator {
-            width: 6px;
-            height: 6px;
-            background: var(--accent-neon);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-neon);
-            animation: pulseFlash 1.5s infinite alternate;
-        }
-        .hero-section h1 {
-            font-size: 32px;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 15px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #fff 40%, var(--accent-neon) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-section p {
-            color: var(--text-muted);
-            font-size: 14.5px;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-        .hero-ctas {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
-            color: #000 !important;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 700;
-            padding: 11px 22px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.15);
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0, 255, 204, 0.3);
-        }
-        .btn-secondary {
-            color: var(--text-main);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 11px 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.06);
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.02);
-            color: var(--accent-neon);
-        }
+        .tree-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .summary-card { background: var(--panel-card); backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; text-align: center; }
+        .summary-card .num { font-size: 24px; font-weight: 800; color: var(--vip-gold); line-height: 1; margin-bottom: 4px; }
+        .summary-card .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; }
+        .summary-card.my-pos .num { color: var(--accent-neon); }
 
-        /* ================= HERO IMAGE SLIDER SECTION ================= */
-        .hero-slider-wrapper {
-            background: var(--panel-card);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 18px;
-            margin-bottom: 35px;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.4);
-        }
-        .slider-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-            padding: 0 6px;
-        }
-        .slider-header .label {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-        .slider-header .label i { color: var(--accent-neon); }
-        .slider-header .counter {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-        .slider-header .counter span { color: var(--accent-neon); font-weight: 700; }
+        .tree-container { background: var(--panel-card); backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 22px; padding: 28px 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.45); }
+        .tree-header { font-size: 15px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+        .tree-header i { color: var(--vip-gold); }
 
-        .slider-frame {
-            position: relative;
-            width: 100%;
-            height: 420px;
-            border-radius: 18px;
-            overflow: hidden;
-            background: #0a0c14;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
-        }
-        .slides-track { position: relative; width: 100%; height: 100%; }
-        .slide-item {
-            position: absolute; inset: 0; opacity: 0;
-            transition: opacity 0.9s ease, transform 1.2s ease; transform: scale(1.08);
-        }
-        .slide-item.active { opacity: 1; transform: scale(1); z-index: 2; }
-        .slide-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .slide-item::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(5,6,10,0.1) 0%, rgba(5,6,10,0.4) 55%, rgba(5,6,10,0.92) 100%); z-index: 1;
-        }
-        .slide-caption {
-            position: absolute; bottom: 30px; left: 30px; right: 30px; z-index: 3;
-            transform: translateY(20px); opacity: 0; transition: all 0.7s ease 0.3s;
-        }
-        .slide-item.active .slide-caption { transform: translateY(0); opacity: 1; }
-        .slide-caption .tag {
-            display: inline-block; font-size: 10px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-neon);
-            background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0, 255, 204, 0.2);
-            padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;
-        }
-        .slide-caption h3 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.3; max-width: 70%; }
-        .slide-caption p { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 60%; }
-
-        .nav-arrow {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.45);
-            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
-            color: var(--text-main); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 5; transition: all 0.3s ease; font-size: 14px;
-        }
-        .nav-arrow:hover { background: var(--accent-neon); color: #000; border-color: var(--accent-neon); box-shadow: 0 0 20px rgba(0,255,204,0.4); }
-        .nav-arrow.prev { left: 18px; }
-        .nav-arrow.next { right: 18px; }
-
-        .dots-row { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 0.3s ease; }
-        .dot.active { background: var(--accent-neon); width: 26px; border-radius: 10px; box-shadow: 0 0 12px rgba(0,255,204,0.6); }
-
-        .progress-bar-track { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 5; }
-        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-neon), var(--accent-hover)); box-shadow: 0 0 10px var(--accent-neon); }
-        .progress-bar-fill.running { animation: progressFill 6s linear forwards; }
-
-        /* --- VERTICAL L-R REFERRAL ROADMAP ZONE --- */
-        .roadmap-container {
-            background: var(--panel-card); backdrop-filter: blur(15px);
-            border: 1px solid var(--card-border); border-radius: 24px;
-            padding: 35px; box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-            overflow-x: auto; -webkit-overflow-scrolling: touch;
-        }
-        .roadmap-title {
-            font-size: 16px; font-weight: 600; margin-bottom: 30px;
-            display: flex; align-items: center; gap: 10px; letter-spacing: 0.3px;
-        }
-        .roadmap-title i { color: var(--accent-neon); }
-
-        /* Loading state styles */
-        .loading-state { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent-neon); border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-state { text-align: center; padding: 50px 0; color: var(--text-muted); font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.06); border-top-color: var(--vip-gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .v-tree, .v-tree ul { list-style: none; margin: 0; padding: 0; position: relative; }
-        .v-tree ul { margin-left: 35px; }
-        .v-tree ul::before {
-            content: ''; position: absolute; left: -15px; top: 0; bottom: 20px;
-            width: 1.5px; background: var(--line-color);
+        .ranked-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .rank-card {
+            background: rgba(9, 10, 15, 0.9);
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.35);
+            position: relative;
+            overflow: hidden;
         }
-        .v-tree li { margin: 0; padding: 8px 0 8px 15px; position: relative; }
-        .v-tree li::before {
-            content: ''; position: absolute; left: -15px; top: 20px;
-            width: 15px; height: 1.5px; border-top: 1.5px solid var(--line-color);
+        .rank-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .rank-card:hover { transform: translateX(4px); border-color: rgba(255,255,255,0.08); }
+
+        .rank-position {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 900;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
         }
 
-        .node-card {
-            background: rgba(9, 10, 15, 0.85); border: 1px solid rgba(255,255,255,0.04);
-            padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center;
-            gap: 8px; transition: all 0.25s ease; backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        /* Top 1 — সোনালী */
+        .rank-card.pos-1 {
+            border-color: rgba(251, 191, 36, 0.3);
+            background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(9,10,15,0.95));
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.1), 0 4px 15px rgba(0,0,0,0.4);
         }
-        .node-card:hover { border-color: var(--accent-neon); box-shadow: 0 0 12px rgba(0,255,204,0.15); transform: translateX(3px); }
-        .node-icon {
-            font-size: 11px; color: var(--accent-neon); background: rgba(0, 255, 204, 0.05);
-            width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        .rank-card.pos-1 .rank-position {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            box-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
         }
-        .node-meta { display: flex; flex-direction: column; white-space: nowrap; }
-        .node-meta strong { font-size: 11px; font-weight: 600; color: var(--text-main); line-height: 1.2; }
-        .node-meta span { font-size: 9px; color: var(--text-muted); margin-top: 1px; }
+        .rank-card.pos-1::before {
+            background: linear-gradient(90deg, rgba(251,191,36,0.05), transparent);
+            opacity: 1;
+        }
 
-        .root-node { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.02); }
-        .sub-branch-node { border-color: rgba(0, 255, 204, 0.12); }
+        /* Top 2 — রূপালী */
+        .rank-card.pos-2 {
+            border-color: rgba(192, 192, 192, 0.25);
+            background: linear-gradient(135deg, rgba(192,192,192,0.04), rgba(9,10,15,0.95));
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.06), 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .rank-card.pos-2 .rank-position {
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            color: #1a1a2e;
+            box-shadow: 0 0 12px rgba(192, 192, 192, 0.3);
+        }
+        .rank-card.pos-2::before {
+            background: linear-gradient(90deg, rgba(192,192,192,0.03), transparent);
+            opacity: 1;
+        }
 
-        @keyframes pulseFlash { 0% { opacity: 0.3; } 100% { opacity: 1; } }
-        @keyframes progressFill { from { width: 0%; } to { width: 100%; } }
-        
-        @media (max-width: 600px) {
-            body { padding: 20px 10px; }
-            .hero-section { padding: 25px 20px; }
-            .roadmap-container { padding: 25px 20px; }
-            .hero-section h1 { font-size: 24px; }
-            .slider-frame { height: 280px; }
-            .slide-caption { left: 18px; right: 18px; bottom: 22px; }
-            .slide-caption h3 { font-size: 16px; max-width: 100%; }
-            .slide-caption p { font-size: 11px; max-width: 100%; }
-            .nav-arrow { width: 36px; height: 36px; }
-            .nav-arrow.prev { left: 10px; }
-            .nav-arrow.next { right: 10px; }
+        /* Top 3 — ব্রোঞ্জ */
+        .rank-card.pos-3 {
+            border-color: rgba(205, 127, 50, 0.25);
+            background: linear-gradient(135deg, rgba(205,127,50,0.04), rgba(9,10,15,0.95));
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.06), 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .rank-card.pos-3 .rank-position {
+            background: linear-gradient(135deg, #d4956a, #b87333);
+            color: #1a1a2e;
+            box-shadow: 0 0 12px rgba(205, 127, 50, 0.3);
+        }
+        .rank-card.pos-3::before {
+            background: linear-gradient(90deg, rgba(205,127,50,0.03), transparent);
+            opacity: 1;
+        }
+
+        /* লগইন ইউজার — রঙিন গ্লোয়িং হাইলাইট */
+        .rank-card.is-me {
+            border-color: rgba(0, 255, 204, 0.45) !important;
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.08), rgba(0, 200, 255, 0.04), rgba(9,10,15,0.95)) !important;
+            box-shadow: 0 0 35px rgba(0, 255, 204, 0.15), 0 0 70px rgba(0, 255, 204, 0.05), 0 4px 15px rgba(0,0,0,0.4) !important;
+            animation: meGlow 2.5s ease-in-out infinite alternate;
+        }
+        .rank-card.is-me::before {
+            background: linear-gradient(90deg, rgba(0,255,204,0.06), rgba(0,200,255,0.03), transparent) !important;
+            opacity: 1 !important;
+        }
+        @keyframes meGlow {
+            0% { box-shadow: 0 0 25px rgba(0, 255, 204, 0.12), 0 0 50px rgba(0, 255, 204, 0.04), 0 4px 15px rgba(0,0,0,0.4); }
+            100% { box-shadow: 0 0 40px rgba(0, 255, 204, 0.2), 0 0 80px rgba(0, 255, 204, 0.08), 0 4px 15px rgba(0,0,0,0.4); }
+        }
+        .rank-card.is-me .rank-position {
+            background: linear-gradient(135deg, #00ffcc, #00c9ff) !important;
+            color: #000 !important;
+            box-shadow: 0 0 18px rgba(0, 255, 204, 0.5) !important;
+        }
+
+        /* ক্রাউন */
+        .crown-icon {
+            position: absolute;
+            top: -8px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #fbbf24;
+            filter: drop-shadow(0 0 6px rgba(251,191,36,0.6));
+            animation: crownBounce 2s ease-in-out infinite;
+        }
+        @keyframes crownBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-3px); }
+        }
+
+        /* অ্যাভাটার */
+        .node-avatar {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+            flex-shrink: 0; color: #000;
+            position: relative;
+        }
+        .active-avatar { background: linear-gradient(135deg, #00ffcc, #00b38f); }
+        .inactive-avatar { background: #2a2d3a; color: var(--text-muted); }
+        .online-dot { position: absolute; bottom: -2px; right: -2px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid #090a0f; }
+        .active-dot { background: #00ff66; box-shadow: 0 0 6px #00ff66; }
+        .inactive-dot { background: #4b5563; }
+
+        /* ইনফো */
+        .node-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+        .node-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .node-name { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .rank-card.is-me .node-name { font-weight: 800 !important; color: #fff !important; text-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
+
+        .node-you-tag { font-size: 8px; font-weight: 700; color: #000; background: linear-gradient(135deg, #00ffcc, #00c9ff); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(0, 255, 204, 0.3); }
+
+        .top1-badge { font-size: 8px; font-weight: 800; color: #000; background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+        .top2-badge { font-size: 8px; font-weight: 800; color: #1a1a2e; background: linear-gradient(135deg, #e2e8f0, #94a3b8); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(192, 192, 192, 0.3); }
+        .top3-badge { font-size: 8px; font-weight: 800; color: #1a1a2e; background: linear-gradient(135deg, #d4956a, #b87333); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(205, 127, 50, 0.3); }
+
+        /* VIP লেভেল ব্যাজ */
+        .vip-level-badge { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 5px; flex-shrink: 0; letter-spacing: 0.5px; }
+        .vl-0 { background: rgba(255,255,255,0.04); color: var(--text-muted); }
+        .vl-1 { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.18); }
+        .vl-2 { background: rgba(167, 139, 250, 0.12); color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.18); }
+        .vl-3 { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+        .vl-4 { background: rgba(251, 191, 36, 0.18); color: #f59e0b; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .vl-5 { background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(167,139,250,0.25)); color: #fbbf24; border: 1px solid rgba(251,191,36,0.35); box-shadow: 0 0 10px rgba(251,191,36,0.15); }
+
+        .node-sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .node-sub i { font-size: 8px; }
+        .stat-active { color: #00ff66; }
+        .stat-vip { color: var(--vip-gold); }
+        .stat-total { color: #818cf8; }
+
+        /* স্কোর বার */
+        .score-bar-wrap { width: 70px; height: 4px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+        .score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .pos-1 .score-bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .pos-2 .score-bar-fill { background: linear-gradient(90deg, #e2e8f0, #94a3b8); }
+        .pos-3 .score-bar-fill { background: linear-gradient(90deg, #d4956a, #b87333); }
+        .is-me .score-bar-fill { background: linear-gradient(90deg, #00ffcc, #00c9ff) !important; }
+        .rank-card:not(.pos-1):not(.pos-2):not(.pos-3):not(.is-me) .score-bar-fill { background: rgba(255,255,255,0.12); }
+
+        .show-more-btn { display: block; width: 100%; margin-top: 20px; padding: 14px; background: rgba(251,191,36,0.05); border: 1px dashed rgba(251,191,36,0.2); color: var(--vip-gold); font-size: 13px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .show-more-btn:hover { background: rgba(251,191,36,0.1); border-color: var(--vip-gold); }
+
+        .top-separator { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px 0; padding: 0 4px; }
+        .top-separator .line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent); }
+        .top-separator .line:last-child { background: linear-gradient(270deg, rgba(255,255,255,0.06), transparent); }
+        .top-separator span { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+
+        .empty-tree { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .empty-tree i { font-size: 40px; margin-bottom: 16px; opacity: 0.3; display: block; }
+
+        @media (max-width: 640px) {
+            body { padding: 20px 12px; }
+            .hero-section { padding: 22px 16px; }
+            .hero-section h1 { font-size: 20px; }
+            .tree-container { padding: 20px 14px; }
+            .tree-summary { grid-template-columns: repeat(2, 1fr); }
+            .node-name { max-width: 90px; font-size: 11px; }
+            .rank-card { padding: 12px 14px; gap: 10px; }
+            .rank-position { width: 36px; height: 36px; font-size: 12px; border-radius: 8px; }
+            .node-avatar { width: 36px; height: 36px; font-size: 11px; }
+            .score-bar-wrap { width: 45px; }
+            .node-sub { gap: 8px; }
         }
     </style>
 </head>
@@ -314,364 +250,376 @@
     <canvas id="network-canvas-map"></canvas>
 
     <div class="content-terminal-layer">
-        
         <section class="hero-section">
-            <div class="network-meta-badge">
-                <div class="pulse-dot-indicator"></div> Referral Cloud Mining Active
-            </div>
-            <h1>Multi-Tier Referral Mining Engine</h1>
-            <p>Apnar connection network map reference link share kore dynamic layer hash-rate generate koro. Joto beshi user node process extend hobe, referral matrix algorithms calculations totoi speed payout processing finalize korbe.</p>
-            
-           
+            <div class="hero-badge"><div class="pulse-dot"></div> VIP Level Rankings</div>
+            <h1>Unlocked Level Leaderboard</h1>
+            <p>Users ranked by total VIP levels unlocked first, then Active Referrals, then Total Invited Referrals. No same position — everyone gets a unique rank.</p>
         </section>
 
-        <!-- ========== HERO IMAGE SLIDER (5 SLIDES) ========== -->
-        <section class="hero-slider-wrapper">
-            <div class="slider-header">
-                <div class="label"><i class="fa-solid fa-images"></i> Network Highlights</div>
-                <div class="counter">Slide <span id="curSlide">01</span> / 05</div>
+        <div class="tree-summary" id="treeSummary" style="display:none;">
+            <div class="summary-card">
+                <div class="num" id="sumTotal">0</div>
+                <div class="lbl">Total Users</div>
             </div>
-
-            <div class="slider-frame" id="sliderFrame">
-                <div class="slides-track" id="slidesTrack">
-                    <div class="slide-item active">
-                        <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&q=80" alt="Crypto Mining">
-                        <div class="slide-caption">
-                            <span class="tag">Quantum Hash Engine</span>
-                            <h3>High-Speed Cloud Mining Infrastructure</h3>
-                            <p>Industrial-grade GPU clusters processing referral hash layers in real-time.</p>
-                        </div>
-                    </div>
-                    <div class="slide-item">
-                        <img src="https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200&q=80" alt="Blockchain Network">
-                        <div class="slide-caption">
-                            <span class="tag">Decentralized Layer</span>
-                            <h3>Secure Blockchain Verification Nodes</h3>
-                            <p>Every referral transaction is cryptographically verified across distributed ledger endpoints.</p>
-                        </div>
-                    </div>
-                    <div class="slide-item">
-                        <img src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1200&q=80" alt="Trading Dashboard">
-                        <div class="slide-caption">
-                            <span class="tag">Live Analytics</span>
-                            <h3>Real-Time Mining Yield Dashboard</h3>
-                            <p>Monitor tier-wise hash rate, bonus multiplier, and projected payout interactively.</p>
-                        </div>
-                    </div>
-                    <div class="slide-item">
-                        <img src="https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=1200&q=80" alt="Crypto Wallet">
-                        <div class="slide-caption">
-                            <span class="tag">Instant Payout</span>
-                            <h3>Automated Reward Distribution System</h3>
-                            <p>Referral commissions are auto-credited to your wallet once sub-node completes cycle.</p>
-                        </div>
-                    </div>
-                    <div class="slide-item">
-                        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80" alt="Data Analytics">
-                        <div class="slide-caption">
-                            <span class="tag">AI Optimization</span>
-                            <h3>Smart Matrix Algorithm Calibration</h3>
-                            <p>Adaptive AI engine redistributes hash power dynamically across profitable branches.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="nav-arrow prev" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></div>
-                <div class="nav-arrow next" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></div>
-                <div class="dots-row" id="dotsRow"></div>
-                <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar"></div></div>
+            <div class="summary-card">
+                <div class="num" id="sumVip">0</div>
+                <div class="lbl">VIP Members</div>
             </div>
-        </section>
-
-        <!-- Dynamic Roadmap Section -->
-        <section class="roadmap-container">
-            <div class="roadmap-title">
-                <i class="fa-solid fa-network-wired"></i> Live Mining Network Tree (Referral Track)
+            <div class="summary-card">
+                <div class="num" id="sumTopLevel">0</div>
+                <div class="lbl">Max Unlocked</div>
             </div>
+            <div class="summary-card my-pos">
+                <div class="num" id="sumMyPos">-</div>
+                <div class="lbl">Your Position</div>
+            </div>
+        </div>
 
-            <!-- Loading State -->
+        <section class="tree-container">
+            <div class="tree-header">
+                <i class="fa-solid fa-crown"></i> VIP Level Rankings
+            </div>
             <div id="treeLoading" class="loading-state">
                 <div class="spinner"></div>
-                <span>Connecting to Network Nodes...</span>
+                <span>Syncing rankings...</span>
             </div>
-
-            <!-- Dynamic Tree Container -->
-            <ul class="v-tree" id="referralTree" style="display: none;"></ul>
+            <div id="treeRenderArea" style="display: none;">
+                <div class="ranked-list" id="rankedList"></div>
+                <button class="show-more-btn" id="showMoreBtn" style="display:none;">
+                    <i class="fa-solid fa-chevron-down"></i> Load More Users
+                </button>
+            </div>
         </section>
-
     </div>
 
-    <!-- Firebase SDKs (Compat version for config.js support) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- Your Custom Config File -->
     <script src="config.js"></script>
 
     <script>
-        // ========================================
-        // 1. CANVAS BACKGROUND NETWORK ANIMATION
-        // ========================================
+        // ==========================================
+        // 1. CANVAS BACKGROUND
+        // ==========================================
         const canvas = document.getElementById('network-canvas-map');
         const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+        const pts = Array.from({length: 30}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2}));
+        function drawCanvas() {
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle = "rgba(251, 191, 36, 0.03)"; ctx.beginPath();
+            pts.forEach((p,i) => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width)p.vx*=-1; if(p.y<0||p.y>canvas.height)p.vy*=-1; ctx.moveTo(p.x,p.y); ctx.lineTo(pts[(i+1)%pts.length].x, pts[(i+1)%pts.length].y); });
+            ctx.stroke(); requestAnimationFrame(drawCanvas);
+        } drawCanvas();
+
+        // ==========================================
+        // 2. GLOBALS
+        // ==========================================
+        let db = null;
+        let currentUserId = null;
+        let rankedUserList = [];
+        let maxScore = 1;
+        let currentRenderCount = 0;
+        const LIMIT_PER_LOAD = 15;
+
+        // ==========================================
+        // 3. HELPERS
+        // ==========================================
+        function getLoggedInUID() {
+            try {
+                const raw = localStorage.getItem('currentUser');
+                if (!raw) return null;
+                return JSON.parse(raw).uid;
+            } catch(e) { return null; }
+        }
+
+        function getDisplayName(user, uid) { return user.username || user.fullName || user.email || uid.substring(0, 8); }
+        function getInitials(name) { if (!name) return '?'; const p = name.trim().split(/\s+/); return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : name.substring(0,2).toUpperCase(); }
         
-        function alignCanvasDimension() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', alignCanvasDimension);
-        alignCanvasDimension();
-
-        let trackPoints = [];
-        for(let idx=0; idx<30; idx++) {
-            trackPoints.push({
-                x: Math.random()*canvas.width, y: Math.random()*canvas.height, 
-                vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3
-            });
+        /**
+         * VIP Level = কতগুলো VIP আনলক করেছে (unlockedVips অ্যারের length)
+         * যদি unlockedVips না থাকে, তাহলে 0
+         */
+        function getVIPLevel(user) {
+            if (Array.isArray(user.unlockedVips) && user.unlockedVips.length > 0) {
+                return Math.min(user.unlockedVips.length, 5);
+            }
+            return 0;
         }
 
-        function triggerEngineRefreshFrame() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.strokeStyle = "rgba(0, 255, 204, 0.05)";
-            ctx.beginPath();
-            trackPoints.forEach((pt, i) => {
-                pt.x += pt.vx; pt.y += pt.vy;
-                if(pt.x<0 || pt.x>canvas.width) pt.vx*=-1;
-                if(pt.y<0 || pt.y>canvas.height) pt.vy*=-1;
-                ctx.moveTo(pt.x, pt.y);
-                ctx.lineTo(trackPoints[(i+1)%trackPoints.length].x, trackPoints[(i+1)%trackPoints.length].y);
-            });
-            ctx.stroke();
-            requestAnimationFrame(triggerEngineRefreshFrame);
-        }
-        triggerEngineRefreshFrame();
-
-
-        // ========================================
-        // 2. HERO SLIDER LOGIC
-        // ========================================
-        const slides = document.querySelectorAll('.slide-item');
-        const dotsContainer = document.getElementById('dotsRow');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const progressBar = document.getElementById('progressBar');
-        const curSlideLabel = document.getElementById('curSlide');
-
-        let currentSlide = 0;
-        const totalSlides = slides.length;
-        const slideDuration = 6000; 
-        let autoSlideInterval;
-
-        slides.forEach((_, i) => {
-            const dot = document.createElement('div');
-            dot.classList.add('dot');
-            if (i === 0) dot.classList.add('active');
-            dot.addEventListener('click', () => goToSlide(i));
-            dotsContainer.appendChild(dot);
-        });
-
-        const dots = document.querySelectorAll('.dot');
-
-        function updateCounter() { curSlideLabel.textContent = String(currentSlide + 1).padStart(2, '0'); }
-
-        function resetProgress() {
-            progressBar.classList.remove('running');
-            void progressBar.offsetWidth; 
-            progressBar.classList.add('running');
-        }
-
-        function goToSlide(index) {
-            slides[currentSlide].classList.remove('active');
-            dots[currentSlide].classList.remove('active');
-            currentSlide = (index + totalSlides) % totalSlides;
-            slides[currentSlide].classList.add('active');
-            dots[currentSlide].classList.add('active');
-            updateCounter();
-            resetProgress();
-            clearInterval(autoSlideInterval);
-            startAutoSlide();
-        }
-
-        function nextSlide() { goToSlide(currentSlide + 1); }
-        function prevSlide() { goToSlide(currentSlide - 1); }
-        function startAutoSlide() { autoSlideInterval = setInterval(nextSlide, slideDuration); }
-
-        nextBtn.addEventListener('click', nextSlide);
-        prevBtn.addEventListener('click', prevSlide);
-
-        const sliderFrame = document.getElementById('sliderFrame');
-        sliderFrame.addEventListener('mouseenter', () => { clearInterval(autoSlideInterval); progressBar.style.animationPlayState = 'paused'; });
-        sliderFrame.addEventListener('mouseleave', () => { progressBar.style.animationPlayState = 'running'; startAutoSlide(); });
-
-        let touchStartX = 0;
-        sliderFrame.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
-        sliderFrame.addEventListener('touchend', (e) => {
-            const diff = touchStartX - e.changedTouches[0].clientX;
-            if (Math.abs(diff) > 50) { if (diff > 0) nextSlide(); else prevSlide(); }
-        });
-
-        resetProgress();
-        startAutoSlide();
-
-
-        // ========================================
-        // 3. FIREBASE & DYNAMIC REFERRAL LOGIC
-        // ========================================
+        const vipNames = ['Standard', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+        function vipBadgeHTML(l) { return '<span class="vip-level-badge vl-' + l + '">LV ' + l + ' &middot; ' + vipNames[l] + '</span>'; }
         
-        // Initialize Firebase using config.js variables
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        const treeLoading = document.getElementById('treeLoading');
-        const referralTree = document.getElementById('referralTree');
-
-        // Utility: Generate Random Hash String for UI
-        function generateHashRate() {
-            return (Math.random() * 50 + 10).toFixed(1);
+        function topRankBadgeHTML(pos) {
+            if (pos === 1) return '<span class="top1-badge">TOP 1</span>';
+            if (pos === 2) return '<span class="top2-badge">TOP 2</span>';
+            if (pos === 3) return '<span class="top3-badge">TOP 3</span>';
+            return '';
+        }
+        
+        function escapeHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        
+        function showEmpty(msg) {
+            document.getElementById('treeLoading').style.display = 'none';
+            document.getElementById('treeRenderArea').style.display = 'block';
+            document.getElementById('rankedList').innerHTML = '<div class="empty-tree"><i class="fa-solid fa-users-slash"></i><p>' + msg + '</p></div>';
+            document.getElementById('showMoreBtn').style.display = 'none';
         }
 
-        // Utility: Create Node Card HTML
-        function createNodeCard(iconClass, title, subtitle, isRoot = false, isSubBranch = false) {
-            let classes = "node-card";
-            if(isRoot) classes += " root-node";
-            if(isSubBranch) classes += " sub-branch-node";
-
-            return `
-                <div class="${classes}">
-                    <div class="node-icon"><i class="${iconClass}"></i></div>
-                    <div class="node-meta">
-                        <strong>${title}</strong>
-                        <span>${subtitle}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Recursive Function to Build Tree UI
-        function buildTreeUI(user, tierLevel = 1) {
-            let html = "";
-            const isActive = user.status === 'active';
-            const hash = generateHashRate();
-            
-            let icon, title, sub, isSub = false;
-
-            if (tierLevel === 1) {
-                icon = "fa-solid fa-users";
-                title = `Referral Layer 01 (${user.name})`;
-                sub = isActive ? `${user.referralsCount || 0} Nodes Active (+10% Bonus)` : "0 Nodes Active (Mining Offline)";
-            } else if (tierLevel === 2) {
-                icon = "fa-solid fa-user-plus";
-                title = `Sub Referral (${user.name})`;
-                sub = isActive ? `Tier 2 Hash: ${hash} TH/s (+5% Bonus)` : "Mining Offline";
-                isSub = true;
+        // ==========================================
+        // 4. FIREBASE INIT
+        // ==========================================
+        if (typeof firebaseConfig === 'undefined') {
+            document.getElementById('treeLoading').innerHTML = '<span style="color:#ff4d4d">Config missing</span>';
+        } else {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database(); 
+            currentUserId = getLoggedInUID();
+            if (!currentUserId) { 
+                window.location.href = "login.html"; 
             } else {
-                icon = "fa-solid fa-microchip";
-                title = `Sub Node Layer 0${tierLevel} (${user.name})`;
-                sub = isActive ? `Tier ${tierLevel} Mining Yield Active` : "Yield Paused";
-                isSub = true;
+                initSystem();
+            }
+        }
+
+        // ==========================================
+        // 5. DATA FETCH WITH CACHE
+        // ==========================================
+        async function getSmartData() {
+            const localCache = localStorage.getItem('vipRankCache');
+            let localData = localCache ? JSON.parse(localCache) : null;
+            let serverData = null;
+
+            try {
+                const snap = await db.ref('users').once('value');
+                if (snap.exists()) {
+                    serverData = {};
+                    snap.forEach(child => { serverData[child.key] = child.val(); });
+                }
+            } catch(e) {
+                console.error("FB Fetch failed, using cache");
             }
 
-            html += `<li>${createNodeCard(icon, title, sub, false, isSub)}`;
+            if (serverData) {
+                localStorage.setItem('vipRankCache', JSON.stringify({ data: serverData, timestamp: Date.now() }));
+                return serverData;
+            } else if (localData) {
+                return localData.data; 
+            }
+            return null;
+        }
 
-            // If user has referrals, recursively build
-            if (user.referrals && Object.keys(user.referrals).length > 0) {
-                html += "<ul>";
-                Object.values(user.referrals).forEach(ref => {
-                    html += buildTreeUI(ref, tierLevel + 1);
+        // ==========================================
+        // 6. RANKING LOGIC
+        // প্রায়োরিটি:
+        //   ১ম: VIP Level (unlockedVips.length) — বেশি আনলক = উপরে
+        //   ২য়: Active Referral — যাদের balance > 0
+        //   ৩য়: Total Invited Referral — সব রেফারেল কাউন্ট
+        //   ৪র্থ: UID tie-break — কখনো একই পজিশন নয়
+        // ==========================================
+        function rankAllUsers(usersMap) {
+            // চিলড্রেন ম্যাপ তৈরি — কে কাকে রেফার করেছে
+            const childrenMap = {};
+            Object.keys(usersMap).forEach(key => {
+                const refBy = usersMap[key].referredBy;
+                if (refBy && usersMap[refBy]) {
+                    if (!childrenMap[refBy]) childrenMap[refBy] = [];
+                    childrenMap[refBy].push(key);
+                }
+            });
+
+            // প্রতিটি ইউজারের ডাটা প্রসেস
+            const userDataMap = {};
+            Object.keys(usersMap).forEach(uid => {
+                const user = usersMap[uid];
+
+                // VIP Level = unlockedVips অ্যারের দৈর্ঘ্য
+                const vip = getVIPLevel(user);
+
+                // Total Invited Referral = সরাসরি রেফার করা সব ইউজার
+                const directChildren = childrenMap[uid] || [];
+                const totalRefs = directChildren.length;
+
+                // Active Referral = যেসব রেফারেলের balance > 0
+                let activeRefs = 0;
+                directChildren.forEach(cUid => {
+                    if (parseFloat(usersMap[cUid].balance || 0) > 0) activeRefs++;
                 });
-                html += "</ul>";
+
+                // ইউজার নিজে অ্যাক্টিভ কিনা (balance > 0)
+                const isActive = parseFloat(user.balance || 0) > 0;
+
+                userDataMap[uid] = { vip, totalRefs, activeRefs, isActive };
+            });
+
+            // সর্টিং
+            const allUids = Object.keys(usersMap);
+            allUids.sort((a, b) => {
+                const dA = userDataMap[a];
+                const dB = userDataMap[b];
+
+                // ১ম প্রায়োরিটি: VIP Level (বেশি আনলক = ভালো = উপরে)
+                if (dB.vip !== dA.vip) return dB.vip - dA.vip;
+
+                // ২য় প্রায়োরিটি: Active Referral (বেশি = ভালো)
+                if (dB.activeRefs !== dA.activeRefs) return dB.activeRefs - dA.activeRefs;
+
+                // ৩য় প্রায়োরিটি: Total Invited Referral (বেশি = ভালো)
+                if (dB.totalRefs !== dA.totalRefs) return dB.totalRefs - dA.totalRefs;
+
+                // ৪র্থ: UID দিয়ে tie-break — কখনো একই পজিশন হবে না
+                return a < b ? -1 : 1;
+            });
+
+            // র‍্যাংকড লিস্ট তৈরি — প্রতিটি ইউনিক পজিশন
+            const ranked = allUids.map((uid, index) => {
+                const d = userDataMap[uid];
+                // কম্পোজিট স্কোর (শুধু বার ভিজ্যুয়ালের জন্য)
+                const compositeScore = (d.vip * 10000) + (d.activeRefs * 100) + d.totalRefs;
+                return {
+                    uid,
+                    position: index + 1,
+                    score: compositeScore,
+                    vip: d.vip,
+                    activeRefs: d.activeRefs,
+                    totalRefs: d.totalRefs,
+                    isActive: d.isActive,
+                    isMe: uid === currentUserId
+                };
+            });
+
+            maxScore = ranked.length > 0 ? ranked[0].score : 1;
+            if (maxScore === 0) maxScore = 1;
+
+            return { ranked, childrenMap };
+        }
+
+        // ==========================================
+        // 7. INIT
+        // ==========================================
+        function initSystem() {
+            document.getElementById('treeLoading').style.display = 'flex';
+            
+            getSmartData().then(usersMap => {
+                if (!usersMap || Object.keys(usersMap).length === 0) {
+                    showEmpty("No users found in the network.");
+                    return;
+                }
+
+                const result = rankAllUsers(usersMap);
+                rankedUserList = result.ranked;
+                currentRenderCount = 0;
+
+                // সামারি আপডেট
+                const totalUsers = rankedUserList.length;
+                const vipMembers = rankedUserList.filter(u => u.vip >= 1).length;
+                const highestLevel = rankedUserList.length > 0 ? rankedUserList[0].vip : 0;
+                const myEntry = rankedUserList.find(u => u.isMe);
+
+                document.getElementById('sumTotal').textContent = totalUsers;
+                document.getElementById('sumVip').textContent = vipMembers;
+                document.getElementById('sumTopLevel').textContent = 'LV ' + highestLevel;
+                document.getElementById('sumMyPos').textContent = myEntry ? '#' + myEntry.position : 'N/A';
+                document.getElementById('treeSummary').style.display = 'grid';
+
+                renderRankedList(usersMap);
+            });
+        }
+
+        // ==========================================
+        // 8. RENDER
+        // ==========================================
+        function renderRankedList(usersMap) {
+            const listEl = document.getElementById('rankedList');
+            const end = Math.min(currentRenderCount + LIMIT_PER_LOAD, rankedUserList.length);
+
+            if (currentRenderCount === 0) {
+                let html = '';
+                for (let i = 0; i < end; i++) {
+                    html += buildCardHTML(usersMap, rankedUserList[i]);
+                }
+                listEl.innerHTML = html;
+            } else {
+                let appendHTML = '';
+                for (let i = currentRenderCount; i < end; i++) {
+                    appendHTML += buildCardHTML(usersMap, rankedUserList[i]);
+                }
+                listEl.insertAdjacentHTML('beforeend', appendHTML);
             }
 
-            html += `</li>`;
+            currentRenderCount = end;
+
+            document.getElementById('treeLoading').style.display = 'none';
+            document.getElementById('treeRenderArea').style.display = 'block';
+
+            const btn = document.getElementById('showMoreBtn');
+            if (currentRenderCount < rankedUserList.length) {
+                btn.style.display = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Load More (' + (rankedUserList.length - currentRenderCount) + ' remaining)';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function buildCardHTML(usersMap, userData) {
+            const user = usersMap[userData.uid];
+            if (!user) return '';
+
+            const pos = userData.position;
+            const name = getDisplayName(user, userData.uid);
+            const avatarClass = userData.isActive ? 'active-avatar' : 'inactive-avatar';
+            const dotClass = userData.isActive ? 'active-dot' : 'inactive-dot';
+
+            let cardClasses = 'rank-card';
+            if (pos === 1) cardClasses += ' pos-1';
+            else if (pos === 2) cardClasses += ' pos-2';
+            else if (pos === 3) cardClasses += ' pos-3';
+            if (userData.isMe) cardClasses += ' is-me';
+
+            let tags = '';
+            if (userData.isMe) tags += '<span class="node-you-tag">YOU</span>';
+            if (pos <= 3) tags += topRankBadgeHTML(pos);
+            tags += vipBadgeHTML(userData.vip);
+
+            let crown = pos === 1 ? '<div class="crown-icon"><i class="fa-solid fa-crown"></i></div>' : '';
+            const barPercent = Math.max(Math.round((userData.score / maxScore) * 100), 2);
+
+            let html = '';
+            // ৪র্থ পজিশনের আগে সেপারেটর
+            if (pos === 4) {
+                html += '<div class="top-separator"><div class="line"></div><span>Other Rankings</span><div class="line"></div></div>';
+            }
+
+            html += '<div class="' + cardClasses + '">';
+            html += crown;
+            html += '  <div class="rank-position">' + pos + '</div>';
+            html += '  <div class="node-avatar ' + avatarClass + '">' + getInitials(name) + '<div class="online-dot ' + dotClass + '"></div></div>';
+            html += '  <div class="node-info">';
+            html += '    <div class="node-name-row">' + tags + '<span class="node-name">' + escapeHTML(name) + '</span></div>';
+            html += '    <div class="node-sub">';
+            html += '      <span class="stat-vip"><i class="fa-solid fa-crown"></i> LV ' + userData.vip + ' unlocked</span>';
+            html += '      <span class="stat-active"><i class="fa-solid fa-circle"></i> ' + userData.activeRefs + ' active ref</span>';
+            html += '      <span class="stat-total"><i class="fa-solid fa-users"></i> ' + userData.totalRefs + ' invited</span>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '  <div class="score-bar-wrap"><div class="score-bar-fill" style="width: ' + barPercent + '%"></div></div>';
+            html += '</div>';
+
             return html;
         }
 
-        // Main Fetch Function
-        async function loadReferralNetwork() {
-            try {
-                // Get Current User (Assuming the logged-in user's ID is stored locally or replace 'current_user_id')
-                // For demonstration, we fetch the first user or use a specific ID
-                const currentUserId = localStorage.getItem('uid') || 'current_user_id'; 
-                
-                // Fetch Current User Data
-                const currentUserSnap = await db.ref('users/' + currentUserId).once('value');
-                const currentUser = currentUserSnap.val();
+        // Show More বাটন
+        document.getElementById('showMoreBtn').addEventListener('click', function() {
+            const localCache = localStorage.getItem('vipRankCache');
+            if (!localCache) return;
+            const usersMap = JSON.parse(localCache).data;
+            renderRankedList(usersMap);
+        });
 
-                if (!currentUser) {
-                    // Fallback random user if specific ID not found
-                    const randomUserSnap = await db.ref('users').limitToFirst(1).once('value');
-                    const randomUserData = randomUserSnap.val();
-                    
-                    if (!randomUserData) {
-                        treeLoading.innerHTML = "<span style='color: #ff4d4d'>No Network Data Found in Database</span>";
-                        return;
-                    }
-
-                    const rKey = Object.keys(randomUserData)[0];
-                    const rUser = randomUserData[rKey];
-                    rUser.uid = rKey;
-                    renderTree(rUser);
-                } else {
-                    currentUser.uid = currentUserId;
-                    renderTree(currentUser);
-                }
-
-            } catch (error) {
-                console.error("Firebase Fetch Error:", error);
-                treeLoading.innerHTML = "<span style='color: #ff4d4d'>Network Connection Failed</span>";
-            }
-        }
-
-        // Render Tree to DOM
-        function renderTree(mainUser) {
-            let finalHTML = "";
-            
-            // Create Root Node (Current User)
-            const rootHash = generateHashRate();
-            finalHTML += `<li>${createNodeCard("fa-solid fa-user-shield", "My Active Node (You)", `Base Hash: ${rootHash} TH/s`, true)}`;
-            
-            finalHTML += "<ul>";
-
-            // Check if current user has referrals
-            if (mainUser.referrals && Object.keys(mainUser.referrals).length > 0) {
-                Object.values(mainUser.referrals).forEach(tier1User => {
-                    finalHTML += buildTreeUI(tier1User, 1);
-                });
-            } else {
-                // If no referrals mapped under user, fetch 3 random users as Layer 1 for demonstration
-                db.ref('users').limitToFirst(3).once('value', (snap) => {
-                    const randomUsers = snap.val();
-                    let tempHTML = "";
-                    if(randomUsers) {
-                        Object.values(randomUsers).forEach(u => {
-                            tempHTML += buildTreeUI(u, 1);
-                        });
-                    }
-                    referralTree.innerHTML = finalHTML + tempHTML + "</ul></li>";
-                    treeLoading.style.display = "none";
-                    referralTree.style.display = "block";
-                });
-                return;
-            }
-
-            finalHTML += "</ul></li>";
-            
-            referralTree.innerHTML = finalHTML;
-            treeLoading.style.display = "none";
-            referralTree.style.display = "block";
-        }
-
-        // Initialize Data Fetch
-        loadReferralNetwork();
-
-
-        // ========================================
-        // 4. SECURITY & PROTECTION
-        // ========================================
+        // Security
         document.onkeydown = function(e) {
-            if (e.keyCode == 123) return false;
-            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+            if(e.keyCode==123)return false;
+            if(e.ctrlKey&&e.shiftKey&&(e.keyCode=='I'.charCodeAt(0)||e.keyCode=='J'.charCodeAt(0)))return false;
+            if(e.ctrlKey&&e.keyCode=='U'.charCodeAt(0))return false;
         };
     </script>
 </body>
