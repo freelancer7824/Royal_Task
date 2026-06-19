@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Asset Withdrawal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Theme Palette --- */
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --input-bg: #1a1d30;
+            --alert-red: #ff3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            width: 6px;
+        }
+        body::-webkit-scrollbar-track { background: #090a0f; }
+        body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
+
+        /* --- Layout Headers --- */
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* --- Dashboard Wrapper Layout --- */
+        .withdrawal-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1200px;
+        }
+
+        /* --- Interactive Form Panels --- */
+        .form-card, .info-card {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i { color: var(--accent-neon); }
+
+        /* --- Form Components Setup --- */
+        .input-wrapper {
+            margin-bottom: 20px;
+        }
+        .input-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-group {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+        }
+        .input-group:focus-within {
+            border-color: rgba(0, 255, 204, 0.3);
+        }
+        .input-group i { color: var(--text-muted); font-size: 16px; }
+        .input-group input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+            font-size: 14px;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        /* --- Custom Radio Network Selection Grid --- */
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .network-option {
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .network-option p { font-size: 14px; font-weight: 600; }
+        .network-option span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+        
+        .network-radio { display: none; }
+        .network-radio:checked + .network-option {
+            border-color: var(--accent-neon);
+            background: rgba(0, 255, 204, 0.03);
+            color: var(--accent-neon);
+        }
+
+        /* --- Max Multiplier Button Custom Asset --- */
+        .max-btn {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--accent-neon);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .max-btn:hover { background: var(--accent-neon); color: #000; }
+
+        /* --- Processing Metrics Summary Layout --- */
+        .fee-panel {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .fee-row span.highlight { color: var(--text-main); font-weight: 600; }
+
+        /* --- Form Submit Control Button --- */
+        .submit-withdraw-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .submit-withdraw-btn:hover { transform: scale(0.98); opacity: 0.9; }
+
+        /* --- Info / Wallet Metadata Showcase Card --- */
+        .balance-board {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .balance-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .balance-val { font-size: 32px; font-weight: 700; margin-top: 5px; color: var(--text-main); }
+        .balance-val span { font-size: 16px; color: var(--accent-neon); }
+
+        .security-hints {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .security-hints li {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: flex;
+            gap: 10px;
+        }
+        .security-hints li i { color: var(--alert-red); margin-top: 3px; font-size: 14px; }
+
+        /* --- RESPONSIVE MEDIA HOOKS --- */
+        @media (max-width: 900px) {
+            .withdrawal-container { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 16px; }
+            .form-card, .info-card { padding: 20px; }
+            .network-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- Title Header banner -->
+    <div class="page-header">
+        <h1>Secure Settlement Vault</h1>
+        <p>Transfer your automated network block mining rewards cleanly back into cold wallets.</p>
+    </div>
+
+    <!-- Main Dynamic Core Interface Wrapper -->
+    <div class="withdrawal-container">
+        
+        <!-- Left Side Interaction Form Area -->
+        <div class="form-card">
+            <div class="section-title">
+                <i class="fa-solid fa-money-bill-transfer"></i> Outbound Pipeline Parameters
+            </div>
+
+            <!-- Network Selection System radio mapping -->
+            <div class="input-wrapper">
+                <label class="input-label">Select Destination Settlement Protocol</label>
+                <div class="network-grid">
+                    <label>
+                        <input type="radio" name="crypto-net" class="network-radio" value="TRC20" checked onchange="updateProcessingFee(2.00)">
+                        <div class="network-option">
+                            <p>USDT (TRC20)</p>
+                            <span>Fee: 2.00 USDT</span>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="crypto-net" class="network-radio" value="BEP20" onchange="updateProcessingFee(0.80)">
+                        <div class="network-option">
+                            <p>USDT (BEP20)</p>
+                            <span>Fee: 0.80 USDT</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Address Input Form Box -->
+            <div class="input-wrapper">
+                <label class="input-label">Recipient Vault Address</label>
+                <div class="input-group">
+                    <i class="fa-solid fa-wallet"></i>
+                    <input type="text" id="target-wallet" placeholder="Paste target public routing key address..." autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Token Amount Input Form Box -->
+            <div class="input-wrapper">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <label class="input-label" style="margin-bottom: 0;">Transfer Asset Volume</label>
+                    <button class="max-btn" onclick="injectMaxVolumeLimit()">Use Max</button>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                    <input type="number" id="withdraw-amount" placeholder="0.00" step="any" min="1" oninput="calculateNetPayoutResult()">
+                </div>
+            </div>
+
+            <!-- Dynamic Fee Statistics calculations metrics readout panel -->
+            <div class="fee-panel">
+                <div class="fee-row">
+                    <span>Protocol Gas/Handling Fee:</span>
+                    <span class="highlight"><span id="gas-fee-readout">2.00</span> USDT</span>
+                </div>
+                <div class="fee-row">
+                    <span>Net Expected Distribution:</span>
+                    <span class="highlight" style="color: var(--accent-neon);"><span id="net-payout-readout">0.00</span> USDT</span>
+                </div>
+            </div>
+
+            <!-- Operational Button Trigger -->
+            <button class="submit-withdraw-btn" onclick="initiateSecureWithdrawalPipeline()">
+                <i class="fa-solid fa-shield-halved"></i> Request Settlement Authorization
+            </button>
+        </div>
+
+        <!-- Right Side Analytical Security Tracker Area -->
+        <div class="info-card">
+            <div class="section-title">
+                <i class="fa-solid fa-vault"></i> Account Allocation Metrics
+            </div>
+
+            <!-- Current Asset Liquidity Readout Block -->
+            <div class="balance-board">
+                <p class="balance-label">Withdrawable Available Reserves</p>
+                <div class="balance-val"><span id="user-live-balance">145.50</span> <span>USDT</span></div>
+            </div>
+
+            <div class="section-title" style="margin-top: 10px;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Security Compliance Rules
+            </div>
+            
+            <ul class="security-hints">
+                <li>
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><strong>Address Check Disclaimer:</strong> Ensure the recipient address perfectly mirrors your target network. Assets routed onto incorrect networks cannot be recovered.</span>
+                </li>
+                <li>
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><strong>Processing Lifespan:</strong> Outbound queue requests pass via internal smart audit protocol checks, finishing execution sequences within 5-30 minutes.</span>
+                </li>
+                <li>
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><strong>Minimum Settlement Limit:</strong> The lowest acceptable asset amount allowed out of the network tracking terminal is <strong>10.00 USDT</strong>.</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Virtual Vault States Core Mock Engine ---
+        let internalLiquidityBalance = 145.50; 
+        let activeSelectedGasFee = 2.00;
+
+        // Sync initial UI viewport components on boot
+        document.getElementById('user-live-balance').innerText = internalLiquidityBalance.toFixed(2);
+
+        // --- Network Fee Toggle Control Handling ---
+        function updateProcessingFee(feeValue) {
+            activeSelectedGasFee = feeValue;
+            document.getElementById('gas-fee-readout').innerText = activeSelectedGasFee.toFixed(2);
+            calculateNetPayoutResult(); // Recalculate layout
+        }
+
+        // --- Use Max Button Logic ---
+        function injectMaxVolumeLimit() {
+            document.getElementById('withdraw-amount').value = internalLiquidityBalance;
+            calculateNetPayoutResult();
+        }
+
+        // --- Real-time Computational Net Payout Evaluation Engine ---
+        function calculateNetPayoutResult() {
+            const rawInputVal = parseFloat(document.getElementById('withdraw-amount').value);
+            const payoutDisplayElement = document.getElementById('net-payout-readout');
+
+            if (!isNaN(rawInputVal) && rawInputVal > activeSelectedGasFee) {
+                const calculatedNetValue = rawInputVal - activeSelectedGasFee;
+                payoutDisplayElement.innerText = calculatedNetValue.toFixed(2);
+            } else {
+                payoutDisplayElement.innerText = "0.00";
+            }
+        }
+
+        // --- Outbound Validation Check Business Logic Entry-point ---
+        function initiateSecureWithdrawalPipeline() {
+            const targetAddressString = document.getElementById('target-wallet').value.trim();
+            const requestedVolumeValue = parseFloat(document.getElementById('withdraw-amount').value);
+
+            // Constraint Check 1: Empty Fields Check
+            if (targetAddressString === "" || isNaN(requestedVolumeValue)) {
+                alert("Operation Terminated!\nPlease ensure both the target wallet address and transfer amount inputs are complete.");
+                return;
+            }
+
+            // Constraint Check 2: Minimum Boundary Exception Floor
+            if (requestedVolumeValue < 10.00) {
+                alert("Protocol Violation!\nMinimum allowed vault settlement limit requires at least 10.00 USDT.");
+                return;
+            }
+
+            // Constraint Check 3: Checking User Liquidity Pool Cap
+            if (requestedVolumeValue > internalLiquidityBalance) {
+                alert(`Insufficient Vault Balance!\nRequested execution volume (${requestedVolumeValue.toFixed(2)} USDT) overflows your active account balance.`);
+                return;
+            }
+
+            // Execution Step: Execute pipeline mutation sequence simulation
+            const operationVerification = confirm(`Authorize Outbound Transfer Request?\n\nTarget Destination Address: ${targetAddressString}\nNet Distribution Yield: ${(requestedVolumeValue - activeSelectedGasFee).toFixed(2)} USDT`);
+            
+            if (operationVerification) {
+                // Mutate local storage simulation state variables
+                internalLiquidityBalance -= requestedVolumeValue;
+                
+                // Redraw UI terminal variables dynamically
+                document.getElementById('user-live-balance').innerText = internalLiquidityBalance.toFixed(2);
+                document.getElementById('withdraw-amount').value = "";
+                document.getElementById('target-wallet').value = "";
+                document.getElementById('net-payout-readout').innerText = "0.00";
+
+                alert("Outbound Pipeline Handshake Success!\nYour withdrawal transaction payload has queued up. Please await blockchain node confirmation block updates.");
+            }
+        }
+
+        // --- Core Application Structural Protection Code ---
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
+        setInterval(function() {
+            const start = new Date().getTime();
+            debugger;
+            if (new Date().getTime() - start > 100) {
+                document.querySelector('body').innerHTML = `
+                    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#090a0f; color:#ff3366; font-size:20px; font-weight:700;">
+                        [Security Rule Triggered: Execution Paused]
+                    </div>`;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

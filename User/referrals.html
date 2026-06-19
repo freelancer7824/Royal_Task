@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Colors --- */
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --input-bg: #1a1d30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            width: 6px;
+        }
+        body::-webkit-scrollbar-track { background: #090a0f; }
+        body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
+
+        /* --- Page Header --- */
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* --- Link Sharing Panel --- */
+        .referral-share-box {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            max-width: 1100px;
+        }
+        .share-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .share-title i { color: var(--accent-neon); }
+        
+        .link-input-group {
+            display: flex;
+            gap: 12px;
+            background: var(--input-bg);
+            padding: 8px 8px 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .link-input-group input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 14px;
+            font-family: monospace;
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .copy-link-btn {
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .copy-link-btn:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        /* Code Row Extra Style */
+        .code-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .code-row span {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .code-value {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--accent-neon) !important;
+            letter-spacing: 1px;
+            font-size: 15px !important;
+        }
+        .copy-icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.2s;
+            padding: 4px 8px;
+        }
+        .copy-icon-btn:hover {
+            color: var(--accent-neon);
+        }
+
+        /* --- Mini Stats Grid --- */
+        .ref-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            max-width: 1100px;
+        }
+        .ref-card {
+            background: #121420;
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .ref-card-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(0, 255, 204, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--accent-neon);
+        }
+        .ref-card-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .ref-card-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* --- Shimmer Skeleton Loader --- */
+        .skeleton {
+            background: linear-gradient(90deg, #1a1d30 25%, #242943 50%, #1a1d30 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            height: 20px;
+            display: inline-block;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* --- Table Layout Section --- */
+        .table-container {
+            background-color: var(--panel-card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 1100px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .table-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .table-header i { color: var(--accent-neon); }
+        
+        .responsive-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: var(--text-main);
+        }
+        tr:last-child td { border: none; }
+        
+        /* Status Badge */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.active { background: rgba(0, 255, 102, 0.1); color: #00ff66; }
+        .badge.inactive { background: rgba(255, 255, 255, 0.05); color: #8a94a6; }
+
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .ref-stats-grid { grid-template-columns: 1fr; gap: 14px; }
+            .link-input-group { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
+            .link-input-group input { padding: 4px 6px; text-align: center; }
+            .copy-link-btn { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 16px; }
+            .table-container, .referral-share-box { padding: 16px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="page-header">
+        <h1>Global Referral Network</h1>
+        <p>Track your team growth across all levels. You earn from every active node in your downline tree.</p>
+    </div>
+
+    <div class="referral-share-box">
+        <div class="share-title">
+            <i class="fa-solid fa-link"></i> Your Unique Invite Link
+        </div>
+        <div class="link-input-group">
+            <input type="text" id="ref-url" value="Generating link..." readonly>
+            <button class="copy-link-btn" id="copy-btn" disabled>
+                <i class="fa-regular fa-clone" id="copy-icon"></i>
+                <span id="btn-text">Copy Link</span>
+            </button>
+        </div>
+        
+        <div class="code-row">
+            <span>Your Referral Code: <span id="ref-code-text" class="code-value">Loading...</span></span>
+            <button class="copy-icon-btn" id="copy-code-btn" disabled title="Copy Code">
+                <i class="fa-regular fa-copy" id="code-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="ref-stats-grid">
+        <div class="ref-card">
+            <div class="ref-card-icon"><i class="fa-solid fa-users-gear"></i></div>
+            <div class="ref-card-info">
+                <h3 id="total-ref"><div class="skeleton" style="width: 40px;"></div></h3>
+                <p>Total Team Size</p>
+            </div>
+        </div>
+        <div class="ref-card">
+            <div class="ref-card-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="ref-card-info">
+                <h3 id="active-ref"><div class="skeleton" style="width: 40px;"></div></h3>
+                <p>Active Nodes (Global)</p>
+            </div>
+        </div>
+        <div class="ref-card">
+            <div class="ref-card-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div class="ref-card-info">
+                <h3 id="earned-ref"><div class="skeleton" style="width: 60px;"></div></h3>
+                <p>Total Commission Earned</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <i class="fa-solid fa-user-group"></i> Direct Referrals List
+        </div>
+        <div class="responsive-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Joined Date</th>
+                        <th>Current Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="referral-table-body">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted);">Syncing network data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script src="config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Firebase Initialization ---
+            if (typeof firebaseConfig === 'undefined') {
+                console.error("Configuration Error: config.js missing!");
+                return;
+            }
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+
+            const database = firebase.database();
+
+            // --- 2. Login Check & Get UID ---
+            function checkLogin() {
+                const loggedInUser = localStorage.getItem('currentUser');
+                if (!loggedInUser) {
+                    if (window !== window.top) {
+                        window.top.location.href = "login.html";
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                    return null;
+                }
+                try {
+                    const userData = JSON.parse(loggedInUser);
+                    return userData.uid; 
+                } catch (e) {
+                    console.error("User data parse error", e);
+                    if (window !== window.top) {
+                        window.top.location.href = "login.html";
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                    return null;
+                }
+            }
+
+            const currentUserId = checkLogin();
+            if (!currentUserId) return;
+
+            // --- 3. Setup Referral Link & Code ---
+            function setupReferralData(uid) {
+                const origin = window.location.origin;
+                const refLink = `${origin}/register.html?ref=${uid}`;
+                
+                const urlInput = document.getElementById('ref-url');
+                const copyBtn = document.getElementById('copy-btn');
+                urlInput.value = refLink;
+                copyBtn.disabled = false;
+                
+                copyBtn.onclick = () => {
+                    const copyIcon = document.getElementById('copy-icon');
+                    const btnText = document.getElementById('btn-text');
+
+                    navigator.clipboard.writeText(urlInput.value).then(() => {
+                        copyIcon.className = "fa-solid fa-check";
+                        btnText.innerText = "Copied!";
+                        setTimeout(() => {
+                            copyIcon.className = "fa-regular fa-clone";
+                            btnText.innerText = "Copy Link";
+                        }, 2000);
+                    }).catch(() => console.error("Link copy failed."));
+                };
+
+                const codeText = document.getElementById('ref-code-text');
+                const copyCodeBtn = document.getElementById('copy-code-btn');
+                codeText.textContent = uid;
+                copyCodeBtn.disabled = false;
+
+                copyCodeBtn.onclick = () => {
+                    const codeIcon = document.getElementById('code-icon');
+                    navigator.clipboard.writeText(uid).then(() => {
+                        codeIcon.className = "fa-solid fa-check";
+                        codeIcon.style.color = "var(--accent-neon)";
+                        setTimeout(() => {
+                            codeIcon.className = "fa-regular fa-copy";
+                            codeIcon.style.color = "";
+                        }, 2000);
+                    }).catch(() => console.error("Code copy failed."));
+                };
+            }
+
+            setupReferralData(currentUserId);
+
+            // --- 4. Recursive Function to Calculate Downline Stats (Total & Active) ---
+            // এই ফাংশনটি সব লেভেল ট্র্যাভার্স করবে
+            function calculateDownlineStats(allUsersSnapshot) {
+                let totalTeamSize = 0;
+                let totalActiveNodes = 0;
+                let totalEarnings = 0.00;
+                const directReferralsList = [];
+
+                // সব ইউজারকে একটি ফ্ল্যাট লিস্টে আনা (সহজে খোঁজার জন্য)
+                const usersMap = {};
+                if (allUsersSnapshot.exists()) {
+                    allUsersSnapshot.forEach((child) => {
+                        usersMap[child.key] = child.val();
+                    });
+                }
+
+                // রিকার্সিভ ফাংশন (Recursive Traversal)
+                function traverse(uid) {
+                    if (!usersMap[uid]) return; // যদি ইউজার না থাকে
+
+                    // বর্তমান UID এর চাইল্ডরেন খোঁজা
+                    Object.keys(usersMap).forEach((key) => {
+                        const user = usersMap[key];
+                        if (user.referredBy === uid) {
+                            // চাইল্ড পাওয়া গেছে
+                            totalTeamSize++; // টোটাল কাউন্ট বাড়ানো
+                            
+                            const userBalance = parseFloat(user.balance || 0);
+                            
+                            // টেবিলের জন্য সরাসরি রেফারেলদের তথ্য সংগ্রহ (যদি এটি প্রথম লেভেল হয়)
+                            if (uid === currentUserId) {
+                                directReferralsList.push({
+                                    name: user.fullName || user.username || "Unknown",
+                                    date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                                    balance: userBalance.toFixed(2),
+                                    status: userBalance > 0 ? "Active" : "Inactive"
+                                });
+                            }
+
+                            // অ্যাক্টিভ চেক (যেকোনো লেভেলের জন্য)
+                            if (userBalance > 0) {
+                                totalActiveNodes++;
+                                totalEarnings += 0.20; // প্রতি অ্যাক্টিভ নোডে 0.20
+                            }
+
+                            // রিকার্সিভ কল: চাইল্ডের চাইল্ড (Level 2, Level 3...) খোঁজা
+                            traverse(key);
+                        }
+                    });
+                }
+
+                // প্রসেস শুরু করা আমার ID দিয়ে
+                traverse(currentUserId);
+
+                return {
+                    totalTeamSize,
+                    totalActiveNodes,
+                    totalEarnings,
+                    directReferralsList
+                };
+            }
+
+            // --- 5. Realtime Data Fetching ---
+            const allUsersRef = database.ref('users');
+            
+            // যখনই কোনো ইউজার রেজিস্টার হবে বা ব্যালেন্স চেঞ্জ হবে, এই ফাংশন রান করবে
+            allUsersRef.on('value', (snapshot) => {
+                const stats = calculateDownlineStats(snapshot);
+                
+                // UI Update করা হচ্ছে
+                document.getElementById('total-ref').textContent = stats.totalTeamSize;
+                document.getElementById('active-ref').textContent = stats.totalActiveNodes;
+                document.getElementById('earned-ref').innerHTML = `${stats.totalEarnings.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`;
+
+                // ডাটাবেজে আপডেট করা (Total Earned এবং Active Count সেভ করা)
+                database.ref('users/' + currentUserId).update({
+                    referralCount: stats.totalTeamSize,
+                    activeReferrals: stats.totalActiveNodes,
+                    referralEarnings: stats.totalEarnings
+                });
+
+                // টেবিল রেন্ডার করা (শুধুমাত্র সরাসরি রেফারেল)
+                const tbody = document.getElementById('referral-table-body');
+                tbody.innerHTML = '';
+
+                if (stats.directReferralsList.length > 0) {
+                    stats.directReferralsList.forEach(member => {
+                        const statusClass = member.status === 'Active' ? 'active' : 'inactive';
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${member.name}</td>
+                            <td>${member.date}</td>
+                            <td>${member.balance} USDT</td>
+                            <td><span class="badge ${statusClass}">${member.status}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No direct referrals found. Start sharing your link!</td></tr>`;
+                }
+            });
+
+            // Helper Function: Skeleton রিমুভ করে টেক্সট বসানো (Initial load এর জন্য)
+            function updateTextWithSkeleton(elementId, text) {
+                const el = document.getElementById(elementId);
+                if (el && el.querySelector('.skeleton')) {
+                    el.innerHTML = text;
+                } else {
+                    el.textContent = text;
+                }
+            }
+
+        });
+
+        /* --- Security Scripts --- */
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; 
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; 
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Funds</title>
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Colors --- */
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --input-bg: #1a1d30;
+            --warning-color: #ffcc00;
+            --error-color: #ff4a5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            width: 6px;
+        }
+        body::-webkit-scrollbar-track { background: #090a0f; }
+        body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
+
+        /* --- TOP BAR (New Balance Section) --- */
+        .top-bar {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .balance-card {
+            background: rgba(18, 20, 32, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .balance-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-neon);
+        }
+
+        .balance-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 255, 204, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-neon);
+            font-size: 16px;
+        }
+
+        .balance-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .balance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .balance-amount {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- Page Header --- */
+        .page-header {
+            margin-bottom: 30px;
+            margin-right: 220px; /* Make space for top bar on desktop */
+        }
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* --- Deposit Grid Layout --- */
+        .deposit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1100px;
+        }
+
+        .deposit-card {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+        .section-title i { color: var(--accent-neon); }
+
+        /* --- Crypto Selector --- */
+        .crypto-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .crypto-option {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .crypto-option i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .crypto-option span {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Active/Selected State Style Controls via dynamic JS boundary */
+        .crypto-option.selected { 
+            border-color: var(--accent-neon); 
+            background: rgba(0, 255, 204, 0.06); 
+        }
+        .crypto-option.selected i { color: var(--accent-neon) !important; }
+        .crypto-option.selected span { color: var(--text-main); }
+
+        /* --- Form Inputs --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--accent-neon);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
+        }
+
+        /* --- Wallet Address Box --- */
+        .address-box {
+            background-color: rgba(255, 255, 255, 0.01);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 25px;
+        }
+        .address-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .address-string {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--text-main);
+            word-break: break-all;
+            background: #090a0f;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--accent-neon);
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        .copy-btn:active { transform: scale(0.9); }
+
+        /* --- Submit Button --- */
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.15);
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 255, 204, 0.3);
+        }
+        .submit-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- Notice Item --- */
+        .notice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .notice-item {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.01);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .notice-item i {
+            font-size: 18px;
+            color: #ffcc00;
+            margin-top: 2px;
+        }
+        .notice-item h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .notice-item p {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* --- Stylish Custom Popup UI --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 5, 9, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .popup-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .popup-box {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid rgba(0, 255, 204, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 255, 204, 0.05);
+            padding: 32px; border-radius: 24px;
+            width: 90%; max-width: 420px;
+            text-align: center;
+            transform: scale(0.7) translateY(30px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .popup-overlay.show .popup-box { transform: scale(1) translateY(0); }
+
+        .popup-icon-container {
+            width: 70px; height: 70px;
+            background: rgba(0, 255, 204, 0.05);
+            border: 1px dashed var(--accent-neon);
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .popup-icon-container i { color: var(--accent-neon); font-size: 30px; }
+
+        .popup-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .popup-msg { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+        .popup-msg strong { color: var(--accent-neon); }
+
+        .popup-close-btn {
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000; border: none; padding: 12px 30px;
+            border-radius: 12px; font-weight: 700; font-size: 14px;
+            cursor: pointer; width: 100%; transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.2);
+        }
+        .popup-close-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* --- Error Specific Styling --- */
+        .error-icon-container { border-color: var(--error-color); }
+        .error-icon-container i { color: var(--error-color); }
+        .error-title { color: var(--error-color); }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 850px) {
+            .deposit-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .top-bar {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                width: 100%;
+            }
+            .balance-card {
+                flex: 1;
+                justify-content: center;
+            }
+            .page-header { margin-right: 0; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 16px; }
+            .deposit-card { padding: 20px; }
+            .crypto-selector { gap: 8px; }
+            .crypto-option { padding: 10px 5px; }
+            .crypto-option i { font-size: 20px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- Balance Display Top Right -->
+    <div class="top-bar">
+        <div class="balance-card">
+            <div class="balance-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div class="balance-info">
+                <span class="balance-label">Total Balance</span>
+                <span class="balance-amount" id="user-balance-display">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-header">
+        <h1>Deposit Crypto</h1>
+        <p>Add funds to your secure account to initialize high-speed cloud nodes.</p>
+    </div>
+
+    <div class="deposit-grid">
+        <div class="deposit-card">
+            <div class="section-title">
+                <i class="fa-solid fa-credit-card"></i> 1. Select Method & Pay
+            </div>
+
+            <div class="crypto-selector" id="dynamic-methods-container">
+                <div style="color: var(--text-muted); font-size: 13px; grid-column: span 3;">Loading secure gateways...</div>
+            </div>
+
+            <div class="address-box">
+                <div class="address-header">
+                    <span id="network-label">Network: Selecting...</span>
+                    <span>Official Secure Wallet</span>
+                </div>
+                <div class="address-string">
+                    <span id="wallet-address">Loading node terminal...</span>
+                    <button class="copy-btn" onclick="copyAddress()" title="Copy Address">
+                        <i class="fa-regular fa-copy" id="copy-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;" class="section-title">
+                <i class="fa-solid fa-receipt"></i> 2. Submit Payment Proof
+            </div>
+
+            <form id="deposit-form">
+                <div class="form-group">
+                    <label>Amount to Deposit ($)</label>
+                    <div class="input-wrapper">
+                        <input type="number" step="any" placeholder="Min 10 USDT" required id="deposit-amount">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Transaction Hash / TxID</label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Enter block network transaction ID" required id="deposit-txid">
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" id="submit-action-btn" disabled>Submit Verification</button>
+            </form>
+        </div>
+
+        <div class="deposit-card" style="display: flex; flex-direction: column; justify-content: center;">
+            <div class="section-title">
+                <i class="fa-solid fa-shield-halved"></i> Essential Deposit Notice
+            </div>
+
+            <div class="notice-list">
+                <div class="notice-item">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div>
+                        <h4>Correct Network Matching</h4>
+                        <p>Send only the selected cryptocurrency asset to the respective destination address. Sending a different asset (e.g., ERC20 to TRC20) will result in permanent loss of funds.</p>
+                    </div>
+                </div>
+
+                <div class="notice-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <div>
+                        <h4>Blockchain Confirmations</h4>
+                        <p>Deposits are processed automatically after receiving 3 network confirmations on the ledger. This typically takes anywhere between 5 to 15 minutes.</p>
+                    </div>
+                </div>
+
+                <div class="notice-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <div>
+                        <h4>Accurate TxID Submission</h4>
+                        <p>Always double check and copy-paste the exact network blockchain transaction identifier string. Fake or reused TxID submissions will result in account suspension.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="popup-overlay" id="deposit-success-popup">
+        <div class="popup-box">
+            <div class="popup-icon-container">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+            </div>
+            <div class="popup-title">Proof Submitted!</div>
+            <div class="popup-msg" id="popup-success-message-text"></div>
+            <button class="popup-close-btn" id="popup-close-action-btn">Acknowledge Terminal</button>
+        </div>
+    </div>
+
+    <!-- Error Popup (Hidden by default) -->
+    <div class="popup-overlay" id="error-popup">
+        <div class="popup-box">
+            <div class="popup-icon-container error-icon-container">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="popup-title error-title">Initialization Error</div>
+            <div class="popup-msg" id="error-message-text">Could not connect to the secure network node. Please ensure <strong>config.js</strong> is present and configured correctly.</div>
+            <button class="popup-close-btn" onclick="location.reload()">Retry Connection</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Config JS File -->
+    <script src="config.js"></script>
+
+    <script>
+        const addressText = document.getElementById('wallet-address');
+        const networkLabel = document.getElementById('network-label');
+        const copyIcon = document.getElementById('copy-icon');
+        const methodsContainer = document.getElementById('dynamic-methods-container');
+        const submitBtn = document.getElementById('submit-action-btn');
+        const balanceDisplay = document.getElementById('user-balance-display');
+        const errorPopup = document.getElementById('error-popup');
+
+        let currentSelectedMethod = ""; 
+        let activeGateways = {}; 
+        let currentUserId = null;
+        let currentUsername = null;
+        let database = null;
+
+        // --- ১. লগইন চেক এবং রিডাইরেকশন লজিক ---
+        function checkLogin() {
+            const loggedInUser = localStorage.getItem('currentUser');
+            
+            if (!loggedInUser) {
+                window.location.href = "login.html";
+                return false;
+            } else {
+                try {
+                    const userData = JSON.parse(loggedInUser);
+                    currentUserId = userData.uid;
+                    currentUsername = userData.username || userData.displayName || "User";
+                    return true;
+                } catch (e) {
+                    console.error("User data parse error", e);
+                    window.location.href = "login.html";
+                    return false;
+                }
+            }
+        }
+
+        // --- Firebase Init Wrapper (Fixes Script Error) ---
+        function initializeFirebaseApp() {
+            // Check if config exists
+            if (typeof firebaseConfig === 'undefined') {
+                console.error("Config Error: firebaseConfig is not defined.");
+                showError("Configuration file missing. Please check your connection.");
+                return false;
+            }
+
+            // Check if firebase object exists
+            if (typeof firebase === 'undefined') {
+                console.error("SDK Error: Firebase SDK not loaded.");
+                showError("Network Error: Secure Gateway SDK failed to load.");
+                return false;
+            }
+
+            // Initialize only if not already initialized
+            if (!firebase.apps.length) {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log("Firebase Initialized Successfully");
+                } catch (error) {
+                    console.error("Init Error:", error);
+                    showError("System Error: Failed to initialize secure environment.");
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function showError(msg) {
+            const errorMsgEl = document.getElementById('error-message-text');
+            errorMsgEl.innerHTML = msg;
+            errorPopup.classList.add('show');
+        }
+
+        // --- Clipboard Copy Logic ---
+        function copyAddress() {
+            const textToCopy = addressText.innerText;
+            if(addressText.innerText.includes("Loading") || addressText.innerText.includes("Unavailable")) return;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyIcon.className = "fa-solid fa-check";
+                copyIcon.style.color = "#00ffcc";
+                setTimeout(() => {
+                    copyIcon.className = "fa-regular fa-copy";
+                    copyIcon.style.color = "";
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers
+                alert("Copied to clipboard: " + textToCopy);
+            });
+        }
+
+        // --- Main Application Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // ১. লগইন চেক
+            if (!checkLogin()) {
+                return; 
+            }
+
+            // ২. Firebase ইনিশিয়ালাইজ চেক
+            if (!initializeFirebaseApp()) {
+                return; // ইনিশিয়ালাইজ ফেইল করলে আর আগাবে না
+            }
+
+            // ৩. ডাটাবেস রেফারেন্স নেওয়া
+            database = firebase.database();
+            const depositForm = document.getElementById('deposit-form');
+            
+            const popupOverlay = document.getElementById('deposit-success-popup');
+            const popupMsg = document.getElementById('popup-success-message-text');
+            const popupCloseBtn = document.getElementById('popup-close-action-btn');
+
+            // --- ৪. ব্যালেন্স লোড করা ---
+            if (currentUserId) {
+                const userBalanceRef = database.ref(`users/${currentUserId}/balance`);
+                
+                userBalanceRef.on('value', (snapshot) => {
+                    if (snapshot.exists() && snapshot.val() !== null) {
+                        const balance = parseFloat(snapshot.val());
+                        balanceDisplay.innerText = balance.toFixed(2) + " USD";
+                    } else {
+                        balanceDisplay.innerText = "0.00 USD";
+                    }
+                }, (error) => {
+                    console.error("Balance fetch error:", error);
+                    balanceDisplay.innerText = "Error";
+                });
+            }
+
+            popupCloseBtn.addEventListener('click', () => {
+                popupOverlay.classList.remove('show');
+            });
+
+            // --- ৫. পেমেন্ট মেথড লোড করা ---
+            database.ref('deposit_methods').on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    methodsContainer.innerHTML = ""; 
+                    activeGateways = snapshot.val();
+                    
+                    let firstActiveKey = null;
+
+                    Object.keys(activeGateways).forEach((key) => {
+                        const gateway = activeGateways[key];
+                        
+                        if (gateway.status !== "enabled") return;
+
+                        if (!firstActiveKey) firstActiveKey = key;
+
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = "crypto-option";
+                        optionDiv.setAttribute('data-key', key);
+                        optionDiv.innerHTML = `
+                            <i class="${gateway.icon || 'fa-solid fa-wallet'}" style="color: ${gateway.icon_color || '#fff'}"></i>
+                            <span>${gateway.name}</span>
+                        `;
+
+                        optionDiv.addEventListener('click', () => {
+                            switchSelectedGateway(key);
+                        });
+
+                        methodsContainer.appendChild(optionDiv);
+                    });
+
+                    if (firstActiveKey) {
+                        switchSelectedGateway(firstActiveKey);
+                        submitBtn.disabled = false; 
+                    } else {
+                        methodsContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; grid-column: span 3;">No payment method available currently.</div>`;
+                        addressText.innerText = "Unavailable";
+                        networkLabel.innerText = "Network: N/A";
+                        submitBtn.disabled = true;
+                    }
+                } else {
+                    methodsContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 13px; grid-column: span 3;">Database terminal endpoints not found.</div>`;
+                    submitBtn.disabled = true;
+                }
+            }, (error) => {
+                console.error("Firebase read error: ", error);
+            });
+
+            function switchSelectedGateway(key) {
+                const allOptions = document.querySelectorAll('.crypto-option');
+                allOptions.forEach(opt => opt.classList.remove('selected'));
+
+                const targetOption = document.querySelector(`.crypto-option[data-key="${key}"]`);
+                if (targetOption) targetOption.classList.add('selected');
+
+                const selectedData = activeGateways[key];
+                currentSelectedMethod = selectedData.name;
+                addressText.innerText = selectedData.address;
+                
+                const cryptoUpper = (selectedData.crypto || "crypto").toUpperCase();
+                networkLabel.innerText = `Network: ${cryptoUpper} ${cryptoUpper === 'USDT' ? '(TRC-20)' : ''}`;
+                copyIcon.className = "fa-regular fa-copy";
+            }
+
+            // --- ৬. ডিপোজিট সাবমিশন ---
+            depositForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const amount = document.getElementById('deposit-amount').value;
+                const txid = document.getElementById('deposit-txid').value.trim();
+
+                if(Number(amount) < 10) {
+                    alert("Minimum deposit limit is 10 USDT.");
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Transmitting Network Data...";
+
+                const newDepositRef = database.ref('deposits').push();
+                
+                newDepositRef.set({
+                    deposit_id: newDepositRef.key,
+                    user_id: currentUserId, 
+                    username: currentUsername, 
+                    method: currentSelectedMethod,
+                    amount: Number(amount),
+                    txid: txid,
+                    status: "pending", 
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                })
+                .then(() => {
+                    popupMsg.innerHTML = `Your transaction verification proof has been transmitted successfully.<br><br>Amount: <strong>${amount} USDT</strong><br>TxID: <span style="font-family:monospace; color:#8a94a6;">${txid}</span><br><br>Status: <span style="color:var(--warning-color); font-weight:700;"><i class="fa-solid fa-clock"></i> Verification Pending</span>`;
+                    popupOverlay.classList.add('show');
+                    depositForm.reset();
+                })
+                .catch((error) => {
+                    console.error("Firebase write error: ", error);
+                    alert("Error: Data insertion failed on cloud network node.");
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Submit Verification";
+                });
+            });
+        });
+
+        // --- Security System Control ---
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+    </script>
+</body>
+</html>

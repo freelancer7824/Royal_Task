@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Level Operations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Colors --- */
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --vip-gold: #ffaa00;
+            --danger-color: #ff3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar { width: 6px; }
+        body::-webkit-scrollbar-track { background: #090a0f; }
+        body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
+
+        /* --- Page Header Layout --- */
+        .page-header { margin-bottom: 35px; }
+        .page-header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+
+        /* --- Real-Time Balance Status Board --- */
+        .status-banner {
+            background: linear-gradient(90deg, rgba(0, 255, 204, 0.07) 0%, rgba(18, 20, 32, 0.3) 100%);
+            border: 1px solid rgba(0, 255, 204, 0.15);
+            padding: 18px 24px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px rgba(0, 255, 204, 0.02);
+        }
+        .status-info { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+        .status-info i { color: var(--accent-neon); font-size: 20px; animation: pulse 2s infinite; }
+        
+        .balance-display {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .balance-display span { color: var(--accent-neon); }
+
+        /* --- VIP Level Grid Matrix --- */
+        .vip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+        }
+
+        .vip-card {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vip-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 204, 0.2);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .card-bg-icon {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            font-size: 90px;
+            opacity: 0.02;
+            color: #fff;
+            transform: rotate(-10deg);
+        }
+
+        .vip-tag { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: var(--vip-gold); margin-bottom: 4px; }
+        .vip-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+        
+        .vip-price {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding-bottom: 12px;
+        }
+        .vip-price span { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+
+        .vip-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; flex-grow: 1; }
+        .vip-features li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+        .vip-features li i { color: var(--accent-neon); font-size: 12px; }
+
+        .unlock-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .unlock-btn:hover { opacity: 0.9; transform: scale(0.98); }
+
+        .vip-card.unlocked-state {
+            border-color: rgba(0, 255, 204, 0.4);
+            background: linear-gradient(145deg, #0e1a1c 0%, #0e1019 100%);
+        }
+        .vip-card.unlocked-state .unlock-btn {
+            background: rgba(255, 255, 255, 0.03) !important;
+            color: var(--accent-neon) !important;
+            border: 1px solid rgba(0, 255, 204, 0.2) !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        /* --- Stylish Custom Popup (Modal) UI --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 5, 9, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .popup-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .popup-box {
+            background: linear-gradient(145deg, #16192b 0%, #0e1019 100%);
+            border: 1px solid rgba(255, 51, 102, 0.2);
+            box-shadow: 0 20px 50px rgba(255, 51, 102, 0.1);
+            padding: 30px; border-radius: 24px;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            transform: scale(0.7) translateY(30px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .popup-overlay.show .popup-box { transform: scale(1) translateY(0); }
+
+        .popup-icon-container {
+            width: 70px; height: 70px;
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px dashed var(--danger-color);
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .popup-icon-container i { color: var(--danger-color); font-size: 32px; }
+
+        .popup-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; color: #fff; }
+        .popup-msg { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+        .popup-msg strong { color: var(--text-main); }
+
+        .popup-close-btn {
+            background: linear-gradient(135deg, #ff3366 0%, #cc0044 100%);
+            color: #fff; border: none; padding: 12px 30px;
+            border-radius: 12px; font-weight: 700; font-size: 14px;
+            cursor: pointer; width: 100%; transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.2);
+        }
+        .popup-close-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 16px; }
+            .status-banner { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
+            .status-info { justify-content: center; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="page-header">
+        <h1>VIP Multi-Level Matrix</h1>
+        <p>Deploy specialized higher extraction layers to expand your automated mining farm capabilities.</p>
+    </div>
+
+    <div class="status-banner">
+        <div class="status-info">
+            <i class="fa-solid fa-bolt-lightning"></i>
+            <span>Instant Balance Node Trigger Activation Panel</span>
+        </div>
+        <div class="balance-display">
+            Account Balance: <span id="wallet-balance-amount">Loading...</span> <span>USDT</span>
+        </div>
+    </div>
+
+    <div class="vip-grid" id="level-container-grid"></div>
+
+    <!-- Stylish কাস্টম পপআপ HTML স্ট্রাকচার -->
+    <div class="popup-overlay" id="insufficient-popup-overlay">
+        <div class="popup-box">
+            <div class="popup-icon-container">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="popup-title">Insufficient Funds</div>
+            <div class="popup-msg" id="popup-error-message-text"></div>
+            <button class="popup-close-btn" id="popup-close-action-btn">Acknowledge Node</button>
+        </div>
+    </div>
+
+    <!-- Realtime Database এবং App Compat SDK Links -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- লোকাল কনফিগারেশন ফাইল লিঙ্ক -->
+    <script src="config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Login Check & Auth Logic ---
+            // localStorage থেকে currentUser চেক করা হচ্ছে
+            function checkLogin() {
+                const loggedInUser = localStorage.getItem('currentUser');
+                if (!loggedInUser) {
+                    // লগড ইন না থাকলে লগইন পেজে রিডাইরেক্ট
+                    if (window !== window.top) {
+                        window.top.location.href = "login.html";
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                    return null;
+                }
+                try {
+                    const userData = JSON.parse(loggedInUser);
+                    return userData.uid; 
+                } catch (e) {
+                    console.error("User data parse error", e);
+                    if (window !== window.top) {
+                        window.top.location.href = "login.html";
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                    return null;
+                }
+            }
+
+            const currentUserId = checkLogin();
+
+            // যদি ইউজার আইডি না থাকে, তবে আর কোড এগোবে না
+            if (!currentUserId) {
+                return; 
+            }
+
+            // Firebase Initialize
+            if (typeof firebaseConfig !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+            } else {
+                alert("Configuration Error: config.js missing!");
+                return;
+            }
+
+            const database = firebase.database();
+
+            let currentAccountBalance = 0.00;
+            let currentUserVip = "VIP 0"; 
+            const gridContainer = document.getElementById('level-container-grid');
+            const balanceDisplayElement = document.getElementById('wallet-balance-amount');
+
+            // পপআপ এলিমেন্ট রেফারেন্স
+            const popupOverlay = document.getElementById('insufficient-popup-overlay');
+            const popupMsg = document.getElementById('popup-error-message-text');
+            const popupCloseBtn = document.getElementById('popup-close-action-btn');
+
+            // পপআপ বন্ধ করার ফাংশন
+            popupCloseBtn.addEventListener('click', () => {
+                popupOverlay.classList.remove('show');
+            });
+
+            // পপআপ দেখানোর ফাংশন
+            function showInsufficientBalancePopup(required, available) {
+                popupMsg.innerHTML = `You do not have enough core node assets to unlock this layer.<br><br>Required: <strong>${required.toFixed(2)} USDT</strong><br>Available: <strong>${available.toFixed(2)} USDT</strong>`;
+                popupOverlay.classList.add('show');
+            }
+
+            // --- ১. Realtime Database থেকে রিয়েল-টাইম ইউজার ব্যালেন্স ও রানিং VIP লোড ---
+            function listenToUserStats() {
+                const userRef = database.ref('users/' + currentUserId);
+                
+                userRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        // ব্যালেন্স আপডেট
+                        currentAccountBalance = parseFloat(userData.balance || 0);
+                        // কারেন্ট VIP আপডেট (Database এ কি নামে আছে তা চেক করা জরুরি, ধরে নিলাম 'current_vip')
+                        currentUserVip = userData.current_vip || "VIP 0"; 
+                        
+                        balanceDisplayElement.innerText = currentAccountBalance.toFixed(2);
+                        
+                        // ব্যালেন্স বা VIP লেভেল রিয়েলটাইমে চেঞ্জ হলে গ্রিড পুনরায় রেন্ডার হবে
+                        renderVIPGrid();
+                    } else {
+                        balanceDisplayElement.innerText = "0.00";
+                    }
+                }, (error) => {
+                    console.error("Error fetching user data: ", error);
+                });
+            }
+
+            // গ্লোবাল ভেরিয়েবল ডাটাবেজ থেকে আসা VIP অবজেক্ট সাময়িক স্টোর করার জন্য
+            let cachedVipLevels = {};
+
+            // --- ২. Realtime Database থেকে রিয়েল-টাইম VIP সেটিংস লোড ---
+            function listenToVIPLevels() {
+                const vipSettingsRef = database.ref('vip_settings');
+                
+                vipSettingsRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        cachedVipLevels = snapshot.val();
+                        renderVIPGrid();
+                    } else {
+                        gridContainer.innerHTML = `<div style="color: var(--text-muted); font-size:14px;">No VIP matrix configuration found on server.</div>`;
+                    }
+                }, (error) => {
+                    console.error("Error fetching VIP levels: ", error);
+                });
+            }
+
+            // --- ৩. UI কার্ড জেনারেট এবং রেন্ডার করার লজিক ---
+            function renderVIPGrid() {
+                if (Object.keys(cachedVipLevels).length === 0) return;
+                
+                gridContainer.innerHTML = ""; // আগের নোড ক্লিয়ার করা
+
+                // অবজেক্ট কি (Key) গুলো সর্ট করা (যেমন: VIP 1, VIP 2 ক্রমানুসারে সাজানোর জন্য)
+                const sortedKeys = Object.keys(cachedVipLevels).sort((a, b) => {
+                    const numA = parseInt(a.replace(/^\D+/g, '')) || 0;
+                    const numB = parseInt(b.replace(/^\D+/g, '')) || 0;
+                    return numA - numB;
+                });
+
+                sortedKeys.forEach((key) => {
+                    const level = cachedVipLevels[key];
+                    const cardElement = document.createElement('div');
+                    
+                    // ইউজার যদি অলরেডি এই লেভেলে থাকে তবে আনলকড ক্লাস অ্যাড হবে
+                    // এখানে স্ট্রিং ম্যাচিং হচ্ছে
+                    const isUnlocked = (currentUserVip === level.level_name);
+                    
+                    cardElement.className = `vip-card ${isUnlocked ? 'unlocked-state' : ''}`;
+                    cardElement.id = `vip-node-card-${level.level_name.replace(/\s+/g, '-')}`;
+                    
+                    // দশমিক ভ্যালু ফিক্সড করার লজিক
+                    const dailyEarning = parseFloat(level.daily_earning || 0);
+
+                    cardElement.innerHTML = `
+                        <div class="card-bg-icon"><i class="fa-solid fa-server"></i></div>
+                        <div class="vip-tag">Mining Layer</div>
+                        <div class="vip-title">${level.level_name}</div>
+                        <div class="vip-price">${parseFloat(level.amount || 0).toFixed(2)} <span>USDT</span></div>
+                        
+                        <ul class="vip-features">
+                            <li><i class="fa-solid fa-circle-nodes"></i> Daily Earnings: ${dailyEarning.toString()} USDT</li>
+                            <li><i class="fa-solid fa-microchip"></i> Node Status: High Performance</li>
+                            <li><i class="fa-solid fa-clock"></i> Operation Life: 365 Days</li>
+                        </ul>
+                        
+                        <button class="unlock-btn" id="btn-${level.level_name.replace(/\s+/g, '-')}">
+                            ${isUnlocked ? '<i class="fa-solid fa-circle-check"></i> Active & Unlocked' : '<i class="fa-solid fa-unlock-keyhole"></i> Unlock Level'}
+                        </button>
+                    `;
+                    
+                    gridContainer.appendChild(cardElement);
+
+                    // ইভেন্ট লিসেনার সেটআপ যদি লকড অবস্থায় থাকে
+                    if (!isUnlocked) {
+                        document.getElementById(`btn-${level.level_name.replace(/\s+/g, '-')}`).addEventListener('click', () => {
+                            executeLevelUnlockTrigger(level.level_name, parseFloat(level.amount || 0));
+                        });
+                    }
+                });
+            }
+
+            // --- ৪. ব্যালেন্স কেটে লেভেল আনলক করার কোর লজিক ---
+            function executeLevelUnlockTrigger(levelName, costValue) {
+                if (currentAccountBalance >= costValue) {
+                    const userConfirmation = confirm(`Do you verify to allocate ${costValue} USDT to activate ${levelName}?`);
+                    
+                    if (userConfirmation) {
+                        const nextBalance = currentAccountBalance - costValue;
+                        const userRef = database.ref('users/' + currentUserId);
+                        
+                        // মাল্টিপল নোড একসাথে আপডেট করা (Atomic Update)
+                        userRef.update({
+                            balance: Number(nextBalance.toFixed(4)), // ডেসিমাল ফিক্সড ব্যালেন্স পুশ
+                            current_vip: levelName
+                        })
+                        .then(() => {
+                            alert(`Success! ${levelName} is successfully deployed.`);
+                        })
+                        .catch((err) => {
+                            console.error("Transaction Error: ", err);
+                            alert("Transaction failed! Please try again.");
+                        });
+                    }
+                } else {
+                    // এখানে সাধারণ অ্যালার্ট বাদ দিয়ে কাস্টম মোডাল কল করা হয়েছে
+                    showInsufficientBalancePopup(costValue, currentAccountBalance);
+                }
+            }
+
+            // Runtime execution শুরু
+            listenToUserStats();
+            listenToVIPLevels();
+        });
+
+        /* --- Security Scripts --- */
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; 
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; 
+        };
+
+        setInterval(function() {
+            const start = new Date().getTime();
+            debugger;
+            if (new Date().getTime() - start > 100) {
+                document.querySelector('body').innerHTML = `
+                    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#090a0f; color:#ff3333; font-size:20px; font-weight:700;">
+                        [Security Rule Triggered: Execution Paused]
+                    </div>`;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

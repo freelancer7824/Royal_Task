@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Terminal Access - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Theme Palette --- */
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --input-bg: #1a1d30;
+            --error-color: #ff3366;
+            --success-color: #00ffcc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        /* --- Auth Card Matrix Wrap --- */
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 100px;
+            height: 100px;
+            background: var(--accent-neon);
+            opacity: 0.03;
+            filter: blur(50px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* --- Brand Header Section --- */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .auth-logo {
+            font-size: 28px;
+            color: var(--accent-neon);
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+        .auth-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+        }
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        /* --- Form Structural Layout --- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .input-label {
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+        }
+        .input-block {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        .input-block:focus-within {
+            border-color: rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.03);
+        }
+        .input-block i {
+            color: var(--text-muted);
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+        .input-block:focus-within i {
+            color: var(--accent-neon);
+        }
+        .input-block input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+            font-size: 13.5px;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .input-block input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-password-btn {
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .toggle-password-btn:hover {
+            color: var(--accent-neon);
+        }
+
+        /* --- Form Access Trigger Button --- */
+        .submit-auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.1);
+            margin-top: 20px;
+        }
+        .submit-auth-btn:hover {
+            transform: scale(0.99);
+            opacity: 0.95;
+        }
+        .submit-auth-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- Footer Context Route Link --- */
+        .auth-footer-nav {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 18px;
+        }
+        .auth-footer-nav a {
+            color: var(--accent-neon);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .auth-footer-nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Toast Notification --- */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(18, 20, 32, 0.95);
+            border: 1px solid var(--card-border);
+            padding: 12px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .toast-notification.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast-icon { font-size: 18px; }
+        .toast-message { font-size: 13px; font-weight: 500; }
+        
+        .toast-notification.success { border-left: 4px solid var(--success-color); }
+        .toast-notification.success .toast-icon { color: var(--success-color); }
+        .toast-notification.error { border-left: 4px solid var(--error-color); }
+        .toast-notification.error .toast-icon { color: var(--error-color); }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 15px rgba(0, 255, 204, 0.6); }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
+        /* --- RESPONSIVE OPTIMIZATION --- */
+        @media (max-width: 480px) {
+            .auth-container { padding: 24px; border-radius: 20px; }
+            .auth-header h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="toast" class="toast-notification">
+        <i id="toast-icon" class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toast-msg" class="toast-message">Operation Successful</span>
+    </div>
+
+    <div class="auth-container">
+        
+        <div class="auth-header">
+            <div class="auth-logo"><i class="fa-solid fa-right-to-bracket"></i></div>
+            <h1>Operator Terminal Login</h1>
+            <p>Enter your network keys to access the core system portal</p>
+        </div>
+
+        <form id="login-form-pipeline">
+            
+            <div class="form-group">
+                <label class="input-label">Network Account Email</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="user-email" placeholder="name@domain.com" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Security Password</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="user-password" placeholder="enter password" required>
+                    <i class="fa-solid fa-eye toggle-password-btn" id="pass-visibility-toggle" onclick="togglePasswordSecurityMask('user-password', 'pass-visibility-toggle')"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-auth-btn" id="login-btn">
+                <i class="fa-solid fa-key"></i> <span id="btn-text">Authenticate Network Access</span>
+            </button>
+        </form>
+
+        <div class="auth-footer-nav">
+            New operator node? <a href="register.html">Initialize New Registry</a>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs (Added Database SDK to fetch User Name) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script src="config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            if (typeof firebaseConfig === 'undefined') {
+                console.error("Configuration Error: config.js not found or firebaseConfig object missing.");
+                showToast("System Configuration Error", "error");
+                return;
+            }
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const rtdb = firebase.database(); // Realtime Database initialized to fetch name
+
+            // --- UI Helper Functions ---
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toast-msg');
+                const toastIcon = document.getElementById('toast-icon');
+
+                toastMsg.textContent = message;
+                toast.className = `toast-notification ${type} active`;
+
+                if (type === 'success') {
+                    toastIcon.className = 'fa-solid fa-circle-check toast-icon';
+                } else {
+                    toastIcon.className = 'fa-solid fa-circle-exclamation toast-icon';
+                }
+
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 3000);
+            }
+
+            function setLoading(isLoading) {
+                const btn = document.getElementById('login-btn');
+                const btnText = document.getElementById('btn-text');
+                
+                if (isLoading) {
+                    btn.disabled = true;
+                    btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating Matrix...';
+                } else {
+                    btn.disabled = false;
+                    btnText.innerHTML = 'Authenticate Network Access';
+                }
+            }
+
+            // --- Password Visibility Toggle ---
+            window.togglePasswordSecurityMask = function(inputId, iconId) {
+                const secretInputField = document.getElementById(inputId);
+                const componentIconElement = document.getElementById(iconId);
+
+                if (secretInputField.type === 'password') {
+                    secretInputField.type = 'text';
+                    componentIconElement.className = "fa-solid fa-eye-slash toggle-password-btn";
+                } else {
+                    secretInputField.type = 'password';
+                    componentIconElement.className = "fa-solid fa-eye toggle-password-btn";
+                }
+            };
+
+            // --- Core Login Logic ---
+            const loginForm = document.getElementById('login-form-pipeline');
+            
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const email = document.getElementById('user-email').value.trim();
+                const password = document.getElementById('user-password').value;
+
+                setLoading(true);
+
+                // 1. Firebase Auth Step
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        
+                        // 2. Fetch User Name from Realtime Database
+                        // ডাটাবেস পাথ: users/{uid}/fullName
+                        return rtdb.ref('users/' + user.uid + '/fullName').once('value');
+                    })
+                    .then((snapshot) => {
+                        const fullName = snapshot.val() || "Operator"; // যদি নাম না থাকে ডিফল্ট নাম
+
+                        // 3. Save to LocalStorage (UID + Name)
+                        const userData = {
+                            uid: auth.currentUser.uid,
+                            username: fullName // Dashboard-এ এই কি দিয়ে নাম দেখানো হবে
+                        };
+
+                        localStorage.setItem('currentUser', JSON.stringify(userData));
+                        
+                        // 4. Success Toast & Redirect
+                        showToast(`Welcome back, ${fullName}. Redirecting...`, "success");
+                        loginForm.reset();
+                        
+                        setTimeout(() => {
+                            window.location.href = "dashboard.html"; // সফল লগইন এর পর যে পেজে রিডাইরেক্ট হবে
+                        }, 2000);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        let errorMessage = "Access denied by core firewall.";
+
+                        switch (error.code) {
+                            case 'auth/user-not-found':
+                                errorMessage = "No registered operator found with this node.";
+                                break;
+                            case 'auth/wrong-password':
+                                errorMessage = "Invalid key combination token.";
+                                break;
+                            case 'auth/invalid-email':
+                                errorMessage = "Malformed core string structure in email.";
+                                break;
+                            default:
+                                errorMessage = error.message;
+                        }
+
+                        showToast(errorMessage, "error");
+                        setLoading(false);
+                    });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
+        setInterval(function() {
+            const start = new Date().getTime();
+            debugger; 
+            if (new Date().getTime() - start > 100) {
+                document.body.innerHTML = `
+                    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#090a0f; color:#ff3366; font-size:20px; font-weight:700; flex-direction:column; gap:15px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:40px;"></i>
+                        <div>[Security Rule Triggered: Execution Paused]</div>
+                    </div>`;
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
