@@ -403,7 +403,7 @@
             // --- 3. Setup Referral Link & Code ---
             function setupReferralData(uid) {
                 const origin = window.location.origin;
-                const refLink = `${origin}/register.html?ref=${uid}`;
+                const refLink = `${origin}/../User/register?ref=${uid}`;
                 
                 const urlInput = document.getElementById('ref-url');
                 const copyBtn = document.getElementById('copy-btn');
