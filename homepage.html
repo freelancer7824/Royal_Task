@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Network - Referral Mining Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Theme Palette Variable Links --- */
+        :root {
+            --bg-body: #05060a;
+            --bg-surface: #0c0e17;
+            --panel-card: rgba(18, 20, 32, 0.75);
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.04);
+            --input-bg: #1a1d30;
+            --line-color: rgba(0, 255, 204, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        /* Custom Scrollbar Elements */
+        ::-webkit-scrollbar { width: 6px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #1a1d30; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
+
+        /* --- BACKGROUND INFINITE NETWORK MAP CANVAS --- */
+        #network-canvas-map {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        /* --- CONTENT LAYER HOOKS --- */
+        .content-terminal-layer {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* --- HERO HEADLINE AREA --- */
+        .hero-section {
+            background: var(--panel-card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            padding: 40px 35px;
+            border-radius: 24px;
+            margin-bottom: 35px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+        }
+        .network-meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--accent-neon);
+            background: rgba(0, 255, 204, 0.05);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 255, 204, 0.1);
+            margin-bottom: 20px;
+        }
+        .pulse-dot-indicator {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-neon);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-neon);
+            animation: pulseFlash 1.5s infinite alternate;
+        }
+        .hero-section h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-neon) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-section p {
+            color: var(--text-muted);
+            font-size: 14.5px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .hero-ctas {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000 !important;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 11px 22px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.15);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 255, 204, 0.3);
+        }
+        .btn-secondary {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 11px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.02);
+            color: var(--accent-neon);
+        }
+
+        /* ================= HERO IMAGE SLIDER SECTION ================= */
+        .hero-slider-wrapper {
+            background: var(--panel-card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 35px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+        }
+        .slider-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding: 0 6px;
+        }
+        .slider-header .label {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .slider-header .label i { color: var(--accent-neon); }
+        .slider-header .counter {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .slider-header .counter span { color: var(--accent-neon); font-weight: 700; }
+
+        .slider-frame {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #0a0c14;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+        }
+        .slides-track { position: relative; width: 100%; height: 100%; }
+        .slide-item {
+            position: absolute; inset: 0; opacity: 0;
+            transition: opacity 0.9s ease, transform 1.2s ease; transform: scale(1.08);
+        }
+        .slide-item.active { opacity: 1; transform: scale(1); z-index: 2; }
+        .slide-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .slide-item::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(5,6,10,0.1) 0%, rgba(5,6,10,0.4) 55%, rgba(5,6,10,0.92) 100%); z-index: 1;
+        }
+        .slide-caption {
+            position: absolute; bottom: 30px; left: 30px; right: 30px; z-index: 3;
+            transform: translateY(20px); opacity: 0; transition: all 0.7s ease 0.3s;
+        }
+        .slide-item.active .slide-caption { transform: translateY(0); opacity: 1; }
+        .slide-caption .tag {
+            display: inline-block; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-neon);
+            background: rgba(0, 255, 204, 0.08); border: 1px solid rgba(0, 255, 204, 0.2);
+            padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;
+        }
+        .slide-caption h3 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.3; max-width: 70%; }
+        .slide-caption p { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 60%; }
+
+        .nav-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-main); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 5; transition: all 0.3s ease; font-size: 14px;
+        }
+        .nav-arrow:hover { background: var(--accent-neon); color: #000; border-color: var(--accent-neon); box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        .nav-arrow.prev { left: 18px; }
+        .nav-arrow.next { right: 18px; }
+
+        .dots-row { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 0.3s ease; }
+        .dot.active { background: var(--accent-neon); width: 26px; border-radius: 10px; box-shadow: 0 0 12px rgba(0,255,204,0.6); }
+
+        .progress-bar-track { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 5; }
+        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-neon), var(--accent-hover)); box-shadow: 0 0 10px var(--accent-neon); }
+        .progress-bar-fill.running { animation: progressFill 6s linear forwards; }
+
+        /* --- VERTICAL L-R REFERRAL ROADMAP ZONE --- */
+        .roadmap-container {
+            background: var(--panel-card); backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border); border-radius: 24px;
+            padding: 35px; box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+        }
+        .roadmap-title {
+            font-size: 16px; font-weight: 600; margin-bottom: 30px;
+            display: flex; align-items: center; gap: 10px; letter-spacing: 0.3px;
+        }
+        .roadmap-title i { color: var(--accent-neon); }
+
+        /* Loading state styles */
+        .loading-state { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent-neon); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .v-tree, .v-tree ul { list-style: none; margin: 0; padding: 0; position: relative; }
+        .v-tree ul { margin-left: 35px; }
+        .v-tree ul::before {
+            content: ''; position: absolute; left: -15px; top: 0; bottom: 20px;
+            width: 1.5px; background: var(--line-color);
+        }
+        .v-tree li { margin: 0; padding: 8px 0 8px 15px; position: relative; }
+        .v-tree li::before {
+            content: ''; position: absolute; left: -15px; top: 20px;
+            width: 15px; height: 1.5px; border-top: 1.5px solid var(--line-color);
+        }
+
+        .node-card {
+            background: rgba(9, 10, 15, 0.85); border: 1px solid rgba(255,255,255,0.04);
+            padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center;
+            gap: 8px; transition: all 0.25s ease; backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .node-card:hover { border-color: var(--accent-neon); box-shadow: 0 0 12px rgba(0,255,204,0.15); transform: translateX(3px); }
+        .node-icon {
+            font-size: 11px; color: var(--accent-neon); background: rgba(0, 255, 204, 0.05);
+            width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+        }
+        .node-meta { display: flex; flex-direction: column; white-space: nowrap; }
+        .node-meta strong { font-size: 11px; font-weight: 600; color: var(--text-main); line-height: 1.2; }
+        .node-meta span { font-size: 9px; color: var(--text-muted); margin-top: 1px; }
+
+        .root-node { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.02); }
+        .sub-branch-node { border-color: rgba(0, 255, 204, 0.12); }
+
+        @keyframes pulseFlash { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        @keyframes progressFill { from { width: 0%; } to { width: 100%; } }
+        
+        @media (max-width: 600px) {
+            body { padding: 20px 10px; }
+            .hero-section { padding: 25px 20px; }
+            .roadmap-container { padding: 25px 20px; }
+            .hero-section h1 { font-size: 24px; }
+            .slider-frame { height: 280px; }
+            .slide-caption { left: 18px; right: 18px; bottom: 22px; }
+            .slide-caption h3 { font-size: 16px; max-width: 100%; }
+            .slide-caption p { font-size: 11px; max-width: 100%; }
+            .nav-arrow { width: 36px; height: 36px; }
+            .nav-arrow.prev { left: 10px; }
+            .nav-arrow.next { right: 10px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <canvas id="network-canvas-map"></canvas>
+
+    <div class="content-terminal-layer">
+        
+        <section class="hero-section">
+            <div class="network-meta-badge">
+                <div class="pulse-dot-indicator"></div> Referral Cloud Mining Active
+            </div>
+            <h1>Multi-Tier Referral Mining Engine</h1>
+            <p>Apnar connection network map reference link share kore dynamic layer hash-rate generate koro. Joto beshi user node process extend hobe, referral matrix algorithms calculations totoi speed payout processing finalize korbe.</p>
+            
+           
+        </section>
+
+        <!-- ========== HERO IMAGE SLIDER (5 SLIDES) ========== -->
+        <section class="hero-slider-wrapper">
+            <div class="slider-header">
+                <div class="label"><i class="fa-solid fa-images"></i> Network Highlights</div>
+                <div class="counter">Slide <span id="curSlide">01</span> / 05</div>
+            </div>
+
+            <div class="slider-frame" id="sliderFrame">
+                <div class="slides-track" id="slidesTrack">
+                    <div class="slide-item active">
+                        <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&q=80" alt="Crypto Mining">
+                        <div class="slide-caption">
+                            <span class="tag">Quantum Hash Engine</span>
+                            <h3>High-Speed Cloud Mining Infrastructure</h3>
+                            <p>Industrial-grade GPU clusters processing referral hash layers in real-time.</p>
+                        </div>
+                    </div>
+                    <div class="slide-item">
+                        <img src="https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200&q=80" alt="Blockchain Network">
+                        <div class="slide-caption">
+                            <span class="tag">Decentralized Layer</span>
+                            <h3>Secure Blockchain Verification Nodes</h3>
+                            <p>Every referral transaction is cryptographically verified across distributed ledger endpoints.</p>
+                        </div>
+                    </div>
+                    <div class="slide-item">
+                        <img src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1200&q=80" alt="Trading Dashboard">
+                        <div class="slide-caption">
+                            <span class="tag">Live Analytics</span>
+                            <h3>Real-Time Mining Yield Dashboard</h3>
+                            <p>Monitor tier-wise hash rate, bonus multiplier, and projected payout interactively.</p>
+                        </div>
+                    </div>
+                    <div class="slide-item">
+                        <img src="https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=1200&q=80" alt="Crypto Wallet">
+                        <div class="slide-caption">
+                            <span class="tag">Instant Payout</span>
+                            <h3>Automated Reward Distribution System</h3>
+                            <p>Referral commissions are auto-credited to your wallet once sub-node completes cycle.</p>
+                        </div>
+                    </div>
+                    <div class="slide-item">
+                        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80" alt="Data Analytics">
+                        <div class="slide-caption">
+                            <span class="tag">AI Optimization</span>
+                            <h3>Smart Matrix Algorithm Calibration</h3>
+                            <p>Adaptive AI engine redistributes hash power dynamically across profitable branches.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-arrow prev" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="nav-arrow next" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></div>
+                <div class="dots-row" id="dotsRow"></div>
+                <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar"></div></div>
+            </div>
+        </section>
+
+        <!-- Dynamic Roadmap Section -->
+        <section class="roadmap-container">
+            <div class="roadmap-title">
+                <i class="fa-solid fa-network-wired"></i> Live Mining Network Tree (Referral Track)
+            </div>
+
+            <!-- Loading State -->
+            <div id="treeLoading" class="loading-state">
+                <div class="spinner"></div>
+                <span>Connecting to Network Nodes...</span>
+            </div>
+
+            <!-- Dynamic Tree Container -->
+            <ul class="v-tree" id="referralTree" style="display: none;"></ul>
+        </section>
+
+    </div>
+
+    <!-- Firebase SDKs (Compat version for config.js support) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Your Custom Config File -->
+    <script src="config.js"></script>
+
+    <script>
+        // ========================================
+        // 1. CANVAS BACKGROUND NETWORK ANIMATION
+        // ========================================
+        const canvas = document.getElementById('network-canvas-map');
+        const ctx = canvas.getContext('2d');
+        
+        function alignCanvasDimension() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', alignCanvasDimension);
+        alignCanvasDimension();
+
+        let trackPoints = [];
+        for(let idx=0; idx<30; idx++) {
+            trackPoints.push({
+                x: Math.random()*canvas.width, y: Math.random()*canvas.height, 
+                vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3
+            });
+        }
+
+        function triggerEngineRefreshFrame() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.strokeStyle = "rgba(0, 255, 204, 0.05)";
+            ctx.beginPath();
+            trackPoints.forEach((pt, i) => {
+                pt.x += pt.vx; pt.y += pt.vy;
+                if(pt.x<0 || pt.x>canvas.width) pt.vx*=-1;
+                if(pt.y<0 || pt.y>canvas.height) pt.vy*=-1;
+                ctx.moveTo(pt.x, pt.y);
+                ctx.lineTo(trackPoints[(i+1)%trackPoints.length].x, trackPoints[(i+1)%trackPoints.length].y);
+            });
+            ctx.stroke();
+            requestAnimationFrame(triggerEngineRefreshFrame);
+        }
+        triggerEngineRefreshFrame();
+
+
+        // ========================================
+        // 2. HERO SLIDER LOGIC
+        // ========================================
+        const slides = document.querySelectorAll('.slide-item');
+        const dotsContainer = document.getElementById('dotsRow');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const curSlideLabel = document.getElementById('curSlide');
+
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+        const slideDuration = 6000; 
+        let autoSlideInterval;
+
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+
+        function updateCounter() { curSlideLabel.textContent = String(currentSlide + 1).padStart(2, '0'); }
+
+        function resetProgress() {
+            progressBar.classList.remove('running');
+            void progressBar.offsetWidth; 
+            progressBar.classList.add('running');
+        }
+
+        function goToSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            currentSlide = (index + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+            updateCounter();
+            resetProgress();
+            clearInterval(autoSlideInterval);
+            startAutoSlide();
+        }
+
+        function nextSlide() { goToSlide(currentSlide + 1); }
+        function prevSlide() { goToSlide(currentSlide - 1); }
+        function startAutoSlide() { autoSlideInterval = setInterval(nextSlide, slideDuration); }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        const sliderFrame = document.getElementById('sliderFrame');
+        sliderFrame.addEventListener('mouseenter', () => { clearInterval(autoSlideInterval); progressBar.style.animationPlayState = 'paused'; });
+        sliderFrame.addEventListener('mouseleave', () => { progressBar.style.animationPlayState = 'running'; startAutoSlide(); });
+
+        let touchStartX = 0;
+        sliderFrame.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+        sliderFrame.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) { if (diff > 0) nextSlide(); else prevSlide(); }
+        });
+
+        resetProgress();
+        startAutoSlide();
+
+
+        // ========================================
+        // 3. FIREBASE & DYNAMIC REFERRAL LOGIC
+        // ========================================
+        
+        // Initialize Firebase using config.js variables
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const treeLoading = document.getElementById('treeLoading');
+        const referralTree = document.getElementById('referralTree');
+
+        // Utility: Generate Random Hash String for UI
+        function generateHashRate() {
+            return (Math.random() * 50 + 10).toFixed(1);
+        }
+
+        // Utility: Create Node Card HTML
+        function createNodeCard(iconClass, title, subtitle, isRoot = false, isSubBranch = false) {
+            let classes = "node-card";
+            if(isRoot) classes += " root-node";
+            if(isSubBranch) classes += " sub-branch-node";
+
+            return `
+                <div class="${classes}">
+                    <div class="node-icon"><i class="${iconClass}"></i></div>
+                    <div class="node-meta">
+                        <strong>${title}</strong>
+                        <span>${subtitle}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Recursive Function to Build Tree UI
+        function buildTreeUI(user, tierLevel = 1) {
+            let html = "";
+            const isActive = user.status === 'active';
+            const hash = generateHashRate();
+            
+            let icon, title, sub, isSub = false;
+
+            if (tierLevel === 1) {
+                icon = "fa-solid fa-users";
+                title = `Referral Layer 01 (${user.name})`;
+                sub = isActive ? `${user.referralsCount || 0} Nodes Active (+10% Bonus)` : "0 Nodes Active (Mining Offline)";
+            } else if (tierLevel === 2) {
+                icon = "fa-solid fa-user-plus";
+                title = `Sub Referral (${user.name})`;
+                sub = isActive ? `Tier 2 Hash: ${hash} TH/s (+5% Bonus)` : "Mining Offline";
+                isSub = true;
+            } else {
+                icon = "fa-solid fa-microchip";
+                title = `Sub Node Layer 0${tierLevel} (${user.name})`;
+                sub = isActive ? `Tier ${tierLevel} Mining Yield Active` : "Yield Paused";
+                isSub = true;
+            }
+
+            html += `<li>${createNodeCard(icon, title, sub, false, isSub)}`;
+
+            // If user has referrals, recursively build
+            if (user.referrals && Object.keys(user.referrals).length > 0) {
+                html += "<ul>";
+                Object.values(user.referrals).forEach(ref => {
+                    html += buildTreeUI(ref, tierLevel + 1);
+                });
+                html += "</ul>";
+            }
+
+            html += `</li>`;
+            return html;
+        }
+
+        // Main Fetch Function
+        async function loadReferralNetwork() {
+            try {
+                // Get Current User (Assuming the logged-in user's ID is stored locally or replace 'current_user_id')
+                // For demonstration, we fetch the first user or use a specific ID
+                const currentUserId = localStorage.getItem('uid') || 'current_user_id'; 
+                
+                // Fetch Current User Data
+                const currentUserSnap = await db.ref('users/' + currentUserId).once('value');
+                const currentUser = currentUserSnap.val();
+
+                if (!currentUser) {
+                    // Fallback random user if specific ID not found
+                    const randomUserSnap = await db.ref('users').limitToFirst(1).once('value');
+                    const randomUserData = randomUserSnap.val();
+                    
+                    if (!randomUserData) {
+                        treeLoading.innerHTML = "<span style='color: #ff4d4d'>No Network Data Found in Database</span>";
+                        return;
+                    }
+
+                    const rKey = Object.keys(randomUserData)[0];
+                    const rUser = randomUserData[rKey];
+                    rUser.uid = rKey;
+                    renderTree(rUser);
+                } else {
+                    currentUser.uid = currentUserId;
+                    renderTree(currentUser);
+                }
+
+            } catch (error) {
+                console.error("Firebase Fetch Error:", error);
+                treeLoading.innerHTML = "<span style='color: #ff4d4d'>Network Connection Failed</span>";
+            }
+        }
+
+        // Render Tree to DOM
+        function renderTree(mainUser) {
+            let finalHTML = "";
+            
+            // Create Root Node (Current User)
+            const rootHash = generateHashRate();
+            finalHTML += `<li>${createNodeCard("fa-solid fa-user-shield", "My Active Node (You)", `Base Hash: ${rootHash} TH/s`, true)}`;
+            
+            finalHTML += "<ul>";
+
+            // Check if current user has referrals
+            if (mainUser.referrals && Object.keys(mainUser.referrals).length > 0) {
+                Object.values(mainUser.referrals).forEach(tier1User => {
+                    finalHTML += buildTreeUI(tier1User, 1);
+                });
+            } else {
+                // If no referrals mapped under user, fetch 3 random users as Layer 1 for demonstration
+                db.ref('users').limitToFirst(3).once('value', (snap) => {
+                    const randomUsers = snap.val();
+                    let tempHTML = "";
+                    if(randomUsers) {
+                        Object.values(randomUsers).forEach(u => {
+                            tempHTML += buildTreeUI(u, 1);
+                        });
+                    }
+                    referralTree.innerHTML = finalHTML + tempHTML + "</ul></li>";
+                    treeLoading.style.display = "none";
+                    referralTree.style.display = "block";
+                });
+                return;
+            }
+
+            finalHTML += "</ul></li>";
+            
+            referralTree.innerHTML = finalHTML;
+            treeLoading.style.display = "none";
+            referralTree.style.display = "block";
+        }
+
+        // Initialize Data Fetch
+        loadReferralNetwork();
+
+
+        // ========================================
+        // 4. SECURITY & PROTECTION
+        // ========================================
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+    </script>
+</body>
+</html>
