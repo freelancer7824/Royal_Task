@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- Dark Premium Colors --- */
         :root {
             --bg-body: #090a0f;
             --panel-card: #121420;
@@ -19,6 +18,7 @@
             --card-border: rgba(255, 255, 255, 0.03);
             --vip-gold: #ffaa00;
             --danger-color: #ff3366;
+            --success-green: #00e676;
         }
 
         * {
@@ -43,12 +43,10 @@
         body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
         body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
 
-        /* --- Page Header Layout --- */
         .page-header { margin-bottom: 35px; }
         .page-header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px; }
         .page-header p { color: var(--text-muted); font-size: 14px; }
 
-        /* --- Real-Time Balance Status Board --- */
         .status-banner {
             background: linear-gradient(90deg, rgba(0, 255, 204, 0.07) 0%, rgba(18, 20, 32, 0.3) 100%);
             border: 1px solid rgba(0, 255, 204, 0.15);
@@ -75,7 +73,6 @@
         }
         .balance-display span { color: var(--accent-neon); }
 
-        /* --- VIP Level Grid Matrix --- */
         .vip-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
@@ -110,6 +107,45 @@
             transform: rotate(-10deg);
         }
 
+        /* --- আনলকড স্টেট --- */
+        .vip-card.unlocked-state {
+            border-color: rgba(0, 230, 118, 0.35);
+            background: linear-gradient(145deg, #0a1a12 0%, #0e1019 100%);
+        }
+        .vip-card.unlocked-state::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--success-green), transparent);
+            border-radius: 20px 20px 0 0;
+        }
+        .vip-card.unlocked-state .vip-tag {
+            color: var(--success-green);
+        }
+
+        /* --- লকড/নেক্সট স্টেট --- */
+        .vip-card.locked-state {
+            opacity: 0.45;
+            pointer-events: none;
+            filter: grayscale(0.3);
+        }
+
+        /* --- অ্যাক্টিভ স্টেট (বর্তমান লেভেল) --- */
+        .vip-card.active-state {
+            border-color: rgba(0, 255, 204, 0.4);
+            background: linear-gradient(145deg, #0e1a1c 0%, #0e1019 100%);
+        }
+        .vip-card.active-state::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-neon), transparent);
+            border-radius: 20px 20px 0 0;
+            animation: shimmer 2.5s infinite;
+        }
+
         .vip-tag { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: var(--vip-gold); margin-bottom: 4px; }
         .vip-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
         
@@ -127,6 +163,7 @@
         .vip-features li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
         .vip-features li i { color: var(--accent-neon); font-size: 12px; }
 
+        /* --- আনলক বাটন (ডিফল্ট / নেক্সট আনলকেবল) --- */
         .unlock-btn {
             width: 100%;
             background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
@@ -145,24 +182,39 @@
         }
         .unlock-btn:hover { opacity: 0.9; transform: scale(0.98); }
 
-        .vip-card.unlocked-state {
-            border-color: rgba(0, 255, 204, 0.4);
-            background: linear-gradient(145deg, #0e1a1c 0%, #0e1019 100%);
+        /* --- আনলকড বাটন (সবুজ, ডিসেবলড) --- */
+        .unlock-btn.btn-unlocked {
+            background: rgba(0, 230, 118, 0.08) !important;
+            color: var(--success-green) !important;
+            border: 1px solid rgba(0, 230, 118, 0.25) !important;
+            cursor: default !important;
+            pointer-events: none;
         }
-        .vip-card.unlocked-state .unlock-btn {
-            background: rgba(255, 255, 255, 0.03) !important;
+
+        /* --- অ্যাক্টিভ বাটন (নিয়ন, ডিসেবলড) --- */
+        .unlock-btn.btn-active {
+            background: rgba(0, 255, 204, 0.08) !important;
             color: var(--accent-neon) !important;
-            border: 1px solid rgba(0, 255, 204, 0.2) !important;
+            border: 1px solid rgba(0, 255, 204, 0.25) !important;
+            cursor: default !important;
+            pointer-events: none;
+        }
+
+        /* --- লকড বাটন (গ্রে, ডিসেবলড) --- */
+        .unlock-btn.btn-locked {
+            background: rgba(255, 255, 255, 0.03) !important;
+            color: #555 !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
             cursor: not-allowed !important;
             pointer-events: none;
         }
 
-        /* --- Stylish Custom Popup (Modal) UI --- */
+        /* --- পপআপ --- */
         .popup-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(4, 5, 9, 0.8);
-            backdrop-filter: blur(8px);
+            background: rgba(4, 5, 9, 0.85);
+            backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center;
             z-index: 9999;
             opacity: 0; pointer-events: none;
@@ -205,16 +257,65 @@
         }
         .popup-close-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
+        /* --- সাকসেস টোস্ট --- */
+        .toast-notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(145deg, #0d2818 0%, #0e1019 100%);
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            color: var(--text-main);
+            padding: 18px 28px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        .toast-notification.show { transform: translateX(0); }
+        .toast-notification i { color: var(--success-green); font-size: 20px; }
+
+        /* --- লোক আইকন --- */
+        .lock-overlay-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .lock-overlay-badge i { font-size: 13px; color: #444; }
+        .vip-card.unlocked-state .lock-overlay-badge i { color: var(--success-green); }
+        .vip-card.active-state .lock-overlay-badge i { color: var(--accent-neon); }
+
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.7; }
             100% { transform: scale(1); opacity: 1; }
         }
 
+        @keyframes shimmer {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
         @media (max-width: 600px) {
             body { padding: 16px; }
             .status-banner { flex-direction: column; gap: 15px; align-items: stretch; text-align: center; }
             .status-info { justify-content: center; }
+            .toast-notification { right: 16px; left: 16px; top: 16px; }
         }
     </style>
 </head>
@@ -237,7 +338,7 @@
 
     <div class="vip-grid" id="level-container-grid"></div>
 
-    <!-- Stylish কাস্টম পপআপ HTML স্ট্রাকচার -->
+    <!-- ইনসাফিশিয়েন্ট ব্যালেন্স পপআপ -->
     <div class="popup-overlay" id="insufficient-popup-overlay">
         <div class="popup-box">
             <div class="popup-icon-container">
@@ -249,22 +350,23 @@
         </div>
     </div>
 
-    <!-- Realtime Database এবং App Compat SDK Links -->
+    <!-- সাকসেস টোস্ট -->
+    <div class="toast-notification" id="success-toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-message-text"></span>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- লোকাল কনফিগারেশন ফাইল লিঙ্ক -->
     <script src="config.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- 1. Login Check & Auth Logic ---
-            // localStorage থেকে currentUser চেক করা হচ্ছে
+            // --- লগইন চেক ---
             function checkLogin() {
                 const loggedInUser = localStorage.getItem('currentUser');
                 if (!loggedInUser) {
-                    // লগড ইন না থাকলে লগইন পেজে রিডাইরেক্ট
                     if (window !== window.top) {
                         window.top.location.href = "login.html";
                     } else {
@@ -276,7 +378,6 @@
                     const userData = JSON.parse(loggedInUser);
                     return userData.uid; 
                 } catch (e) {
-                    console.error("User data parse error", e);
                     if (window !== window.top) {
                         window.top.location.href = "login.html";
                     } else {
@@ -287,11 +388,7 @@
             }
 
             const currentUserId = checkLogin();
-
-            // যদি ইউজার আইডি না থাকে, তবে আর কোড এগোবে না
-            if (!currentUserId) {
-                return; 
-            }
+            if (!currentUserId) return;
 
             // Firebase Initialize
             if (typeof firebaseConfig !== 'undefined') {
@@ -306,54 +403,73 @@
             const database = firebase.database();
 
             let currentAccountBalance = 0.00;
-            let currentUserVip = "VIP 0"; 
+            let unlockedVipList = []; // যেসব VIP আনলক হয়েছে সেগুলোর নামের অ্যারে
+            let cachedVipLevels = {};
+            let isTransactionPending = false; // ডাবল ক্লিক প্রতিরোধ
+
             const gridContainer = document.getElementById('level-container-grid');
             const balanceDisplayElement = document.getElementById('wallet-balance-amount');
-
-            // পপআপ এলিমেন্ট রেফারেন্স
             const popupOverlay = document.getElementById('insufficient-popup-overlay');
             const popupMsg = document.getElementById('popup-error-message-text');
             const popupCloseBtn = document.getElementById('popup-close-action-btn');
+            const successToast = document.getElementById('success-toast');
+            const toastMessage = document.getElementById('toast-message-text');
 
-            // পপআপ বন্ধ করার ফাংশন
+            // পপআপ বন্ধ
             popupCloseBtn.addEventListener('click', () => {
                 popupOverlay.classList.remove('show');
             });
 
-            // পপআপ দেখানোর ফাংশন
+            // ইনসাফিশিয়েন্ট ব্যালেন্স পপআপ দেখানো
             function showInsufficientBalancePopup(required, available) {
                 popupMsg.innerHTML = `You do not have enough core node assets to unlock this layer.<br><br>Required: <strong>${required.toFixed(2)} USDT</strong><br>Available: <strong>${available.toFixed(2)} USDT</strong>`;
                 popupOverlay.classList.add('show');
             }
 
-            // --- ১. Realtime Database থেকে রিয়েল-টাইম ইউজার ব্যালেন্স ও রানিং VIP লোড ---
+            // সাকসেস টোস্ট দেখানো
+            function showSuccessToast(message) {
+                toastMessage.innerText = message;
+                successToast.classList.add('show');
+                setTimeout(() => {
+                    successToast.classList.remove('show');
+                }, 3500);
+            }
+
+            // VIP নাম থেকে নম্বর বের করা (যেমন "VIP 3" → 3)
+            function extractVipNumber(vipName) {
+                const match = vipName.match(/\d+/);
+                return match ? parseInt(match[0]) : 0;
+            }
+
+            // --- রিয়েল-টাইম ইউজার ডাটা লিসেন ---
             function listenToUserStats() {
                 const userRef = database.ref('users/' + currentUserId);
                 
                 userRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
-                        // ব্যালেন্স আপডেট
                         currentAccountBalance = parseFloat(userData.balance || 0);
-                        // কারেন্ট VIP আপডেট (Database এ কি নামে আছে তা চেক করা জরুরি, ধরে নিলাম 'current_vip')
-                        currentUserVip = userData.current_vip || "VIP 0"; 
+                        
+                        // unlockedVips অ্যারে লোড করা (ডাটাবেজে সেভ থাকবে)
+                        if (Array.isArray(userData.unlockedVips)) {
+                            unlockedVipList = [...userData.unlockedVips];
+                        } else {
+                            unlockedVipList = [];
+                        }
                         
                         balanceDisplayElement.innerText = currentAccountBalance.toFixed(2);
-                        
-                        // ব্যালেন্স বা VIP লেভেল রিয়েলটাইমে চেঞ্জ হলে গ্রিড পুনরায় রেন্ডার হবে
                         renderVIPGrid();
                     } else {
                         balanceDisplayElement.innerText = "0.00";
+                        unlockedVipList = [];
+                        renderVIPGrid();
                     }
                 }, (error) => {
                     console.error("Error fetching user data: ", error);
                 });
             }
 
-            // গ্লোবাল ভেরিয়েবল ডাটাবেজ থেকে আসা VIP অবজেক্ট সাময়িক স্টোর করার জন্য
-            let cachedVipLevels = {};
-
-            // --- ২. Realtime Database থেকে রিয়েল-টাইম VIP সেটিংস লোড ---
+            // --- রিয়েল-টাইম VIP সেটিংস লিসেন ---
             function listenToVIPLevels() {
                 const vipSettingsRef = database.ref('vip_settings');
                 
@@ -362,41 +478,76 @@
                         cachedVipLevels = snapshot.val();
                         renderVIPGrid();
                     } else {
-                        gridContainer.innerHTML = `<div style="color: var(--text-muted); font-size:14px;">No VIP matrix configuration found on server.</div>`;
+                        gridContainer.innerHTML = `<div style="color: var(--text-muted); font-size:14px; grid-column: 1/-1; text-align:center; padding:40px 0;">No VIP matrix configuration found on server.</div>`;
                     }
                 }, (error) => {
                     console.error("Error fetching VIP levels: ", error);
                 });
             }
 
-            // --- ৩. UI কার্ড জেনারেট এবং রেন্ডার করার লজিক ---
+            // --- UI রেন্ডার লজিক ---
             function renderVIPGrid() {
                 if (Object.keys(cachedVipLevels).length === 0) return;
                 
-                gridContainer.innerHTML = ""; // আগের নোড ক্লিয়ার করা
+                gridContainer.innerHTML = "";
 
-                // অবজেক্ট কি (Key) গুলো সর্ট করা (যেমন: VIP 1, VIP 2 ক্রমানুসারে সাজানোর জন্য)
+                // সর্ট করা কি গুলো
                 const sortedKeys = Object.keys(cachedVipLevels).sort((a, b) => {
                     const numA = parseInt(a.replace(/^\D+/g, '')) || 0;
                     const numB = parseInt(b.replace(/^\D+/g, '')) || 0;
                     return numA - numB;
                 });
 
+                // সবচেয়ে বেশি আনলকড VIP এর নম্বর বের করা
+                let highestUnlockedNum = 0;
+                unlockedVipList.forEach(name => {
+                    const num = extractVipNumber(name);
+                    if (num > highestUnlockedNum) highestUnlockedNum = num;
+                });
+
                 sortedKeys.forEach((key) => {
                     const level = cachedVipLevels[key];
+                    const levelNum = extractVipNumber(level.level_name);
+                    const isUnlocked = unlockedVipList.includes(level.level_name);
+                    const isActive = (levelNum === highestUnlockedNum && isUnlocked);
+                    const isNextUnlockable = (!isUnlocked && levelNum === highestUnlockedNum + 1);
+                    const isLocked = (!isUnlocked && levelNum > highestUnlockedNum + 1);
+
                     const cardElement = document.createElement('div');
                     
-                    // ইউজার যদি অলরেডি এই লেভেলে থাকে তবে আনলকড ক্লাস অ্যাড হবে
-                    // এখানে স্ট্রিং ম্যাচিং হচ্ছে
-                    const isUnlocked = (currentUserVip === level.level_name);
-                    
-                    cardElement.className = `vip-card ${isUnlocked ? 'unlocked-state' : ''}`;
+                    // ক্লাস অ্যাসাইন
+                    let cardClass = 'vip-card';
+                    let btnClass = 'unlock-btn';
+                    let btnHtml = '';
+                    let badgeIcon = '';
+
+                    if (isActive) {
+                        cardClass += ' active-state';
+                        btnClass += ' btn-active';
+                        btnHtml = '<i class="fa-solid fa-signal"></i> Currently Active';
+                        badgeIcon = '<i class="fa-solid fa-signal"></i>';
+                    } else if (isUnlocked) {
+                        cardClass += ' unlocked-state';
+                        btnClass += ' btn-unlocked';
+                        btnHtml = '<i class="fa-solid fa-circle-check"></i> Unlocked';
+                        badgeIcon = '<i class="fa-solid fa-circle-check"></i>';
+                    } else if (isLocked) {
+                        cardClass += ' locked-state';
+                        btnClass += ' btn-locked';
+                        btnHtml = '<i class="fa-solid fa-lock"></i> Locked';
+                        badgeIcon = '<i class="fa-solid fa-lock"></i>';
+                    } else if (isNextUnlockable) {
+                        btnHtml = '<i class="fa-solid fa-unlock-keyhole"></i> Unlock Level';
+                        badgeIcon = '<i class="fa-solid fa-lock-open"></i>';
+                    }
+
+                    cardElement.className = cardClass;
                     cardElement.id = `vip-node-card-${level.level_name.replace(/\s+/g, '-')}`;
                     
-                    // দশমিক ভ্যালু ফিক্সড করার লজিক
                     const dailyEarning = parseFloat(level.daily_earning || 0);
 
                     cardElement.innerHTML = `
+                        <div class="lock-overlay-badge">${badgeIcon}</div>
                         <div class="card-bg-icon"><i class="fa-solid fa-server"></i></div>
                         <div class="vip-tag">Mining Layer</div>
                         <div class="vip-title">${level.level_name}</div>
@@ -408,15 +559,15 @@
                             <li><i class="fa-solid fa-clock"></i> Operation Life: 365 Days</li>
                         </ul>
                         
-                        <button class="unlock-btn" id="btn-${level.level_name.replace(/\s+/g, '-')}">
-                            ${isUnlocked ? '<i class="fa-solid fa-circle-check"></i> Active & Unlocked' : '<i class="fa-solid fa-unlock-keyhole"></i> Unlock Level'}
+                        <button class="${btnClass}" id="btn-${level.level_name.replace(/\s+/g, '-')}">
+                            ${btnHtml}
                         </button>
                     `;
                     
                     gridContainer.appendChild(cardElement);
 
-                    // ইভেন্ট লিসেনার সেটআপ যদি লকড অবস্থায় থাকে
-                    if (!isUnlocked) {
+                    // শুধু পরবর্তী আনলকেবল লেভেলে ক্লিক ইভেন্ট
+                    if (isNextUnlockable) {
                         document.getElementById(`btn-${level.level_name.replace(/\s+/g, '-')}`).addEventListener('click', () => {
                             executeLevelUnlockTrigger(level.level_name, parseFloat(level.amount || 0));
                         });
@@ -424,56 +575,53 @@
                 });
             }
 
-            // --- ৪. ব্যালেন্স কেটে লেভেল আনলক করার কোর লজিক ---
+            // --- আনলক ট্রিগার লজিক ---
             function executeLevelUnlockTrigger(levelName, costValue) {
+                // ট্রানজেকশন পেন্ডিং থাকলে আবার ক্লিক ব্লক
+                if (isTransactionPending) return;
+
                 if (currentAccountBalance >= costValue) {
-                    const userConfirmation = confirm(`Do you verify to allocate ${costValue} USDT to activate ${levelName}?`);
+                    const userConfirmation = confirm(`Do you verify to allocate ${costValue.toFixed(2)} USDT to activate ${levelName}?`);
                     
                     if (userConfirmation) {
+                        isTransactionPending = true;
                         const nextBalance = currentAccountBalance - costValue;
                         const userRef = database.ref('users/' + currentUserId);
                         
-                        // মাল্টিপল নোড একসাথে আপডেট করা (Atomic Update)
+                        // unlockedVips অ্যারেতে নতুন লেভেল অ্যাড করে আপডেট
+                        const updatedUnlockedList = [...unlockedVipList, levelName];
+                        
                         userRef.update({
-                            balance: Number(nextBalance.toFixed(4)), // ডেসিমাল ফিক্সড ব্যালেন্স পুশ
-                            current_vip: levelName
+                            balance: Number(nextBalance.toFixed(4)),
+                            current_vip: levelName,
+                            unlockedVips: updatedUnlockedList
                         })
                         .then(() => {
-                            alert(`Success! ${levelName} is successfully deployed.`);
+                            showSuccessToast(`${levelName} deployed successfully!`);
+                            isTransactionPending = false;
                         })
                         .catch((err) => {
                             console.error("Transaction Error: ", err);
                             alert("Transaction failed! Please try again.");
+                            isTransactionPending = false;
                         });
                     }
                 } else {
-                    // এখানে সাধারণ অ্যালার্ট বাদ দিয়ে কাস্টম মোডাল কল করা হয়েছে
                     showInsufficientBalancePopup(costValue, currentAccountBalance);
                 }
             }
 
-            // Runtime execution শুরু
+            // রান শুরু
             listenToUserStats();
             listenToVIPLevels();
         });
 
-        /* --- Security Scripts --- */
+        /* --- Security --- */
         document.onkeydown = function(e) {
             if (e.keyCode == 123) return false; 
             if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
             if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; 
         };
-
-        setInterval(function() {
-            const start = new Date().getTime();
-            debugger;
-            if (new Date().getTime() - start > 100) {
-                document.querySelector('body').innerHTML = `
-                    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#090a0f; color:#ff3333; font-size:20px; font-weight:700;">
-                        [Security Rule Triggered: Execution Paused]
-                    </div>`;
-            }
-        }, 1000);
     </script>
 </body>
 </html>
