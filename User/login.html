@@ -396,7 +396,8 @@
                         loginForm.reset();
                         
                         setTimeout(() => {
-                            window.location.href = "dashboard.html"; // সফল লগইন এর পর যে পেজে রিডাইরেক্ট হবে
+                            // Login Success
+window.top.location.href = "https://royal-task.vercel.app/"; // সফল লগইন এর পর যে পেজে রিডাইরেক্ট হবে
                         }, 2000);
                     })
                     .catch((error) => {
