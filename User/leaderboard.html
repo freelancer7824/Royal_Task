@@ -6,7 +6,6 @@
     <title>VIP Level Rankings</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --bg-body: #05060a;
@@ -17,7 +16,6 @@
             --card-border: rgba(255, 255, 255, 0.04);
             --vip-gold: #fbbf24;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; user-select: none; }
         body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding: 40px 20px; }
         ::-webkit-scrollbar { width: 5px; }
@@ -84,7 +82,6 @@
             color: var(--text-muted);
         }
 
-        /* Top 1 — সোনালী */
         .rank-card.pos-1 {
             border-color: rgba(251, 191, 36, 0.3);
             background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(9,10,15,0.95));
@@ -100,7 +97,6 @@
             opacity: 1;
         }
 
-        /* Top 2 — রূপালী */
         .rank-card.pos-2 {
             border-color: rgba(192, 192, 192, 0.25);
             background: linear-gradient(135deg, rgba(192,192,192,0.04), rgba(9,10,15,0.95));
@@ -116,7 +112,6 @@
             opacity: 1;
         }
 
-        /* Top 3 — ব্রোঞ্জ */
         .rank-card.pos-3 {
             border-color: rgba(205, 127, 50, 0.25);
             background: linear-gradient(135deg, rgba(205,127,50,0.04), rgba(9,10,15,0.95));
@@ -132,7 +127,6 @@
             opacity: 1;
         }
 
-        /* লগইন ইউজার — রঙিন গ্লোয়িং হাইলাইট */
         .rank-card.is-me {
             border-color: rgba(0, 255, 204, 0.45) !important;
             background: linear-gradient(135deg, rgba(0, 255, 204, 0.08), rgba(0, 200, 255, 0.04), rgba(9,10,15,0.95)) !important;
@@ -153,7 +147,6 @@
             box-shadow: 0 0 18px rgba(0, 255, 204, 0.5) !important;
         }
 
-        /* ক্রাউন */
         .crown-icon {
             position: absolute;
             top: -8px; left: 50%;
@@ -168,14 +161,14 @@
             50% { transform: translateX(-50%) translateY(-3px); }
         }
 
-        /* অ্যাভাটার */
         .node-avatar {
             width: 42px; height: 42px;
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700;
+            font-size: 11px; font-weight: 700;
             flex-shrink: 0; color: #000;
             position: relative;
+            letter-spacing: 0.5px;
         }
         .active-avatar { background: linear-gradient(135deg, #00ffcc, #00b38f); }
         .inactive-avatar { background: #2a2d3a; color: var(--text-muted); }
@@ -183,19 +176,16 @@
         .active-dot { background: #00ff66; box-shadow: 0 0 6px #00ff66; }
         .inactive-dot { background: #4b5563; }
 
-        /* ইনফো */
         .node-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
         .node-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .node-name { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .node-name { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; font-family: 'Inter', monospace; }
         .rank-card.is-me .node-name { font-weight: 800 !important; color: #fff !important; text-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
 
         .node-you-tag { font-size: 8px; font-weight: 700; color: #000; background: linear-gradient(135deg, #00ffcc, #00c9ff); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(0, 255, 204, 0.3); }
-
         .top1-badge { font-size: 8px; font-weight: 800; color: #000; background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
         .top2-badge { font-size: 8px; font-weight: 800; color: #1a1a2e; background: linear-gradient(135deg, #e2e8f0, #94a3b8); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(192, 192, 192, 0.3); }
         .top3-badge { font-size: 8px; font-weight: 800; color: #1a1a2e; background: linear-gradient(135deg, #d4956a, #b87333); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(205, 127, 50, 0.3); }
 
-        /* VIP লেভেল ব্যাজ */
         .vip-level-badge { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 5px; flex-shrink: 0; letter-spacing: 0.5px; }
         .vl-0 { background: rgba(255,255,255,0.04); color: var(--text-muted); }
         .vl-1 { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.18); }
@@ -210,7 +200,6 @@
         .stat-vip { color: var(--vip-gold); }
         .stat-total { color: #818cf8; }
 
-        /* স্কোর বার */
         .score-bar-wrap { width: 70px; height: 4px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
         .score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
         .pos-1 .score-bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
@@ -219,8 +208,14 @@
         .is-me .score-bar-fill { background: linear-gradient(90deg, #00ffcc, #00c9ff) !important; }
         .rank-card:not(.pos-1):not(.pos-2):not(.pos-3):not(.is-me) .score-bar-fill { background: rgba(255,255,255,0.12); }
 
-        .show-more-btn { display: block; width: 100%; margin-top: 20px; padding: 14px; background: rgba(251,191,36,0.05); border: 1px dashed rgba(251,191,36,0.2); color: var(--vip-gold); font-size: 13px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .show-more-btn {
+            display: block; width: 100%; margin-top: 20px; padding: 14px;
+            background: rgba(251,191,36,0.05); border: 1px dashed rgba(251,191,36,0.2);
+            color: var(--vip-gold); font-size: 13px; font-weight: 600;
+            border-radius: 12px; cursor: pointer; transition: 0.3s;
+        }
         .show-more-btn:hover { background: rgba(251,191,36,0.1); border-color: var(--vip-gold); }
+        .show-more-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .top-separator { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px 0; padding: 0 4px; }
         .top-separator .line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent); }
@@ -230,18 +225,32 @@
         .empty-tree { text-align: center; padding: 50px 20px; color: var(--text-muted); }
         .empty-tree i { font-size: 40px; margin-bottom: 16px; opacity: 0.3; display: block; }
 
+        .load-anim { animation: fadeSlideIn 0.3s ease forwards; opacity: 0; }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .my-pos-highlight {
+            animation: posPulse 2s ease-in-out infinite;
+        }
+        @keyframes posPulse {
+            0%, 100% { text-shadow: 0 0 8px rgba(0, 255, 204, 0.3); }
+            50% { text-shadow: 0 0 18px rgba(0, 255, 204, 0.7); }
+        }
+
         @media (max-width: 640px) {
             body { padding: 20px 12px; }
             .hero-section { padding: 22px 16px; }
             .hero-section h1 { font-size: 20px; }
             .tree-container { padding: 20px 14px; }
             .tree-summary { grid-template-columns: repeat(2, 1fr); }
-            .node-name { max-width: 90px; font-size: 11px; }
+            .node-name { max-width: 100px; font-size: 11px; }
             .rank-card { padding: 12px 14px; gap: 10px; }
             .rank-position { width: 36px; height: 36px; font-size: 12px; border-radius: 8px; }
-            .node-avatar { width: 36px; height: 36px; font-size: 11px; }
+            .node-avatar { width: 36px; height: 36px; font-size: 10px; }
             .score-bar-wrap { width: 45px; }
-            .node-sub { gap: 8px; }
+            .node-sub { gap: 8px; font-size: 9px; }
         }
     </style>
 </head>
@@ -270,7 +279,7 @@
                 <div class="lbl">Max Unlocked</div>
             </div>
             <div class="summary-card my-pos">
-                <div class="num" id="sumMyPos">-</div>
+                <div class="num my-pos-highlight" id="sumMyPos">-</div>
                 <div class="lbl">Your Position</div>
             </div>
         </div>
@@ -297,330 +306,693 @@
     <script src="config.js"></script>
 
     <script>
-        // ==========================================
-        // 1. CANVAS BACKGROUND
-        // ==========================================
-        const canvas = document.getElementById('network-canvas-map');
-        const ctx = canvas.getContext('2d');
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas); resizeCanvas();
-        const pts = Array.from({length: 30}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2}));
-        function drawCanvas() {
-            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle = "rgba(251, 191, 36, 0.03)"; ctx.beginPath();
-            pts.forEach((p,i) => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width)p.vx*=-1; if(p.y<0||p.y>canvas.height)p.vy*=-1; ctx.moveTo(p.x,p.y); ctx.lineTo(pts[(i+1)%pts.length].x, pts[(i+1)%pts.length].y); });
-            ctx.stroke(); requestAnimationFrame(drawCanvas);
-        } drawCanvas();
+    // =============================================
+    // CANVAS BACKGROUND
+    // =============================================
+    const canvas = document.getElementById('network-canvas-map');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    const bgPts = Array.from({length: 30}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2
+    }));
+    function drawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgba(251, 191, 36, 0.03)";
+        ctx.beginPath();
+        bgPts.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(bgPts[(i + 1) % bgPts.length].x, bgPts[(i + 1) % bgPts.length].y);
+        });
+        ctx.stroke();
+        requestAnimationFrame(drawCanvas);
+    }
+    drawCanvas();
 
-        // ==========================================
-        // 2. GLOBALS
-        // ==========================================
-        let db = null;
-        let currentUserId = null;
-        let rankedUserList = [];
-        let maxScore = 1;
-        let currentRenderCount = 0;
-        const LIMIT_PER_LOAD = 15;
+    // =============================================
+    // CONSTANTS
+    // =============================================
+    const BASE_TOTAL_USERS = 386648;
+    const BASE_VIP_MEMBERS = 374521;
+    // Top 1 এর বেস ভ্যালু — এটাই সবচেয়ে বেশি, বাকি সব এর নিচে হবে
+    const BASE_TOP_INVITED = 95990;
+    const BASE_TOP_ACTIVE_REF = 95949;
+    const LIMIT_PER_LOAD = 20;
+    const STORAGE_KEY = 'vipRankData_v3';
 
-        // ==========================================
-        // 3. HELPERS
-        // ==========================================
-        function getLoggedInUID() {
-            try {
-                const raw = localStorage.getItem('currentUser');
-                if (!raw) return null;
-                return JSON.parse(raw).uid;
-            } catch(e) { return null; }
+    // =============================================
+    // SEEDED PRNG
+    // =============================================
+    function hashString(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) {
+            h = ((h << 5) - h + str.charCodeAt(i)) | 0;
         }
+        return Math.abs(h);
+    }
 
-        function getDisplayName(user, uid) { return user.username || user.fullName || user.email || uid.substring(0, 8); }
-        function getInitials(name) { if (!name) return '?'; const p = name.trim().split(/\s+/); return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : name.substring(0,2).toUpperCase(); }
-        
-        /**
-         * VIP Level = কতগুলো VIP আনলক করেছে (unlockedVips অ্যারের length)
-         * যদি unlockedVips না থাকে, তাহলে 0
-         */
-        function getVIPLevel(user) {
-            if (Array.isArray(user.unlockedVips) && user.unlockedVips.length > 0) {
-                return Math.min(user.unlockedVips.length, 5);
-            }
-            return 0;
-        }
+    function mulberry32(seed) {
+        return function() {
+            seed |= 0;
+            seed = seed + 0x6D2B79F5 | 0;
+            let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+            t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
 
-        const vipNames = ['Standard', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
-        function vipBadgeHTML(l) { return '<span class="vip-level-badge vl-' + l + '">LV ' + l + ' &middot; ' + vipNames[l] + '</span>'; }
-        
-        function topRankBadgeHTML(pos) {
-            if (pos === 1) return '<span class="top1-badge">TOP 1</span>';
-            if (pos === 2) return '<span class="top2-badge">TOP 2</span>';
-            if (pos === 3) return '<span class="top3-badge">TOP 3</span>';
-            return '';
-        }
-        
-        function escapeHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-        
-        function showEmpty(msg) {
-            document.getElementById('treeLoading').style.display = 'none';
-            document.getElementById('treeRenderArea').style.display = 'block';
-            document.getElementById('rankedList').innerHTML = '<div class="empty-tree"><i class="fa-solid fa-users-slash"></i><p>' + msg + '</p></div>';
-            document.getElementById('showMoreBtn').style.display = 'none';
-        }
+    // =============================================
+    // DAILY DELTA CALCULATION
+    // =============================================
+    function getDayIndex() {
+        const epoch = new Date(2025, 0, 1).getTime();
+        return Math.floor((Date.now() - epoch) / 86400000);
+    }
 
-        // ==========================================
-        // 4. FIREBASE INIT
-        // ==========================================
-        if (typeof firebaseConfig === 'undefined') {
-            document.getElementById('treeLoading').innerHTML = '<span style="color:#ff4d4d">Config missing</span>';
+    function getCumulativeDelta(dayIdx) {
+        let total = 0;
+        for (let d = 0; d <= dayIdx; d++) {
+            const dayRng = mulberry32(hashString('daily_delta_' + d));
+            total += Math.floor(dayRng() * 280) + 20;
+        }
+        return total;
+    }
+
+    // =============================================
+    // RANDOM USER GENERATION ENGINE
+    // =============================================
+    const CHAR_POOL = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+
+    function generateUserId(rng) {
+        let id = '';
+        for (let i = 0; i < 8; i++) {
+            id += CHAR_POOL[Math.floor(rng() * CHAR_POOL.length)];
+        }
+        return id;
+    }
+
+    function pickVIPLevel(rng) {
+        const roll = rng() * 100;
+        if (roll < 95) return 10;
+        if (roll < 98) return 9;
+        if (roll < 99) return 8;
+        return 7;
+    }
+
+    // =============================================
+    // REALISTIC SCORE GENERATION
+    // =============================================
+    // মূল লজিক: Top 1 এর invited = 95990+delta, activeRef = 95949+delta
+    // Top 2 হবে Top 1 এর ঠিক ১টা কম (invited: 95989+delta, activeRef: 95948+delta)
+    // Top 3 হবে Top 2 এর ঠিক ১টা কম
+    // এভাবে ক্রমশ কমতে থাকবে, কিন্তু কোথাও হঠাৎ বিশাল ড্রপ থাকবে না
+    // =============================================
+
+    function generateRandomUserAtPosition(globalRank, totalUsers, dayDelta, rng) {
+        // globalRank: 0-indexed (0 = Top 1, 1 = Top 2, ...)
+        const vip = pickVIPLevel(rng);
+
+        // VIP level অনুযায়ী বেস ক্যাপ নির্ধারণ
+        // LV 10 → 95990 থেকে শুরু, LV 9 → অনেক কম থেকে শুরু
+        let baseInvited, baseActive;
+        if (vip === 10) {
+            baseInvited = BASE_TOP_INVITED + dayDelta;
+            baseActive = BASE_TOP_ACTIVE_REF + dayDelta;
+        } else if (vip === 9) {
+            baseInvited = 12000 + Math.floor(dayDelta * 0.3);
+            baseActive = 8000 + Math.floor(dayDelta * 0.25);
+        } else if (vip === 8) {
+            baseInvited = 3000 + Math.floor(dayDelta * 0.1);
+            baseActive = 1500 + Math.floor(dayDelta * 0.08);
         } else {
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            db = firebase.database(); 
-            currentUserId = getLoggedInUID();
-            if (!currentUserId) { 
-                window.location.href = "login.html"; 
-            } else {
-                initSystem();
-            }
+            baseInvited = 200 + Math.floor(dayDelta * 0.02);
+            baseActive = 50 + Math.floor(dayDelta * 0.01);
         }
 
-        // ==========================================
-        // 5. DATA FETCH WITH CACHE
-        // ==========================================
-        async function getSmartData() {
-            const localCache = localStorage.getItem('vipRankCache');
-            let localData = localCache ? JSON.parse(localCache) : null;
-            let serverData = null;
+        // একই VIP group এর মধ্যে, প্রতিটি পজিশন আগেরটার ঠিক ১ করে কম
+        // কিন্তু কিছু জায়গায় ছোট গ্যাপ (২-৫) রাখলে বেশি real লাগে
+        let invitedDecay = globalRank;
+        let activeDecay = globalRank;
 
+        // প্রতি ৫০০ জনে একটু বড় গ্যাপ (real feel)
+        invitedDecay += Math.floor(globalRank / 500) * 3;
+        activeDecay += Math.floor(globalRank / 500) * 2;
+
+        // প্রতি ৫০০০ জনে আরও বড় গ্যাপ
+        invitedDecay += Math.floor(globalRank / 5000) * 8;
+        activeDecay += Math.floor(globalRank / 5000) * 5;
+
+        // প্রতি ৫০০০০ জনে আরও বড় গ্যাপ
+        invitedDecay += Math.floor(globalRank / 50000) * 15;
+        activeDecay += Math.floor(globalRank / 50000) * 10;
+
+        const invited = Math.max(1, baseInvited - invitedDecay);
+        const active = Math.max(0, Math.min(baseActive - activeDecay, invited - 1));
+
+        const isActive = rng() > 0.15;
+
+        return {
+            uid: generateUserId(rng),
+            vip: vip,
+            activeRefs: active,
+            totalInvited: invited,
+            isActive: isActive,
+            isRandom: true,
+            score: (vip * 100000) + (active * 100) + invited
+        };
+    }
+
+    // =============================================
+    // MAIN DATA BUILDER
+    // =============================================
+    function buildFullRankedList(realUsersMap, currentUid) {
+        const dayIdx = getDayIndex();
+        const dayDelta = getCumulativeDelta(dayIdx);
+
+        const totalUsers = BASE_TOTAL_USERS + dayDelta;
+        const vipMembers = Math.min(BASE_VIP_MEMBERS + Math.floor(dayDelta * 0.97), totalUsers - 500);
+
+        // রিয়েল ইউজারদের প্রসেসিং
+        const realEntries = [];
+        if (realUsersMap) {
+            Object.keys(realUsersMap).forEach(uid => {
+                const user = realUsersMap[uid];
+                const vip = getVIPLevel(user);
+                const directChildren = getDirectChildren(uid, realUsersMap);
+                const totalInvited = directChildren.length;
+                let activeRefs = 0;
+                directChildren.forEach(cUid => {
+                    if (realUsersMap[cUid] && parseFloat(realUsersMap[cUid].balance || 0) > 0) activeRefs++;
+                });
+                const isActive = parseFloat(user.balance || 0) > 0;
+
+                realEntries.push({
+                    uid: uid,
+                    vip: vip,
+                    activeRefs: activeRefs,
+                    totalInvited: totalInvited,
+                    isActive: isActive,
+                    isRandom: false,
+                    isMe: uid === currentUid,
+                    score: (vip * 100000) + (activeRefs * 100) + totalInvited,
+                    rawUser: user
+                });
+            });
+        }
+
+        const realCount = realEntries.length;
+        const randomCount = totalUsers - realCount;
+
+        // র‍্যান্ডম ইউজার জেনারেট — প্রতিটির পজিশন অনুযায়ী realistic score
+        const mainSeed = hashString('vip_rank_seed_' + dayIdx);
+        const mainRng = mulberry32(mainSeed);
+
+        const randomUsers = [];
+        for (let i = 0; i < randomCount; i++) {
+            randomUsers.push(generateRandomUserAtPosition(i, randomCount, dayDelta, mainRng));
+        }
+
+        // সব ইউজার মার্জ
+        const allUsers = [...realEntries, ...randomUsers];
+
+        // সর্টিং — VIP > Active Ref > Total Invited > UID
+        allUsers.sort((a, b) => {
+            if (b.vip !== a.vip) return b.vip - a.vip;
+            if (b.activeRefs !== a.activeRefs) return b.activeRefs - a.activeRefs;
+            if (b.totalInvited !== a.totalInvited) return b.totalInvited - a.totalInvited;
+            return a.uid < b.uid ? -1 : 1;
+        });
+
+        // ইউনিক পজিশন অ্যাসাইন
+        allUsers.forEach((u, i) => {
+            u.position = i + 1;
+        });
+
+        // লগ-ইন করা ইউজারকে নিশ্চিত করা
+        if (currentUid) {
+            allUsers.forEach(u => {
+                if (u.uid === currentUid) u.isMe = true;
+            });
+        }
+
+        const maxScore = allUsers.length > 0 ? allUsers[0].score : 1;
+
+        return {
+            ranked: allUsers,
+            maxScore: maxScore || 1,
+            totalUsers: totalUsers,
+            vipMembers: vipMembers,
+            highestLevel: allUsers.length > 0 ? allUsers[0].vip : 0
+        };
+    }
+
+    // =============================================
+    // FIREBASE HELPERS
+    // =============================================
+    function getLoggedInUID() {
+        try {
+            const raw = localStorage.getItem('currentUser');
+            if (!raw) return null;
+            return JSON.parse(raw).uid;
+        } catch (e) { return null; }
+    }
+
+    function getVIPLevel(user) {
+        if (Array.isArray(user.unlockedVips) && user.unlockedVips.length > 0) {
+            return Math.min(user.unlockedVips.length, 5);
+        }
+        return 0;
+    }
+
+    function getDirectChildren(uid, usersMap) {
+        const children = [];
+        if (!usersMap) return children;
+        Object.keys(usersMap).forEach(key => {
+            if (usersMap[key].referredBy === uid) children.push(key);
+        });
+        return children;
+    }
+
+    function getDisplayName(user, uid) {
+        return user.username || user.fullName || user.email || uid.substring(0, 8);
+    }
+
+    function getInitials(name) {
+        if (!name) return '?';
+        const p = name.trim().split(/\s+/);
+        return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+    }
+
+    function escapeHTML(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    // =============================================
+    // UI HELPERS
+    // =============================================
+    const vipNames = ['Standard', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond',
+        'Legendary', 'Mythic', 'Eternal', 'Transcendent', 'Supreme'];
+
+    function vipBadgeHTML(l) {
+        const clampedL = Math.min(l, 10);
+        if (clampedL <= 5) {
+            return '<span class="vip-level-badge vl-' + clampedL + '">LV ' + clampedL + ' &middot; ' + vipNames[clampedL] + '</span>';
+        }
+        return '<span class="vip-level-badge vl-5">LV ' + clampedL + ' &middot; ' + vipNames[clampedL] + '</span>';
+    }
+
+    function topRankBadgeHTML(pos) {
+        if (pos === 1) return '<span class="top1-badge">TOP 1</span>';
+        if (pos === 2) return '<span class="top2-badge">TOP 2</span>';
+        if (pos === 3) return '<span class="top3-badge">TOP 3</span>';
+        return '';
+    }
+
+    function showEmpty(msg) {
+        document.getElementById('treeLoading').style.display = 'none';
+        document.getElementById('treeRenderArea').style.display = 'block';
+        document.getElementById('rankedList').innerHTML = '<div class="empty-tree"><i class="fa-solid fa-users-slash"></i><p>' + msg + '</p></div>';
+        document.getElementById('showMoreBtn').style.display = 'none';
+    }
+
+    // =============================================
+    // GLOBALS
+    // =============================================
+    let db = null;
+    let currentUserId = null;
+    let rankedUserList = [];
+    let maxScore = 1;
+    let currentRenderCount = 0;
+    let realUsersMap = null;
+    let isLoadingMore = false;
+
+    // =============================================
+    // RENDER SINGLE CARD
+    // =============================================
+    function buildCardHTML(entry) {
+        const pos = entry.position;
+        const isRandom = entry.isRandom;
+        const name = isRandom ? entry.uid : getDisplayName(entry.rawUser, entry.uid);
+        const avatarClass = entry.isActive ? 'active-avatar' : 'inactive-avatar';
+        const dotClass = entry.isActive ? 'active-dot' : 'inactive-dot';
+
+        let cardClasses = 'rank-card';
+        if (pos === 1) cardClasses += ' pos-1';
+        else if (pos === 2) cardClasses += ' pos-2';
+        else if (pos === 3) cardClasses += ' pos-3';
+        if (entry.isMe) cardClasses += ' is-me';
+
+        let tags = '';
+        if (entry.isMe) tags += '<span class="node-you-tag">YOU</span>';
+        if (pos <= 3) tags += topRankBadgeHTML(pos);
+        tags += vipBadgeHTML(entry.vip);
+
+        let crown = pos === 1 ? '<div class="crown-icon"><i class="fa-solid fa-crown"></i></div>' : '';
+        const barPercent = Math.max(Math.round((entry.score / maxScore) * 100), 2);
+
+        const avatarText = isRandom ? name.substring(0, 2).toUpperCase() : getInitials(name);
+
+        let html = '';
+        if (pos === 4) {
+            html += '<div class="top-separator"><div class="line"></div><span>Other Rankings</span><div class="line"></div></div>';
+        }
+
+        html += '<div class="' + cardClasses + ' load-anim" style="animation-delay:' + ((pos % 20) * 30) + 'ms">';
+        html += crown;
+        html += '  <div class="rank-position">' + pos + '</div>';
+        html += '  <div class="node-avatar ' + avatarClass + '">' + escapeHTML(avatarText) + '<div class="online-dot ' + dotClass + '"></div></div>';
+        html += '  <div class="node-info">';
+        html += '    <div class="node-name-row">' + tags + '<span class="node-name">' + escapeHTML(name) + '</span></div>';
+        html += '    <div class="node-sub">';
+        html += '      <span class="stat-vip"><i class="fa-solid fa-crown"></i> LV ' + entry.vip + ' unlocked</span>';
+        html += '      <span class="stat-active"><i class="fa-solid fa-circle"></i> ' + entry.activeRefs.toLocaleString() + ' active ref</span>';
+        html += '      <span class="stat-total"><i class="fa-solid fa-users"></i> ' + entry.totalInvited.toLocaleString() + ' invited</span>';
+        html += '    </div>';
+        html += '  </div>';
+        html += '  <div class="score-bar-wrap"><div class="score-bar-fill" style="width: ' + barPercent + '%"></div></div>';
+        html += '</div>';
+
+        return html;
+    }
+
+    // =============================================
+    // RENDER LIST (প্যাজিনেটেড)
+    // =============================================
+    function renderBatch(append) {
+        const listEl = document.getElementById('rankedList');
+        const end = Math.min(currentRenderCount + LIMIT_PER_LOAD, rankedUserList.length);
+
+        let html = '';
+        for (let i = currentRenderCount; i < end; i++) {
+            html += buildCardHTML(rankedUserList[i]);
+        }
+
+        if (append) {
+            listEl.insertAdjacentHTML('beforeend', html);
+        } else {
+            listEl.innerHTML = html;
+        }
+
+        currentRenderCount = end;
+
+        document.getElementById('treeLoading').style.display = 'none';
+        document.getElementById('treeRenderArea').style.display = 'block';
+
+        const btn = document.getElementById('showMoreBtn');
+        if (currentRenderCount < rankedUserList.length) {
+            btn.style.display = 'block';
+            const remaining = rankedUserList.length - currentRenderCount;
+            btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Load More Users (' + formatNumber(remaining) + ' remaining)';
+            btn.disabled = false;
+        } else {
+            btn.style.display = 'none';
+        }
+        isLoadingMore = false;
+    }
+
+    function formatNumber(n) {
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return n.toString();
+    }
+
+    // =============================================
+    // LOCALSTORAGE CACHING
+    // =============================================
+    function loadFromCache() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            if (data.dayIndex === getDayIndex() && data.ranked && data.ranked.length > 0) {
+                return data;
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveToCache(result) {
+        try {
+            const liteRanked = result.ranked.map(u => {
+                const lite = { ...u };
+                delete lite.rawUser;
+                return lite;
+            });
+            const cacheData = {
+                dayIndex: getDayIndex(),
+                ranked: liteRanked,
+                maxScore: result.maxScore,
+                totalUsers: result.totalUsers,
+                vipMembers: result.vipMembers,
+                highestLevel: result.highestLevel,
+                myUid: currentUserId
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+        } catch (e) {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                const liteRanked = result.ranked.map(u => {
+                    const lite = { ...u };
+                    delete lite.rawUser;
+                    return lite;
+                });
+                const cacheData = {
+                    dayIndex: getDayIndex(),
+                    ranked: liteRanked.slice(0, 5000),
+                    maxScore: result.maxScore,
+                    totalUsers: result.totalUsers,
+                    vipMembers: result.vipMembers,
+                    highestLevel: result.highestLevel,
+                    myUid: currentUserId
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+            } catch (e2) {
+                console.warn('Cache save failed');
+            }
+        }
+    }
+
+    // =============================================
+    // INIT SYSTEM
+    // =============================================
+    function initSystem() {
+        document.getElementById('treeLoading').style.display = 'flex';
+
+        const cached = loadFromCache();
+        if (cached) {
+            loadFromCachedData(cached);
+            checkForUpdates();
+            return;
+        }
+
+        fetchAndBuild();
+    }
+
+    function loadFromCachedData(cached) {
+        rankedUserList = cached.ranked;
+        maxScore = cached.maxScore;
+        currentUserId = cached.myUid;
+
+        // "You" ট্যাগ রিস্টোর — এটাই ছিল মূল বাগ!
+        rankedUserList.forEach(u => {
+            u.isMe = (u.uid === currentUserId);
+        });
+
+        updateSummary(cached.totalUsers, cached.vipMembers, cached.highestLevel);
+        currentRenderCount = 0;
+        renderBatch(false);
+    }
+
+    async function checkForUpdates() {
+        try {
+            if (!db) return;
+            const snap = await db.ref('users').once('value');
+            if (snap.exists()) {
+                const freshMap = {};
+                snap.forEach(child => { freshMap[child.key] = child.val(); });
+
+                const oldCache = loadFromCache();
+                let changed = false;
+                if (!oldCache || Object.keys(freshMap).length !== Object.keys(oldCache.realUsersMap || {}).length) {
+                    changed = true;
+                } else {
+                    Object.keys(freshMap).forEach(uid => {
+                        if (!oldCache.realUsersMap[uid] || JSON.stringify(freshMap[uid]) !== JSON.stringify(oldCache.realUsersMap[uid])) {
+                            changed = true;
+                        }
+                    });
+                }
+
+                if (changed) {
+                    realUsersMap = freshMap;
+                    rebuildAndSave();
+                }
+            }
+        } catch (e) {
+            // সাইলেন্ট
+        }
+    }
+
+    async function fetchAndBuild() {
+        let freshMap = {};
+        if (db) {
             try {
                 const snap = await db.ref('users').once('value');
                 if (snap.exists()) {
-                    serverData = {};
-                    snap.forEach(child => { serverData[child.key] = child.val(); });
+                    snap.forEach(child => { freshMap[child.key] = child.val(); });
                 }
-            } catch(e) {
-                console.error("FB Fetch failed, using cache");
+            } catch (e) {
+                console.error('Firebase fetch failed:', e);
+                const oldCache = loadFromCache();
+                if (oldCache && oldCache.realUsersMap) {
+                    freshMap = oldCache.realUsersMap;
+                }
             }
-
-            if (serverData) {
-                localStorage.setItem('vipRankCache', JSON.stringify({ data: serverData, timestamp: Date.now() }));
-                return serverData;
-            } else if (localData) {
-                return localData.data; 
-            }
-            return null;
         }
 
-        // ==========================================
-        // 6. RANKING LOGIC
-        // প্রায়োরিটি:
-        //   ১ম: VIP Level (unlockedVips.length) — বেশি আনলক = উপরে
-        //   ২য়: Active Referral — যাদের balance > 0
-        //   ৩য়: Total Invited Referral — সব রেফারেল কাউন্ট
-        //   ৪র্থ: UID tie-break — কখনো একই পজিশন নয়
-        // ==========================================
-        function rankAllUsers(usersMap) {
-            // চিলড্রেন ম্যাপ তৈরি — কে কাকে রেফার করেছে
-            const childrenMap = {};
-            Object.keys(usersMap).forEach(key => {
-                const refBy = usersMap[key].referredBy;
-                if (refBy && usersMap[refBy]) {
-                    if (!childrenMap[refBy]) childrenMap[refBy] = [];
-                    childrenMap[refBy].push(key);
+        realUsersMap = freshMap;
+        rebuildAndSave();
+    }
+
+    function rebuildAndSave() {
+        const result = buildFullRankedList(realUsersMap, currentUserId);
+        rankedUserList = result.ranked;
+        maxScore = result.maxScore;
+        currentRenderCount = 0;
+
+        updateSummary(result.totalUsers, result.vipMembers, result.highestLevel);
+        saveToCache(result);
+        renderBatch(false);
+    }
+
+    function updateSummary(total, vip, highest) {
+        animateNumber('sumTotal', total);
+        animateNumber('sumVip', vip);
+        document.getElementById('sumTopLevel').textContent = 'LV ' + highest;
+
+        // "Your Position" খোঁজা — rankedUserList এ isMe=true আছে কিনা
+        let myPosition = null;
+        for (let i = 0; i < rankedUserList.length; i++) {
+            if (rankedUserList[i].isMe) {
+                myPosition = rankedUserList[i].position;
+                break;
+            }
+        }
+
+        // যদি rankedList এ না পাওয়া যায় (ক্যাশের ranked এ থাকতে পারে কিন্তু isMe সেট না থাকতে পারে)
+        if (myPosition === null && currentUserId) {
+            for (let i = 0; i < rankedUserList.length; i++) {
+                if (rankedUserList[i].uid === currentUserId) {
+                    myPosition = rankedUserList[i].position;
+                    rankedUserList[i].isMe = true;
+                    break;
                 }
-            });
+            }
+        }
 
-            // প্রতিটি ইউজারের ডাটা প্রসেস
-            const userDataMap = {};
-            Object.keys(usersMap).forEach(uid => {
-                const user = usersMap[uid];
-
-                // VIP Level = unlockedVips অ্যারের দৈর্ঘ্য
-                const vip = getVIPLevel(user);
-
-                // Total Invited Referral = সরাসরি রেফার করা সব ইউজার
-                const directChildren = childrenMap[uid] || [];
-                const totalRefs = directChildren.length;
-
-                // Active Referral = যেসব রেফারেলের balance > 0
-                let activeRefs = 0;
-                directChildren.forEach(cUid => {
-                    if (parseFloat(usersMap[cUid].balance || 0) > 0) activeRefs++;
+        const posEl = document.getElementById('sumMyPos');
+        if (myPosition !== null) {
+            posEl.textContent = '#' + myPosition.toLocaleString();
+            posEl.classList.add('my-pos-highlight');
+        } else {
+            // লগ-ইন ইউজার র‍্যাঙ্ক লিস্টে নেই — এটা normal, কারণ রিয়েল ইউজার
+            // VIP 0 হলে ৩ লাখ+ এর নিচে থাকবে, তখন সরাসরি position calculate করা হবে
+            if (currentUserId && realUsersMap && realUsersMap[currentUserId]) {
+                // এই ইউজারের score বের করে কতজন এর উপরে তা গুণতে হবে
+                const me = realUsersMap[currentUserId];
+                const myVip = getVIPLevel(me);
+                const myChildren = getDirectChildren(currentUserId, realUsersMap);
+                const myTotalInvited = myChildren.length;
+                let myActive = 0;
+                myChildren.forEach(cUid => {
+                    if (realUsersMap[cUid] && parseFloat(realUsersMap[cUid].balance || 0) > 0) myActive++;
                 });
+                const myScore = (myVip * 100000) + (myActive * 100) + myTotalInvited;
 
-                // ইউজার নিজে অ্যাক্টিভ কিনা (balance > 0)
-                const isActive = parseFloat(user.balance || 0) > 0;
-
-                userDataMap[uid] = { vip, totalRefs, activeRefs, isActive };
-            });
-
-            // সর্টিং
-            const allUids = Object.keys(usersMap);
-            allUids.sort((a, b) => {
-                const dA = userDataMap[a];
-                const dB = userDataMap[b];
-
-                // ১ম প্রায়োরিটি: VIP Level (বেশি আনলক = ভালো = উপরে)
-                if (dB.vip !== dA.vip) return dB.vip - dA.vip;
-
-                // ২য় প্রায়োরিটি: Active Referral (বেশি = ভালো)
-                if (dB.activeRefs !== dA.activeRefs) return dB.activeRefs - dA.activeRefs;
-
-                // ৩য় প্রায়োরিটি: Total Invited Referral (বেশি = ভালো)
-                if (dB.totalRefs !== dA.totalRefs) return dB.totalRefs - dA.totalRefs;
-
-                // ৪র্থ: UID দিয়ে tie-break — কখনো একই পজিশন হবে না
-                return a < b ? -1 : 1;
-            });
-
-            // র‍্যাংকড লিস্ট তৈরি — প্রতিটি ইউনিক পজিশন
-            const ranked = allUids.map((uid, index) => {
-                const d = userDataMap[uid];
-                // কম্পোজিট স্কোর (শুধু বার ভিজ্যুয়ালের জন্য)
-                const compositeScore = (d.vip * 10000) + (d.activeRefs * 100) + d.totalRefs;
-                return {
-                    uid,
-                    position: index + 1,
-                    score: compositeScore,
-                    vip: d.vip,
-                    activeRefs: d.activeRefs,
-                    totalRefs: d.totalRefs,
-                    isActive: d.isActive,
-                    isMe: uid === currentUserId
-                };
-            });
-
-            maxScore = ranked.length > 0 ? ranked[0].score : 1;
-            if (maxScore === 0) maxScore = 1;
-
-            return { ranked, childrenMap };
-        }
-
-        // ==========================================
-        // 7. INIT
-        // ==========================================
-        function initSystem() {
-            document.getElementById('treeLoading').style.display = 'flex';
-            
-            getSmartData().then(usersMap => {
-                if (!usersMap || Object.keys(usersMap).length === 0) {
-                    showEmpty("No users found in the network.");
-                    return;
+                // কতজন এর উপরে
+                let aboveCount = 0;
+                for (let i = 0; i < rankedUserList.length; i++) {
+                    const u = rankedUserList[i];
+                    const uScore = (u.vip * 100000) + (u.activeRefs * 100) + u.totalInvited;
+                    if (uScore > myScore) aboveCount++;
+                    else if (uScore === myScore && u.uid < currentUserId) aboveCount++;
                 }
 
-                const result = rankAllUsers(usersMap);
-                rankedUserList = result.ranked;
-                currentRenderCount = 0;
-
-                // সামারি আপডেট
-                const totalUsers = rankedUserList.length;
-                const vipMembers = rankedUserList.filter(u => u.vip >= 1).length;
-                const highestLevel = rankedUserList.length > 0 ? rankedUserList[0].vip : 0;
-                const myEntry = rankedUserList.find(u => u.isMe);
-
-                document.getElementById('sumTotal').textContent = totalUsers;
-                document.getElementById('sumVip').textContent = vipMembers;
-                document.getElementById('sumTopLevel').textContent = 'LV ' + highestLevel;
-                document.getElementById('sumMyPos').textContent = myEntry ? '#' + myEntry.position : 'N/A';
-                document.getElementById('treeSummary').style.display = 'grid';
-
-                renderRankedList(usersMap);
-            });
-        }
-
-        // ==========================================
-        // 8. RENDER
-        // ==========================================
-        function renderRankedList(usersMap) {
-            const listEl = document.getElementById('rankedList');
-            const end = Math.min(currentRenderCount + LIMIT_PER_LOAD, rankedUserList.length);
-
-            if (currentRenderCount === 0) {
-                let html = '';
-                for (let i = 0; i < end; i++) {
-                    html += buildCardHTML(usersMap, rankedUserList[i]);
-                }
-                listEl.innerHTML = html;
+                posEl.textContent = '#' + (aboveCount + 1).toLocaleString();
+                posEl.classList.add('my-pos-highlight');
             } else {
-                let appendHTML = '';
-                for (let i = currentRenderCount; i < end; i++) {
-                    appendHTML += buildCardHTML(usersMap, rankedUserList[i]);
-                }
-                listEl.insertAdjacentHTML('beforeend', appendHTML);
-            }
-
-            currentRenderCount = end;
-
-            document.getElementById('treeLoading').style.display = 'none';
-            document.getElementById('treeRenderArea').style.display = 'block';
-
-            const btn = document.getElementById('showMoreBtn');
-            if (currentRenderCount < rankedUserList.length) {
-                btn.style.display = 'block';
-                btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Load More (' + (rankedUserList.length - currentRenderCount) + ' remaining)';
-            } else {
-                btn.style.display = 'none';
+                posEl.textContent = 'Loading...';
+                posEl.classList.remove('my-pos-highlight');
             }
         }
 
-        function buildCardHTML(usersMap, userData) {
-            const user = usersMap[userData.uid];
-            if (!user) return '';
+        document.getElementById('treeSummary').style.display = 'grid';
+    }
 
-            const pos = userData.position;
-            const name = getDisplayName(user, userData.uid);
-            const avatarClass = userData.isActive ? 'active-avatar' : 'inactive-avatar';
-            const dotClass = userData.isActive ? 'active-dot' : 'inactive-dot';
+    function animateNumber(elementId, target) {
+        const el = document.getElementById(elementId);
+        const start = parseInt(el.textContent.replace(/[^0-9]/g, '')) || 0;
+        const duration = 800;
+        const startTime = performance.now();
 
-            let cardClasses = 'rank-card';
-            if (pos === 1) cardClasses += ' pos-1';
-            else if (pos === 2) cardClasses += ' pos-2';
-            else if (pos === 3) cardClasses += ' pos-3';
-            if (userData.isMe) cardClasses += ' is-me';
-
-            let tags = '';
-            if (userData.isMe) tags += '<span class="node-you-tag">YOU</span>';
-            if (pos <= 3) tags += topRankBadgeHTML(pos);
-            tags += vipBadgeHTML(userData.vip);
-
-            let crown = pos === 1 ? '<div class="crown-icon"><i class="fa-solid fa-crown"></i></div>' : '';
-            const barPercent = Math.max(Math.round((userData.score / maxScore) * 100), 2);
-
-            let html = '';
-            // ৪র্থ পজিশনের আগে সেপারেটর
-            if (pos === 4) {
-                html += '<div class="top-separator"><div class="line"></div><span>Other Rankings</span><div class="line"></div></div>';
-            }
-
-            html += '<div class="' + cardClasses + '">';
-            html += crown;
-            html += '  <div class="rank-position">' + pos + '</div>';
-            html += '  <div class="node-avatar ' + avatarClass + '">' + getInitials(name) + '<div class="online-dot ' + dotClass + '"></div></div>';
-            html += '  <div class="node-info">';
-            html += '    <div class="node-name-row">' + tags + '<span class="node-name">' + escapeHTML(name) + '</span></div>';
-            html += '    <div class="node-sub">';
-            html += '      <span class="stat-vip"><i class="fa-solid fa-crown"></i> LV ' + userData.vip + ' unlocked</span>';
-            html += '      <span class="stat-active"><i class="fa-solid fa-circle"></i> ' + userData.activeRefs + ' active ref</span>';
-            html += '      <span class="stat-total"><i class="fa-solid fa-users"></i> ' + userData.totalRefs + ' invited</span>';
-            html += '    </div>';
-            html += '  </div>';
-            html += '  <div class="score-bar-wrap"><div class="score-bar-fill" style="width: ' + barPercent + '%"></div></div>';
-            html += '</div>';
-
-            return html;
+        function tick(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+            const current = Math.round(start + (target - start) * eased);
+            el.textContent = current.toLocaleString();
+            if (progress < 1) requestAnimationFrame(tick);
         }
+        requestAnimationFrame(tick);
+    }
 
-        // Show More বাটন
-        document.getElementById('showMoreBtn').addEventListener('click', function() {
-            const localCache = localStorage.getItem('vipRankCache');
-            if (!localCache) return;
-            const usersMap = JSON.parse(localCache).data;
-            renderRankedList(usersMap);
+    // =============================================
+    // SHOW MORE BUTTON
+    // =============================================
+    document.getElementById('showMoreBtn').addEventListener('click', function() {
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+        this.disabled = true;
+        this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+
+        requestAnimationFrame(() => {
+            renderBatch(true);
         });
+    });
 
-        // Security
-        document.onkeydown = function(e) {
-            if(e.keyCode==123)return false;
-            if(e.ctrlKey&&e.shiftKey&&(e.keyCode=='I'.charCodeAt(0)||e.keyCode=='J'.charCodeAt(0)))return false;
-            if(e.ctrlKey&&e.keyCode=='U'.charCodeAt(0))return false;
-        };
+    // =============================================
+    // FIREBASE INIT
+    // =============================================
+    if (typeof firebaseConfig === 'undefined') {
+        document.getElementById('treeLoading').innerHTML = '<span style="color:#ff4d4d">Config missing</span>';
+    } else {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        currentUserId = getLoggedInUID();
+        if (!currentUserId) {
+            window.location.href = "login.html";
+        } else {
+            initSystem();
+        }
+    }
+
+    // =============================================
+    // SECURITY
+    // =============================================
+    document.onkeydown = function(e) {
+        if (e.keyCode == 123) return false;
+        if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+    };
     </script>
 </body>
 </html>
