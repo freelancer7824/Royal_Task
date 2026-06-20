@@ -41,7 +41,6 @@
         body::-webkit-scrollbar-track { background: var(--bg-body); }
         body::-webkit-scrollbar-thumb { background: #1a1d2e; border-radius: 10px; }
 
-        /* --- পেজ হেডার --- */
         .page-header { margin-bottom: 30px; }
         .page-header h1 {
             font-size: 28px; font-weight: 800;
@@ -52,7 +51,6 @@
         }
         .page-header p { color: var(--text-muted); font-size: 13.5px; line-height: 1.5; }
 
-        /* --- টপ স্ট্যাটাস বার --- */
         .top-stats {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -94,7 +92,6 @@
         .stat-value.gold { color: var(--vip-gold); }
         .stat-unit { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 4px; }
 
-        /* --- গ্রিড --- */
         .claim-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -102,7 +99,6 @@
             max-width: 1200px;
         }
 
-        /* --- ক্লেইম কার্ড --- */
         .claim-card {
             background: linear-gradient(160deg, #12141f 0%, #0c0d15 100%);
             border: 1px solid var(--card-border);
@@ -119,7 +115,6 @@
             box-shadow: 0 16px 40px rgba(0,0,0,0.4);
         }
 
-        /* কার্ডের উপরে কালার স্ট্রিপ */
         .card-strip {
             height: 4px;
             width: 100%;
@@ -132,8 +127,8 @@
         .card-strip.strip-cooldown {
             background: linear-gradient(90deg, #2a1a3a, var(--cooldown-purple), #2a1a3a);
         }
-        .card-strip.strip-claimed {
-            background: linear-gradient(90deg, #1a2a1a, #2a3a2a, #1a2a1a);
+        .card-strip.strip-locked {
+            background: linear-gradient(90deg, #1a1a1a, #2a2a2a, #1a1a1a);
         }
 
         @keyframes stripFlow {
@@ -170,9 +165,9 @@
             color: var(--cooldown-purple);
             border: 1px solid rgba(168, 85, 247, 0.2);
         }
-        .badge-claimed {
+        .badge-locked {
             background: rgba(255, 255, 255, 0.03);
-            color: #555;
+            color: #444;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -181,7 +176,6 @@
             50% { opacity: 0.6; }
         }
 
-        /* আর্নিং ডিসপ্লে */
         .earning-display {
             background: rgba(0, 255, 204, 0.04);
             border: 1px solid rgba(0, 255, 204, 0.08);
@@ -191,6 +185,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            transition: opacity 0.3s;
+        }
+        .earning-display.dimmed {
+            opacity: 0.3;
         }
         .earning-left {
             display: flex; align-items: center; gap: 10px;
@@ -206,7 +204,6 @@
         .earning-amount { font-size: 20px; font-weight: 800; color: var(--accent-neon); margin-top: 2px; }
         .earning-amount .unit { font-size: 11px; font-weight: 500; color: var(--text-muted); }
 
-        /* কাউন্টডাউন বার */
         .cooldown-section { margin-bottom: 16px; }
         .cooldown-header {
             display: flex; justify-content: space-between;
@@ -231,7 +228,6 @@
             width: 100% !important;
         }
 
-        /* ফিচার রো */
         .card-features {
             display: flex; gap: 16px;
             margin-bottom: 18px;
@@ -241,8 +237,9 @@
         }
         .feat-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted); }
         .feat-item i { font-size: 10px; color: var(--accent-dim); }
+        .feat-item.feat-dim { color: #333; }
+        .feat-item.feat-dim i { color: #333; }
 
-        /* ক্লেইম বাটন */
         .claim-btn {
             width: 100%;
             padding: 14px;
@@ -270,15 +267,65 @@
             pointer-events: none;
         }
 
-        .claim-btn.btn-claimed {
+        .claim-btn.btn-locked {
             background: rgba(255, 255, 255, 0.02);
-            color: #444;
+            color: #3a3a3a;
             border: 1px solid rgba(255, 255, 255, 0.04);
             cursor: default;
             pointer-events: none;
         }
 
-        /* --- এম্পটি স্টেট --- */
+        /* লকড কার্ডের ওভারলে */
+        .card-locked-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(7, 8, 13, 0.55);
+            border-radius: 20px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .card-locked-overlay .lock-icon {
+            width: 52px; height: 52px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-locked-overlay .lock-icon i { font-size: 20px; color: #333; }
+
+        /* লকড রিজন টুলটিপ */
+        .locked-reason {
+            display: none;
+            position: absolute;
+            bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #1a1020;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            color: var(--cooldown-purple);
+            font-size: 11px; font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 10px;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .locked-reason::after {
+            content: '';
+            position: absolute;
+            top: 100%; left: 50%; transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(168, 85, 247, 0.25);
+        }
+        .claim-card.show-reason .locked-reason { display: block; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -296,7 +343,6 @@
         .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
         .empty-state p { font-size: 13px; color: #444; line-height: 1.5; }
 
-        /* --- টোস্ট --- */
         .toast {
             position: fixed; top: 24px; right: 24px;
             padding: 16px 24px; border-radius: 14px;
@@ -320,7 +366,6 @@
         }
         .toast.toast-error i { color: var(--danger); font-size: 18px; }
 
-        /* --- পপআপ --- */
         .popup-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(4, 5, 9, 0.85);
@@ -364,7 +409,6 @@
         }
         .popup-dismiss-btn:hover { opacity: 0.9; }
 
-        /* --- কনফার্ম পপআপ (ক্লেইম কনফার্মেশন) --- */
         .confirm-popup .popup-box {
             border-color: rgba(0, 230, 118, 0.2);
             box-shadow: 0 20px 50px rgba(0, 230, 118, 0.06);
@@ -389,7 +433,6 @@
         }
         .confirm-popup .popup-cancel-btn:hover { background: rgba(255,255,255,0.06); }
 
-        /* --- ব্যাকগ্রাউন্ড গ্লো ইফেক্ট --- */
         .bg-glow {
             position: fixed; top: -200px; right: -200px;
             width: 500px; height: 500px;
@@ -422,7 +465,7 @@
     <div class="page-wrapper">
         <div class="page-header">
             <h1>Daily Mining Claims</h1>
-            <p>Collect your unlocked level earnings every 24 hours. Each node generates passive income continuously.</p>
+            <p>Collect your unlocked level earnings every 24 hours. Only the latest unlocked level is claimable each cycle.</p>
         </div>
 
         <div class="top-stats">
@@ -513,7 +556,7 @@
             let balance = 0;
             let unlockedVips = [];
             let vipSettings = {};
-            let claimTimestamps = {}; // { "VIP 1": 1700000000000, ... }
+            let claimTimestamps = {};
             let pendingClaimLevel = null;
             let countdownIntervals = {};
 
@@ -547,6 +590,39 @@
 
             function isReady(lastClaim) {
                 return getCooldownMs(lastClaim) <= 0;
+            }
+
+            /**
+             * মূল লজিক: একটি লেভেল claimable কি না তা নির্ধারণ করে
+             * 
+             * নিয়ম:
+             * 1. যদি কোনো claimTimestamps না থাকে (প্রথমবার) → claimable
+             * 2. যদি cooldown শেষ হয়ে যায় এবং এটাই সর্বশেষ unlocked লেভেল হয় → claimable
+             * 3. অন্যথায় → locked (পুরনো লেভেল বা cooldown চলছে)
+             */
+            function getCardState(levelName, sortedUnlocked) {
+                const lastClaim = claimTimestamps[levelName] || null;
+                const neverClaimed = !lastClaim;
+                const cooldownDone = lastClaim ? isReady(lastClaim) : false;
+                const isLastLevel = sortedUnlocked[sortedUnlocked.length - 1] === levelName;
+
+                if (neverClaimed) {
+                    // প্রথমবার আনলক হয়েছে, এখনো কখনো claim হয়নি
+                    return 'ready';
+                }
+
+                if (cooldownDone && isLastLevel) {
+                    // ২৪ ঘন্টা পার হয়েছে এবং এটাই সর্বশেষ লেভেল
+                    return 'ready';
+                }
+
+                if (cooldownDone && !isLastLevel) {
+                    // ২৪ ঘন্টা পার হয়েছে কিন্তু এটা সর্বশেষ লেভেল নয় → locked
+                    return 'locked';
+                }
+
+                // cooldown চলছে
+                return 'cooldown';
             }
 
             // --- টোস্ট ফাংশন ---
@@ -631,7 +707,6 @@
 
             // --- গ্রিড রেন্ডার ---
             function renderGrid() {
-                // আগের সব কাউন্টডাউন ইন্টারভাল ক্লিয়ার
                 Object.values(countdownIntervals).forEach(id => clearInterval(id));
                 countdownIntervals = {};
 
@@ -647,7 +722,7 @@
 
                 gridEl.innerHTML = '';
 
-                // আনলকড VIP গুলো সর্ট করে রেন্ডার
+                // আনলকড VIP গুলো সর্ট করে রেন্ডার (Level 1, 2, 3...)
                 const sortedUnlocked = [...unlockedVips].sort((a, b) => extractNum(a) - extractNum(b));
 
                 sortedUnlocked.forEach(levelName => {
@@ -657,7 +732,10 @@
                     const level = vipSettings[settingKey];
                     const dailyEarning = parseFloat(level.daily_earning || 0);
                     const lastClaim = claimTimestamps[levelName] || null;
-                    const ready = !lastClaim || isReady(lastClaim);
+
+                    // ★ মূল লজিক: কার্ডের স্টেট নির্ধারণ
+                    const cardState = getCardState(levelName, sortedUnlocked);
+
                     const cooldownMs = lastClaim ? getCooldownMs(lastClaim) : 0;
                     const totalCooldown = 24 * 60 * 60 * 1000;
                     const progressPercent = lastClaim ? Math.min(100, ((totalCooldown - cooldownMs) / totalCooldown) * 100) : 100;
@@ -668,19 +746,32 @@
                     card.id = cardId;
 
                     let stripClass, badgeClass, badgeText, btnClass, btnHtml;
+                    let showLockOverlay = false;
+                    let earningDimmed = false;
+                    let featDimmed = false;
 
-                    if (ready) {
+                    if (cardState === 'ready') {
                         stripClass = 'strip-ready';
                         badgeClass = 'badge-ready';
                         badgeText = 'Ready to Claim';
                         btnClass = 'btn-ready';
                         btnHtml = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
-                    } else {
+                    } else if (cardState === 'cooldown') {
                         stripClass = 'strip-cooldown';
                         badgeClass = 'badge-cooldown';
                         badgeText = 'Cooldown';
                         btnClass = 'btn-cooldown';
                         btnHtml = '<i class="fa-solid fa-hourglass-half"></i> <span class="btn-timer-text">' + formatTime(cooldownMs) + '</span>';
+                    } else {
+                        // locked স্টেট — পুরনো লেভেল, আর claim হবে না
+                        stripClass = 'strip-locked';
+                        badgeClass = 'badge-locked';
+                        badgeText = 'Locked';
+                        btnClass = 'btn-locked';
+                        btnHtml = '<i class="fa-solid fa-lock"></i> Not Claimable';
+                        showLockOverlay = true;
+                        earningDimmed = true;
+                        featDimmed = true;
                     }
 
                     card.innerHTML = `
@@ -691,7 +782,7 @@
                                 <div class="card-status-badge ${badgeClass}">${badgeText}</div>
                             </div>
 
-                            <div class="earning-display">
+                            <div class="earning-display ${earningDimmed ? 'dimmed' : ''}">
                                 <div class="earning-left">
                                     <div class="earning-icon-wrap"><i class="fa-solid fa-coins"></i></div>
                                     <div>
@@ -704,31 +795,44 @@
                             <div class="cooldown-section">
                                 <div class="cooldown-header">
                                     <span class="cooldown-label"><i class="fa-regular fa-clock"></i> Next Claim</span>
-                                    <span class="cooldown-time ${ready ? 'ready-text' : ''}" id="timer-${cardId}">
-                                        ${ready ? 'Available Now' : formatTime(cooldownMs)}
+                                    <span class="cooldown-time ${cardState === 'ready' ? 'ready-text' : ''}" id="timer-${cardId}">
+                                        ${cardState === 'ready' ? 'Available Now' : (cardState === 'locked' ? 'N/A' : formatTime(cooldownMs))}
                                     </span>
                                 </div>
                                 <div class="cooldown-bar-bg">
-                                    <div class="cooldown-bar-fill ${ready ? 'fill-ready' : ''}" id="bar-${cardId}" style="width: ${progressPercent}%"></div>
+                                    <div class="cooldown-bar-fill ${cardState === 'ready' ? 'fill-ready' : ''}" id="bar-${cardId}" style="width: ${cardState === 'locked' ? '0' : progressPercent + '%'}"></div>
                                 </div>
                             </div>
 
                             <div class="card-features">
-                                <div class="feat-item"><i class="fa-solid fa-microchip"></i> Active</div>
-                                <div class="feat-item"><i class="fa-solid fa-rotate"></i> 24h Cycle</div>
-                                <div class="feat-item"><i class="fa-solid fa-shield-halved"></i> Secured</div>
+                                <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-microchip"></i> Active</div>
+                                <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-rotate"></i> 24h Cycle</div>
+                                <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-shield-halved"></i> Secured</div>
                             </div>
 
                             <button class="claim-btn ${btnClass}" id="claimbtn-${cardId}" data-level="${levelName}" data-amount="${dailyEarning}">
                                 ${btnHtml}
                             </button>
                         </div>
+
+                        ${showLockOverlay ? `
+                        <div class="card-locked-overlay">
+                            <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
+                        </div>
+                        <div class="locked-reason">Higher level unlocked — claim from latest level</div>
+                        ` : ''}
                     `;
 
                     gridEl.appendChild(card);
 
-                    // ক্লেইম বাটন ইভেন্ট
-                    if (ready) {
+                    // লকড কার্ডে hover করলে রিজন দেখাও
+                    if (showLockOverlay) {
+                        card.addEventListener('mouseenter', () => card.classList.add('show-reason'));
+                        card.addEventListener('mouseleave', () => card.classList.remove('show-reason'));
+                    }
+
+                    // ক্লেইম বাটন ইভেন্ট (শুধু ready স্টেটে)
+                    if (cardState === 'ready') {
                         document.getElementById(`claimbtn-${cardId}`).addEventListener('click', function() {
                             const lvName = this.getAttribute('data-level');
                             const lvAmount = parseFloat(this.getAttribute('data-amount'));
@@ -737,15 +841,15 @@
                         });
                     }
 
-                    // কাউন্টডাউন টাইমার শুরু (যদি cooldown চলমান থাকে)
-                    if (!ready && cooldownMs > 0) {
-                        startCountdown(cardId, lastClaim, levelName, dailyEarning);
+                    // কাউন্টডাউন টাইমার (শুধু cooldown স্টেটে)
+                    if (cardState === 'cooldown' && cooldownMs > 0) {
+                        startCountdown(cardId, lastClaim, levelName, dailyEarning, sortedUnlocked);
                     }
                 });
             }
 
             // --- কাউন্টডাউন টাইমার ---
-            function startCountdown(cardId, lastClaim, levelName, dailyEarning) {
+            function startCountdown(cardId, lastClaim, levelName, dailyEarning, sortedUnlocked) {
                 const timerEl = document.getElementById(`timer-${cardId}`);
                 const barEl = document.getElementById(`bar-${cardId}`);
                 const btnEl = document.getElementById(`claimbtn-${cardId}`);
@@ -761,32 +865,78 @@
                         clearInterval(intervalId);
                         delete countdownIntervals[cardId];
 
-                        // কার্ড আপডেট → Ready স্টেটে পরিবর্তন
-                        timerEl.innerText = 'Available Now';
-                        timerEl.classList.add('ready-text');
-                        barEl.classList.add('fill-ready');
-                        barEl.style.width = '100%';
+                        // cooldown শেষ → এখন চেক করতে হবে এটা কি সর্বশেষ লেভেল
+                        const isLastLevel = sortedUnlocked[sortedUnlocked.length - 1] === levelName;
 
-                        // স্ট্রিপ চেঞ্জ
-                        const strip = cardEl.querySelector('.card-strip');
-                        strip.className = 'card-strip strip-ready';
+                        if (isLastLevel) {
+                            // সর্বশেষ লেভেল → Ready তে পরিবর্তন
+                            timerEl.innerText = 'Available Now';
+                            timerEl.classList.add('ready-text');
+                            barEl.classList.add('fill-ready');
+                            barEl.style.width = '100%';
 
-                        // ব্যাজ চেঞ্জ
-                        const badge = cardEl.querySelector('.card-status-badge');
-                        badge.className = 'card-status-badge badge-ready';
-                        badge.innerText = 'Ready to Claim';
+                            const strip = cardEl.querySelector('.card-strip');
+                            strip.className = 'card-strip strip-ready';
 
-                        // বাটন চেঞ্জ
-                        btnEl.className = 'claim-btn btn-ready';
-                        btnEl.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
-                        btnEl.style.pointerEvents = 'auto';
-                        btnEl.style.cursor = 'pointer';
+                            const badge = cardEl.querySelector('.card-status-badge');
+                            badge.className = 'card-status-badge badge-ready';
+                            badge.innerText = 'Ready to Claim';
 
-                        // ক্লিক ইভেন্ট পুনরায় বাইন্ড
-                        btnEl.addEventListener('click', function() {
-                            pendingClaimLevel = { name: levelName, amount: dailyEarning };
-                            showConfirmPopup(levelName, dailyEarning);
-                        });
+                            btnEl.className = 'claim-btn btn-ready';
+                            btnEl.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
+                            btnEl.style.pointerEvents = 'auto';
+                            btnEl.style.cursor = 'pointer';
+
+                            // earning dimmed থাকলে সরাও
+                            const earnDisp = cardEl.querySelector('.earning-display');
+                            if (earnDisp) earnDisp.classList.remove('dimmed');
+                            cardEl.querySelectorAll('.feat-item').forEach(f => {
+                                f.classList.remove('feat-dim');
+                            });
+
+                            btnEl.addEventListener('click', function() {
+                                pendingClaimLevel = { name: levelName, amount: dailyEarning };
+                                showConfirmPopup(levelName, dailyEarning);
+                            });
+                        } else {
+                            // পুরনো লেভেল → Locked তে পরিবর্তন
+                            timerEl.innerText = 'N/A';
+                            timerEl.classList.remove('ready-text');
+                            barEl.classList.remove('fill-ready');
+                            barEl.style.width = '0%';
+
+                            const strip = cardEl.querySelector('.card-strip');
+                            strip.className = 'card-strip strip-locked';
+
+                            const badge = cardEl.querySelector('.card-status-badge');
+                            badge.className = 'card-status-badge badge-locked';
+                            badge.innerText = 'Locked';
+
+                            btnEl.className = 'claim-btn btn-locked';
+                            btnEl.innerHTML = '<i class="fa-solid fa-lock"></i> Not Claimable';
+                            btnEl.style.pointerEvents = 'none';
+
+                            // earning dimmed করো
+                            const earnDisp = cardEl.querySelector('.earning-display');
+                            if (earnDisp) earnDisp.classList.add('dimmed');
+                            cardEl.querySelectorAll('.feat-item').forEach(f => {
+                                f.classList.add('feat-dim');
+                            });
+
+                            // লক ওভারলে যোগ করো
+                            const overlay = document.createElement('div');
+                            overlay.className = 'card-locked-overlay';
+                            overlay.innerHTML = '<div class="lock-icon"><i class="fa-solid fa-lock"></i></div>';
+                            cardEl.appendChild(overlay);
+
+                            const reason = document.createElement('div');
+                            reason.className = 'locked-reason';
+                            reason.innerText = 'Higher level unlocked — claim from latest level';
+                            cardEl.appendChild(reason);
+
+                            cardEl.addEventListener('mouseenter', () => cardEl.classList.add('show-reason'));
+                            cardEl.addEventListener('mouseleave', () => cardEl.classList.remove('show-reason'));
+                        }
                     } else {
                         timerEl.innerText = formatTime(remaining);
                         const pct = Math.min(100, ((totalCooldown - remaining) / totalCooldown) * 100);
@@ -804,14 +954,13 @@
                 // ডাবল চেক: কুলডাউন শেষ হয়েছে কিনা
                 const lastClaim = claimTimestamps[name] || null;
                 if (lastClaim && !isReady(lastClaim)) {
-                    showErrorPopup('Cooldown Active', `This node is still in cooldown. Please wait before claiming again.`);
+                    showErrorPopup('Cooldown Active', 'This node is still in cooldown. Please wait before claiming again.');
                     return;
                 }
 
                 const newBalance = balance + amount;
                 const userRef = db.ref('users/' + uid);
 
-                // ব্যালেন্স আপডেট + টাইমস্ট্যাম্প সেভ
                 const updates = {
                     balance: Number(newBalance.toFixed(4)),
                     ['claimTimestamps/' + name]: Date.now()
