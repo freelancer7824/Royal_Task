@@ -720,8 +720,8 @@
                 const amount = document.getElementById('deposit-amount').value;
                 const txid = document.getElementById('deposit-txid').value.trim();
 
-                if(Number(amount) < 10) {
-                    alert("Minimum deposit limit is 10 USDT.");
+                if(Number(amount) < 1) {
+                    alert("Minimum deposit limit is 1 USDT.");
                     return;
                 }
 
