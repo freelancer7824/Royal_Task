@@ -257,7 +257,7 @@
 <body oncontextmenu="return false;">
 
     <div class="page-header">
-        <h1>Secure Settlement Vault</h1>
+        <h1>Secure Withdrawal</h1>
         <p>Transfer your automated network block mining rewards cleanly back into cold wallets.</p>
     </div>
 
@@ -500,8 +500,8 @@
                 showError("Please ensure both the target wallet address and transfer amount inputs are complete.");
                 return;
             }
-            if (requestedVolumeValue < 10.00) {
-                showError("Protocol Violation! Minimum allowed vault settlement limit requires at least <strong>10.00 USDT</strong>.");
+            if (requestedVolumeValue < 5.00) {
+                showError("Protocol Violation! Minimum allowed vault settlement limit requires at least <strong>5.00 USDT</strong>.");
                 return;
             }
             if (requestedVolumeValue > internalLiquidityBalance) {
