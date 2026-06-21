@@ -346,15 +346,11 @@
                             updateUI('username', name);
                         }
 
-                        // ভেরিয়েবলগুলো নেওয়া হচ্ছে
-                        const wit = parseFloat(data.withdraw || 0);
-                        const refEarn = parseFloat(data.referralEarnings || 0);
-                        
-                        // অ্যাক্টিভ রেফারেল কাউন্ট (শুধুমাত্র অ্যাক্টিভ ইউজার)
+                        // রেফারেল আয় ও কাউন্ট নেওয়া হচ্ছে (উইথড্র এখন আর এখান থেকে নেওয়া হচ্ছে না)
+                        const refEarn = parseFloat(data.referralEarnings || 0);                        
                         const activeRefCount = data.activeReferrals || 0;
 
                         // অন্যান্য UI আপডেট
-                        updateUI('withdraw-balance', wit.toFixed(2));
                         updateUI('referral-balance', refEarn.toFixed(2));
                         updateUI('referral-count', activeRefCount);
 
@@ -385,9 +381,26 @@
 
                     updateUI('deposit-balance', totalApprovedDeposits.toFixed(2));
                 });
+
+                // --- ৫. CALCULATE APPROVED WITHDRAWALS (Rejected বাদ দেওয়া হয়েছে) ---
+                rtdb.ref('withdrawals').orderByChild('user_id').equalTo(userId).on('value', (snapshot) => {
+                    let totalApprovedWithdrawals = 0;
+
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            const withdrawData = childSnapshot.val();
+                            // শুধুমাত্র approved স্ট্যাটাসের উইথড্রাল কাউন্ট করা হচ্ছে
+                            if (withdrawData.status === 'approved') {
+                                totalApprovedWithdrawals += parseFloat(withdrawData.gross_amount || 0);
+                            }
+                        });
+                    }
+
+                    updateUI('withdraw-balance', totalApprovedWithdrawals.toFixed(2));
+                });
             }
 
-            // --- 5. UI Helper Function with Animation ---
+            // --- 6. UI Helper Function with Animation ---
             function updateUI(id, value) {
                 const el = document.getElementById(id);
                 if (!el) return;
