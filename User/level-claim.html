@@ -53,9 +53,9 @@
 
         .top-stats {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 16px;
-            max-width: 1200px;
+            max-width: 600px;
             margin-bottom: 30px;
         }
         .stat-box {
@@ -73,7 +73,6 @@
             height: 2px;
         }
         .stat-box.balance-box::after { background: linear-gradient(90deg, transparent, var(--accent-neon), transparent); }
-        .stat-box.levels-box::after { background: linear-gradient(90deg, transparent, var(--success), transparent); }
         .stat-box.earning-box::after { background: linear-gradient(90deg, transparent, var(--vip-gold), transparent); }
 
         .stat-label {
@@ -88,31 +87,24 @@
             letter-spacing: -0.5px;
         }
         .stat-value.neon { color: var(--accent-neon); }
-        .stat-value.green { color: var(--success); }
         .stat-value.gold { color: var(--vip-gold); }
         .stat-unit { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 4px; }
 
         .claim-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: 1fr;
             gap: 20px;
-            max-width: 1200px;
+            max-width: 600px;
         }
 
         .claim-card {
             background: linear-gradient(160deg, #12141f 0%, #0c0d15 100%);
             border: 1px solid var(--card-border);
             border-radius: 20px;
-            padding: 0;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .claim-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
         }
 
         .card-strip {
@@ -127,8 +119,8 @@
         .card-strip.strip-cooldown {
             background: linear-gradient(90deg, #2a1a3a, var(--cooldown-purple), #2a1a3a);
         }
-        .card-strip.strip-locked {
-            background: linear-gradient(90deg, #1a1a1a, #2a2a2a, #1a1a1a);
+        .card-strip.strip-expired {
+            background: linear-gradient(90deg, #2a0d15, var(--danger), #2a0d15);
         }
 
         @keyframes stripFlow {
@@ -165,10 +157,10 @@
             color: var(--cooldown-purple);
             border: 1px solid rgba(168, 85, 247, 0.2);
         }
-        .badge-locked {
-            background: rgba(255, 255, 255, 0.03);
-            color: #444;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .badge-expired {
+            background: rgba(255, 51, 102, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(255, 51, 102, 0.2);
         }
 
         @keyframes badgePulse {
@@ -187,9 +179,7 @@
             justify-content: space-between;
             transition: opacity 0.3s;
         }
-        .earning-display.dimmed {
-            opacity: 0.3;
-        }
+        .earning-display.dimmed { opacity: 0.3; }
         .earning-left {
             display: flex; align-items: center; gap: 10px;
         }
@@ -212,6 +202,7 @@
         .cooldown-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .cooldown-time { font-size: 13px; font-weight: 700; color: var(--cooldown-purple); font-variant-numeric: tabular-nums; }
         .cooldown-time.ready-text { color: var(--success); }
+        .cooldown-time.expired-text { color: var(--danger); }
 
         .cooldown-bar-bg {
             width: 100%; height: 6px;
@@ -226,6 +217,10 @@
         .cooldown-bar-fill.fill-ready {
             background: linear-gradient(90deg, var(--success), #69f0ae);
             width: 100% !important;
+        }
+        .cooldown-bar-fill.fill-expired {
+            background: var(--danger);
+            width: 0% !important;
         }
 
         .card-features {
@@ -267,19 +262,19 @@
             pointer-events: none;
         }
 
-        .claim-btn.btn-locked {
-            background: rgba(255, 255, 255, 0.02);
-            color: #3a3a3a;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+        .claim-btn.btn-expired {
+            background: rgba(255, 51, 102, 0.06);
+            color: var(--danger);
+            border: 1px solid rgba(255, 51, 102, 0.12);
             cursor: default;
             pointer-events: none;
         }
 
-        /* লকড কার্ডের ওভারলে */
-        .card-locked-overlay {
+        /* এক্সপায়ারড ওভারলে */
+        .card-expired-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(7, 8, 13, 0.55);
+            background: rgba(7, 8, 13, 0.5);
             border-radius: 20px;
             z-index: 2;
             display: flex;
@@ -287,49 +282,18 @@
             justify-content: center;
             pointer-events: none;
         }
-        .card-locked-overlay .lock-icon {
+        .card-expired-overlay .exp-icon {
             width: 52px; height: 52px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255, 51, 102, 0.08);
+            border: 1px solid rgba(255, 51, 102, 0.15);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
         }
-        .card-locked-overlay .lock-icon i { font-size: 20px; color: #333; }
-
-        /* লকড রিজন টুলটিপ */
-        .locked-reason {
-            display: none;
-            position: absolute;
-            bottom: 80px; left: 50%; transform: translateX(-50%);
-            background: #1a1020;
-            border: 1px solid rgba(168, 85, 247, 0.25);
-            color: var(--cooldown-purple);
-            font-size: 11px; font-weight: 600;
-            padding: 8px 14px;
-            border-radius: 10px;
-            white-space: nowrap;
-            z-index: 10;
-            pointer-events: none;
-            animation: fadeUp 0.3s ease;
-        }
-        .locked-reason::after {
-            content: '';
-            position: absolute;
-            top: 100%; left: 50%; transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: rgba(168, 85, 247, 0.25);
-        }
-        .claim-card.show-reason .locked-reason { display: block; }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(6px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
+        .card-expired-overlay .exp-icon i { font-size: 20px; color: var(--danger); }
 
         .empty-state {
-            grid-column: 1 / -1;
             text-align: center;
-            padding: 80px 20px;
+            padding: 60px 20px;
         }
         .empty-icon {
             width: 80px; height: 80px;
@@ -374,6 +338,7 @@
             z-index: 9999;
             opacity: 0; pointer-events: none;
             transition: all 0.35s ease;
+            padding: 16px;
         }
         .popup-overlay.show { opacity: 1; pointer-events: auto; }
 
@@ -381,23 +346,23 @@
             background: linear-gradient(145deg, #16192b, #0e1019);
             border: 1px solid rgba(255, 51, 102, 0.2);
             box-shadow: 0 20px 50px rgba(255, 51, 102, 0.08);
-            padding: 32px; border-radius: 24px;
-            width: 90%; max-width: 400px;
+            padding: 30px; border-radius: 24px;
+            width: 100%; max-width: 400px;
             text-align: center;
-            transform: scale(0.7) translateY(20px);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
         }
-        .popup-overlay.show .popup-box { transform: scale(1) translateY(0); }
+        .popup-overlay.show .popup-box { transform: scale(1); }
 
         .popup-icon-circle {
-            width: 64px; height: 64px;
+            width: 60px; height: 60px;
             background: rgba(255, 51, 102, 0.08);
             border: 1px dashed var(--danger);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 18px;
         }
-        .popup-icon-circle i { color: var(--danger); font-size: 28px; }
+        .popup-icon-circle i { color: var(--danger); font-size: 26px; }
         .popup-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
         .popup-text { color: var(--text-muted); font-size: 13.5px; line-height: 1.6; margin-bottom: 24px; }
         .popup-text strong { color: var(--text-main); }
@@ -439,12 +404,6 @@
             background: radial-gradient(circle, rgba(0, 255, 204, 0.03) 0%, transparent 70%);
             pointer-events: none; z-index: 0;
         }
-        .bg-glow-2 {
-            position: fixed; bottom: -200px; left: -200px;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(168, 85, 247, 0.02) 0%, transparent 70%);
-            pointer-events: none; z-index: 0;
-        }
 
         .page-wrapper { position: relative; z-index: 1; }
 
@@ -460,12 +419,11 @@
 <body oncontextmenu="return false;">
 
     <div class="bg-glow"></div>
-    <div class="bg-glow-2"></div>
 
     <div class="page-wrapper">
         <div class="page-header">
-            <h1>Daily Mining Claims</h1>
-            <p>Collect your unlocked level earnings every 24 hours. Only the latest unlocked level is claimable each cycle.</p>
+            <h1>Daily Mining Claim</h1>
+            <p>Collect your active VIP earnings every 24 hours. Only your currently active VIP is claimable.</p>
         </div>
 
         <div class="top-stats">
@@ -473,12 +431,8 @@
                 <div class="stat-label"><i class="fa-solid fa-wallet"></i> Wallet Balance</div>
                 <div class="stat-value neon" id="stat-balance">0.00<span class="stat-unit">USDT</span></div>
             </div>
-            <div class="stat-box levels-box">
-                <div class="stat-label"><i class="fa-solid fa-layer-group"></i> Active Nodes</div>
-                <div class="stat-value green" id="stat-levels">0<span class="stat-unit">Levels</span></div>
-            </div>
             <div class="stat-box earning-box">
-                <div class="stat-label"><i class="fa-solid fa-coins"></i> Total Daily Income</div>
+                <div class="stat-label"><i class="fa-solid fa-coins"></i> Daily Claim Amount</div>
                 <div class="stat-value gold" id="stat-daily">0.00<span class="stat-unit">USDT</span></div>
             </div>
         </div>
@@ -528,7 +482,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- লগইন চেক ---
             function checkLogin() {
                 const u = localStorage.getItem('currentUser');
                 if (!u) {
@@ -547,85 +500,72 @@
             const uid = checkLogin();
             if (!uid) return;
 
-            // Firebase Init
             if (typeof firebaseConfig === 'undefined') { alert("config.js missing!"); return; }
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             const db = firebase.database();
 
-            // --- স্টেট ভেরিয়েবল ---
+            // --- স্টেট ---
             let balance = 0;
-            let unlockedVips = [];
+            let currentVip = null;         // বর্তমানে অ্যাক্টিভ VIP নাম
+            let purchaseTs = null;          // VIP পারচেস টাইমস্ট্যাম্প
+            let activeRef = 0;              // অ্যাক্টিভ রেফারেল সংখ্যা
+            let lastClaimTs = null;         // শেষ ক্লেইম টাইমস্ট্যাম্প
             let vipSettings = {};
-            let claimTimestamps = {};
-            let pendingClaimLevel = null;
-            let countdownIntervals = {};
+            let pendingClaim = null;
+            let cdInterval = null;
 
-            // --- DOM রেফারেন্স ---
+            // --- DOM ---
             const gridEl = document.getElementById('claim-grid-container');
             const statBalance = document.getElementById('stat-balance');
-            const statLevels = document.getElementById('stat-levels');
             const statDaily = document.getElementById('stat-daily');
 
-            // --- হেল্পার ফাংশন ---
-            function extractNum(name) {
-                const m = name.match(/\d+/);
-                return m ? parseInt(m[0]) : 0;
-            }
-
+            // --- হেল্পার ---
             function formatTime(ms) {
                 if (ms <= 0) return '00:00:00';
-                const totalSec = Math.floor(ms / 1000);
-                const h = Math.floor(totalSec / 3600);
-                const m = Math.floor((totalSec % 3600) / 60);
-                const s = totalSec % 60;
+                const t = Math.floor(ms / 1000);
+                const h = Math.floor(t / 3600);
+                const m = Math.floor((t % 3600) / 60);
+                const s = t % 60;
                 return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
             }
 
-            function getCooldownMs(lastClaim) {
-                if (!lastClaim) return 0;
-                const elapsed = Date.now() - lastClaim;
-                const remaining = (24 * 60 * 60 * 1000) - elapsed;
+            // এক্সপায়ারি টাইমস্ট্যাম্প = পারচেস টাইম + (activeRef × 24 ঘন্টা)
+            function getExpiryTs() {
+                if (!purchaseTs) return null;
+                return purchaseTs + (activeRef * 86400000);
+            }
+
+            function isVipExpired() {
+                const e = getExpiryTs();
+                return e ? e <= Date.now() : true;
+            }
+
+            // ২৪ ঘন্টার কুলডাউন বাকি আছে কিনা
+            function getCooldownMs() {
+                if (!lastClaimTs) return 0;
+                const elapsed = Date.now() - lastClaimTs;
+                const remaining = 86400000 - elapsed;
                 return remaining > 0 ? remaining : 0;
             }
 
-            function isReady(lastClaim) {
-                return getCooldownMs(lastClaim) <= 0;
+            function isClaimReady() {
+                return getCooldownMs() <= 0;
             }
 
             /**
-             * মূল লজিক: একটি লেভেল claimable কি না তা নির্ধারণ করে
-             * 
-             * নিয়ম:
-             * 1. যদি কোনো claimTimestamps না থাকে (প্রথমবার) → claimable
-             * 2. যদি cooldown শেষ হয়ে যায় এবং এটাই সর্বশেষ unlocked লেভেল হয় → claimable
-             * 3. অন্যথায় → locked (পুরনো লেভেল বা cooldown চলছে)
+             * কার্ডের স্টেট নির্ধারণ:
+             * - expired: VIP এক্সপায়ার হয়ে গেছে → ক্লেইম নেই
+             * - ready: ২৪ ঘন্টা পার হয়েছে → ক্লেইম করা যাবে
+             * - cooldown: ২৪ ঘন্টা শেষ হয়নি → অপেক্ষা করতে হবে
              */
-            function getCardState(levelName, sortedUnlocked) {
-                const lastClaim = claimTimestamps[levelName] || null;
-                const neverClaimed = !lastClaim;
-                const cooldownDone = lastClaim ? isReady(lastClaim) : false;
-                const isLastLevel = sortedUnlocked[sortedUnlocked.length - 1] === levelName;
-
-                if (neverClaimed) {
-                    // প্রথমবার আনলক হয়েছে, এখনো কখনো claim হয়নি
-                    return 'ready';
-                }
-
-                if (cooldownDone && isLastLevel) {
-                    // ২৪ ঘন্টা পার হয়েছে এবং এটাই সর্বশেষ লেভেল
-                    return 'ready';
-                }
-
-                if (cooldownDone && !isLastLevel) {
-                    // ২৪ ঘন্টা পার হয়েছে কিন্তু এটা সর্বশেষ লেভেল নয় → locked
-                    return 'locked';
-                }
-
-                // cooldown চলছে
+            function getCardState() {
+                if (!currentVip) return null; // কোনো VIP নেই
+                if (isVipExpired()) return 'expired';
+                if (!lastClaimTs || isClaimReady()) return 'ready';
                 return 'cooldown';
             }
 
-            // --- টোস্ট ফাংশন ---
+            // --- টোস্ট ---
             function showSuccess(msg) {
                 const t = document.getElementById('toast-success');
                 document.getElementById('toast-success-msg').innerText = msg;
@@ -652,137 +592,119 @@
             const confirmPopup = document.getElementById('confirm-popup');
             document.getElementById('confirm-popup-cancel').onclick = () => {
                 confirmPopup.classList.remove('show');
-                pendingClaimLevel = null;
+                pendingClaim = null;
             };
             document.getElementById('confirm-popup-yes').onclick = () => {
                 confirmPopup.classList.remove('show');
-                if (pendingClaimLevel) executeClaim(pendingClaimLevel);
-                pendingClaimLevel = null;
+                if (pendingClaim) executeClaim(pendingClaim);
+                pendingClaim = null;
             };
-            function showConfirmPopup(levelName, amount) {
+            function showConfirmPopup(amount) {
                 document.getElementById('confirm-popup-text').innerHTML =
-                    `You are about to claim <strong>${parseFloat(amount).toFixed(2)} USDT</strong> from <strong>${levelName}</strong> mining node.<br><br>This amount will be added to your wallet balance.`;
+                    `Claim <strong>${amount.toFixed(2)} USDT</strong> from <strong>${currentVip}</strong> mining node?<br><br>This amount will be added to your wallet balance.`;
                 confirmPopup.classList.add('show');
             }
 
             // --- রিয়েল-টাইম লিসেনার ---
-            function listenUserData() {
-                db.ref('users/' + uid).on('value', snap => {
-                    if (snap.exists()) {
-                        const d = snap.val();
-                        balance = parseFloat(d.balance || 0);
-                        unlockedVips = Array.isArray(d.unlockedVips) ? [...d.unlockedVips] : [];
-                        claimTimestamps = d.claimTimestamps || {};
-                        updateStats();
-                        renderGrid();
-                    } else {
-                        balance = 0; unlockedVips = []; claimTimestamps = {};
-                        updateStats(); renderGrid();
-                    }
-                });
-            }
+            db.ref('users/' + uid).on('value', snap => {
+                if (snap.exists()) {
+                    const d = snap.val();
+                    balance = parseFloat(d.balance || 0);
+                    currentVip = d.current_vip || null;
+                    purchaseTs = d.vipPurchaseTimestamp || null;
+                    activeRef = parseInt(d.activeReferrals || 0);
+                    lastClaimTs = d.lastClaimTimestamp || null;
+                    updateStats();
+                    renderCard();
+                } else {
+                    balance = 0; currentVip = null; purchaseTs = null;
+                    activeRef = 0; lastClaimTs = null;
+                    updateStats(); renderCard();
+                }
+            });
 
-            function listenVIPSettings() {
-                db.ref('vip_settings').on('value', snap => {
-                    if (snap.exists()) {
-                        vipSettings = snap.val();
-                        renderGrid();
-                        updateStats();
-                    }
-                });
-            }
+            db.ref('vip_settings').on('value', snap => {
+                if (snap.exists()) {
+                    vipSettings = snap.val();
+                    updateStats();
+                    renderCard();
+                }
+            });
 
             // --- স্ট্যাটাস আপডেট ---
             function updateStats() {
                 statBalance.innerHTML = `${balance.toFixed(2)}<span class="stat-unit">USDT</span>`;
-                statLevels.innerHTML = `${unlockedVips.length}<span class="stat-unit">Level${unlockedVips.length !== 1 ? 's' : ''}</span>`;
 
-                let totalDaily = 0;
-                unlockedVips.forEach(name => {
-                    const key = Object.keys(vipSettings).find(k => vipSettings[k].level_name === name);
-                    if (key) totalDaily += parseFloat(vipSettings[key].daily_earning || 0);
-                });
-                statDaily.innerHTML = `${totalDaily.toFixed(2)}<span class="stat-unit">USDT</span>`;
+                let daily = 0;
+                if (currentVip && !isVipExpired()) {
+                    const key = Object.keys(vipSettings).find(k => vipSettings[k].level_name === currentVip);
+                    if (key) daily = parseFloat(vipSettings[key].daily_earning || 0);
+                }
+                statDaily.innerHTML = `${daily.toFixed(2)}<span class="stat-unit">USDT</span>`;
             }
 
-            // --- গ্রিড রেন্ডার ---
-            function renderGrid() {
-                Object.values(countdownIntervals).forEach(id => clearInterval(id));
-                countdownIntervals = {};
+            // --- কার্ড রেন্ডার ---
+            function renderCard() {
+                if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
 
-                if (Object.keys(vipSettings).length === 0 || unlockedVips.length === 0) {
+                const state = getCardState();
+
+                // কোনো VIP না থাকলে বা এক্সপায়ার হলে Empty State
+                if (!currentVip || state === 'expired') {
+                    const isExp = state === 'expired';
                     gridEl.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-icon"><i class="fa-solid fa-server"></i></div>
-                            <h3>No Unlocked Nodes</h3>
-                            <p>You haven't unlocked any mining levels yet.<br>Go to the VIP panel to activate your first node.</p>
+                            <div class="empty-icon"><i class="fa-solid ${isExp ? 'fa-hourglass-end' : 'fa-server'}"></i></div>
+                            <h3>${isExp ? 'VIP Expired' : 'No Active VIP'}</h3>
+                            <p>${isExp 
+                                ? 'Your active VIP has expired. Go to the VIP panel to purchase or repurchase a level.' 
+                                : 'You don\'t have any active VIP level.<br>Go to the VIP panel to activate a mining node.'}</p>
                         </div>`;
                     return;
                 }
 
-                gridEl.innerHTML = '';
+                // VIP সেটিংস খুঁজে বের করা
+                const settingKey = Object.keys(vipSettings).find(k => vipSettings[k].level_name === currentVip);
+                if (!settingKey) {
+                    gridEl.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-gear"></i></div><h3>Configuration Error</h3><p>VIP settings not found.</p></div>`;
+                    return;
+                }
 
-                // আনলকড VIP গুলো সর্ট করে রেন্ডার (Level 1, 2, 3...)
-                const sortedUnlocked = [...unlockedVips].sort((a, b) => extractNum(a) - extractNum(b));
+                const level = vipSettings[settingKey];
+                const dailyEarning = parseFloat(level.daily_earning || 0);
+                const cooldownMs = getCooldownMs();
+                const totalCooldown = 86400000;
+                const progressPct = lastClaimTs ? Math.min(100, ((totalCooldown - cooldownMs) / totalCooldown) * 100) : 100;
 
-                sortedUnlocked.forEach(levelName => {
-                    const settingKey = Object.keys(vipSettings).find(k => vipSettings[k].level_name === levelName);
-                    if (!settingKey) return;
+                let stripClass, badgeClass, badgeText, btnClass, btnHtml;
+                let earningDimmed = false;
+                let featDimmed = false;
 
-                    const level = vipSettings[settingKey];
-                    const dailyEarning = parseFloat(level.daily_earning || 0);
-                    const lastClaim = claimTimestamps[levelName] || null;
+                if (state === 'ready') {
+                    stripClass = 'strip-ready';
+                    badgeClass = 'badge-ready';
+                    badgeText = 'Ready to Claim';
+                    btnClass = 'btn-ready';
+                    btnHtml = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
+                } else {
+                    // cooldown
+                    stripClass = 'strip-cooldown';
+                    badgeClass = 'badge-cooldown';
+                    badgeText = 'Cooldown';
+                    btnClass = 'btn-cooldown';
+                    btnHtml = `<i class="fa-solid fa-hourglass-half"></i> <span id="btn-timer-text">${formatTime(cooldownMs)}</span>`;
+                }
 
-                    // ★ মূল লজিক: কার্ডের স্টেট নির্ধারণ
-                    const cardState = getCardState(levelName, sortedUnlocked);
-
-                    const cooldownMs = lastClaim ? getCooldownMs(lastClaim) : 0;
-                    const totalCooldown = 24 * 60 * 60 * 1000;
-                    const progressPercent = lastClaim ? Math.min(100, ((totalCooldown - cooldownMs) / totalCooldown) * 100) : 100;
-
-                    const cardId = `card-${levelName.replace(/\s+/g, '-')}`;
-                    const card = document.createElement('div');
-                    card.className = 'claim-card';
-                    card.id = cardId;
-
-                    let stripClass, badgeClass, badgeText, btnClass, btnHtml;
-                    let showLockOverlay = false;
-                    let earningDimmed = false;
-                    let featDimmed = false;
-
-                    if (cardState === 'ready') {
-                        stripClass = 'strip-ready';
-                        badgeClass = 'badge-ready';
-                        badgeText = 'Ready to Claim';
-                        btnClass = 'btn-ready';
-                        btnHtml = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
-                    } else if (cardState === 'cooldown') {
-                        stripClass = 'strip-cooldown';
-                        badgeClass = 'badge-cooldown';
-                        badgeText = 'Cooldown';
-                        btnClass = 'btn-cooldown';
-                        btnHtml = '<i class="fa-solid fa-hourglass-half"></i> <span class="btn-timer-text">' + formatTime(cooldownMs) + '</span>';
-                    } else {
-                        // locked স্টেট — পুরনো লেভেল, আর claim হবে না
-                        stripClass = 'strip-locked';
-                        badgeClass = 'badge-locked';
-                        badgeText = 'Locked';
-                        btnClass = 'btn-locked';
-                        btnHtml = '<i class="fa-solid fa-lock"></i> Not Claimable';
-                        showLockOverlay = true;
-                        earningDimmed = true;
-                        featDimmed = true;
-                    }
-
-                    card.innerHTML = `
+                gridEl.innerHTML = `
+                    <div class="claim-card" id="claim-card">
                         <div class="card-strip ${stripClass}"></div>
                         <div class="card-body">
                             <div class="card-top-row">
-                                <div class="card-level-name">${levelName}</div>
-                                <div class="card-status-badge ${badgeClass}">${badgeText}</div>
+                                <div class="card-level-name">${currentVip}</div>
+                                <div class="card-status-badge ${badgeClass}" id="card-badge">${badgeText}</div>
                             </div>
 
-                            <div class="earning-display ${earningDimmed ? 'dimmed' : ''}">
+                            <div class="earning-display ${earningDimmed ? 'dimmed' : ''}" id="earning-box">
                                 <div class="earning-left">
                                     <div class="earning-icon-wrap"><i class="fa-solid fa-coins"></i></div>
                                     <div>
@@ -795,193 +717,120 @@
                             <div class="cooldown-section">
                                 <div class="cooldown-header">
                                     <span class="cooldown-label"><i class="fa-regular fa-clock"></i> Next Claim</span>
-                                    <span class="cooldown-time ${cardState === 'ready' ? 'ready-text' : ''}" id="timer-${cardId}">
-                                        ${cardState === 'ready' ? 'Available Now' : (cardState === 'locked' ? 'N/A' : formatTime(cooldownMs))}
+                                    <span class="cooldown-time ${state === 'ready' ? 'ready-text' : ''}" id="timer-display">
+                                        ${state === 'ready' ? 'Available Now' : formatTime(cooldownMs)}
                                     </span>
                                 </div>
                                 <div class="cooldown-bar-bg">
-                                    <div class="cooldown-bar-fill ${cardState === 'ready' ? 'fill-ready' : ''}" id="bar-${cardId}" style="width: ${cardState === 'locked' ? '0' : progressPercent + '%'}"></div>
+                                    <div class="cooldown-bar-fill ${state === 'ready' ? 'fill-ready' : ''}" id="progress-bar" style="width: ${progressPct}%"></div>
                                 </div>
                             </div>
 
-                            <div class="card-features">
+                            <div class="card-features" id="feat-row">
                                 <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-microchip"></i> Active</div>
                                 <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-rotate"></i> 24h Cycle</div>
                                 <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-shield-halved"></i> Secured</div>
                             </div>
 
-                            <button class="claim-btn ${btnClass}" id="claimbtn-${cardId}" data-level="${levelName}" data-amount="${dailyEarning}">
+                            <button class="claim-btn ${btnClass}" id="claim-btn" data-amount="${dailyEarning}">
                                 ${btnHtml}
                             </button>
                         </div>
+                    </div>
+                `;
 
-                        ${showLockOverlay ? `
-                        <div class="card-locked-overlay">
-                            <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
-                        </div>
-                        <div class="locked-reason">Higher level unlocked — claim from latest level</div>
-                        ` : ''}
-                    `;
+                // ক্লেইম বাটন ইভেন্ট
+                if (state === 'ready') {
+                    document.getElementById('claim-btn').addEventListener('click', function() {
+                        const amt = parseFloat(this.getAttribute('data-amount'));
+                        pendingClaim = amt;
+                        showConfirmPopup(amt);
+                    });
+                }
 
-                    gridEl.appendChild(card);
-
-                    // লকড কার্ডে hover করলে রিজন দেখাও
-                    if (showLockOverlay) {
-                        card.addEventListener('mouseenter', () => card.classList.add('show-reason'));
-                        card.addEventListener('mouseleave', () => card.classList.remove('show-reason'));
-                    }
-
-                    // ক্লেইম বাটন ইভেন্ট (শুধু ready স্টেটে)
-                    if (cardState === 'ready') {
-                        document.getElementById(`claimbtn-${cardId}`).addEventListener('click', function() {
-                            const lvName = this.getAttribute('data-level');
-                            const lvAmount = parseFloat(this.getAttribute('data-amount'));
-                            pendingClaimLevel = { name: lvName, amount: lvAmount };
-                            showConfirmPopup(lvName, lvAmount);
-                        });
-                    }
-
-                    // কাউন্টডাউন টাইমার (শুধু cooldown স্টেটে)
-                    if (cardState === 'cooldown' && cooldownMs > 0) {
-                        startCountdown(cardId, lastClaim, levelName, dailyEarning, sortedUnlocked);
-                    }
-                });
+                // কুলডাউন টাইমার শুরু
+                if (state === 'cooldown' && cooldownMs > 0) {
+                    startCountdown(dailyEarning);
+                }
             }
 
-            // --- কাউন্টডাউন টাইমার ---
-            function startCountdown(cardId, lastClaim, levelName, dailyEarning, sortedUnlocked) {
-                const timerEl = document.getElementById(`timer-${cardId}`);
-                const barEl = document.getElementById(`bar-${cardId}`);
-                const btnEl = document.getElementById(`claimbtn-${cardId}`);
-                const cardEl = document.getElementById(cardId);
-                const totalCooldown = 24 * 60 * 60 * 1000;
+            // --- কুলডাউন টাইমার ---
+            function startCountdown(dailyEarning) {
+                const timerEl = document.getElementById('timer-display');
+                const barEl = document.getElementById('progress-bar');
+                const btnEl = document.getElementById('claim-btn');
+                const cardEl = document.getElementById('claim-card');
+                const badgeEl = document.getElementById('card-badge');
+                const stripEl = cardEl ? cardEl.querySelector('.card-strip') : null;
+                const btnTimerEl = document.getElementById('btn-timer-text');
+                const totalCooldown = 86400000;
 
                 if (!timerEl) return;
 
-                const intervalId = setInterval(() => {
-                    const remaining = getCooldownMs(lastClaim);
+                cdInterval = setInterval(() => {
+                    const remaining = getCooldownMs();
 
                     if (remaining <= 0) {
-                        clearInterval(intervalId);
-                        delete countdownIntervals[cardId];
+                        clearInterval(cdInterval);
+                        cdInterval = null;
 
-                        // cooldown শেষ → এখন চেক করতে হবে এটা কি সর্বশেষ লেভেল
-                        const isLastLevel = sortedUnlocked[sortedUnlocked.length - 1] === levelName;
+                        // Ready স্টেটে পরিবর্তন
+                        timerEl.innerText = 'Available Now';
+                        timerEl.className = 'cooldown-time ready-text';
+                        barEl.className = 'cooldown-bar-fill fill-ready';
+                        stripEl.className = 'card-strip strip-ready';
+                        badgeEl.className = 'card-status-badge badge-ready';
+                        badgeEl.innerText = 'Ready to Claim';
 
-                        if (isLastLevel) {
-                            // সর্বশেষ লেভেল → Ready তে পরিবর্তন
-                            timerEl.innerText = 'Available Now';
-                            timerEl.classList.add('ready-text');
-                            barEl.classList.add('fill-ready');
-                            barEl.style.width = '100%';
+                        btnEl.className = 'claim-btn btn-ready';
+                        btnEl.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
+                        btnEl.style.pointerEvents = 'auto';
+                        btnEl.style.cursor = 'pointer';
 
-                            const strip = cardEl.querySelector('.card-strip');
-                            strip.className = 'card-strip strip-ready';
-
-                            const badge = cardEl.querySelector('.card-status-badge');
-                            badge.className = 'card-status-badge badge-ready';
-                            badge.innerText = 'Ready to Claim';
-
-                            btnEl.className = 'claim-btn btn-ready';
-                            btnEl.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
-                            btnEl.style.pointerEvents = 'auto';
-                            btnEl.style.cursor = 'pointer';
-
-                            // earning dimmed থাকলে সরাও
-                            const earnDisp = cardEl.querySelector('.earning-display');
-                            if (earnDisp) earnDisp.classList.remove('dimmed');
-                            cardEl.querySelectorAll('.feat-item').forEach(f => {
-                                f.classList.remove('feat-dim');
-                            });
-
-                            btnEl.addEventListener('click', function() {
-                                pendingClaimLevel = { name: levelName, amount: dailyEarning };
-                                showConfirmPopup(levelName, dailyEarning);
-                            });
-                        } else {
-                            // পুরনো লেভেল → Locked তে পরিবর্তন
-                            timerEl.innerText = 'N/A';
-                            timerEl.classList.remove('ready-text');
-                            barEl.classList.remove('fill-ready');
-                            barEl.style.width = '0%';
-
-                            const strip = cardEl.querySelector('.card-strip');
-                            strip.className = 'card-strip strip-locked';
-
-                            const badge = cardEl.querySelector('.card-status-badge');
-                            badge.className = 'card-status-badge badge-locked';
-                            badge.innerText = 'Locked';
-
-                            btnEl.className = 'claim-btn btn-locked';
-                            btnEl.innerHTML = '<i class="fa-solid fa-lock"></i> Not Claimable';
-                            btnEl.style.pointerEvents = 'none';
-
-                            // earning dimmed করো
-                            const earnDisp = cardEl.querySelector('.earning-display');
-                            if (earnDisp) earnDisp.classList.add('dimmed');
-                            cardEl.querySelectorAll('.feat-item').forEach(f => {
-                                f.classList.add('feat-dim');
-                            });
-
-                            // লক ওভারলে যোগ করো
-                            const overlay = document.createElement('div');
-                            overlay.className = 'card-locked-overlay';
-                            overlay.innerHTML = '<div class="lock-icon"><i class="fa-solid fa-lock"></i></div>';
-                            cardEl.appendChild(overlay);
-
-                            const reason = document.createElement('div');
-                            reason.className = 'locked-reason';
-                            reason.innerText = 'Higher level unlocked — claim from latest level';
-                            cardEl.appendChild(reason);
-
-                            cardEl.addEventListener('mouseenter', () => cardEl.classList.add('show-reason'));
-                            cardEl.addEventListener('mouseleave', () => cardEl.classList.remove('show-reason'));
-                        }
+                        btnEl.addEventListener('click', function() {
+                            const amt = parseFloat(this.getAttribute('data-amount'));
+                            pendingClaim = amt;
+                            showConfirmPopup(amt);
+                        });
                     } else {
                         timerEl.innerText = formatTime(remaining);
+                        if (btnTimerEl) btnTimerEl.innerText = formatTime(remaining);
                         const pct = Math.min(100, ((totalCooldown - remaining) / totalCooldown) * 100);
                         barEl.style.width = pct + '%';
                     }
                 }, 1000);
-
-                countdownIntervals[cardId] = intervalId;
             }
 
             // --- ক্লেইম এক্সিকিউট ---
-            function executeClaim(claimData) {
-                const { name, amount } = claimData;
-
-                // ডাবল চেক: কুলডাউন শেষ হয়েছে কিনা
-                const lastClaim = claimTimestamps[name] || null;
-                if (lastClaim && !isReady(lastClaim)) {
-                    showErrorPopup('Cooldown Active', 'This node is still in cooldown. Please wait before claiming again.');
+            function executeClaim(amount) {
+                // ডাবল চেক
+                if (isVipExpired()) {
+                    showErrorPopup('VIP Expired', 'Your active VIP has expired. You can no longer claim from it.');
+                    return;
+                }
+                if (!isClaimReady()) {
+                    showErrorPopup('Cooldown Active', 'Please wait for the 24-hour cooldown to finish.');
                     return;
                 }
 
                 const newBalance = balance + amount;
                 const userRef = db.ref('users/' + uid);
 
-                const updates = {
+                userRef.update({
                     balance: Number(newBalance.toFixed(4)),
-                    ['claimTimestamps/' + name]: Date.now()
-                };
-
-                userRef.update(updates)
-                    .then(() => {
-                        showSuccess(`${name}: +${amount.toFixed(2)} USDT claimed!`);
-                    })
-                    .catch(err => {
-                        console.error("Claim error:", err);
-                        showErrorPopup('Claim Failed', 'Network error occurred. Please try again.');
-                    });
+                    lastClaimTimestamp: Date.now()
+                })
+                .then(() => {
+                    showSuccess(`${currentVip}: +${amount.toFixed(2)} USDT claimed!`);
+                })
+                .catch(err => {
+                    console.error("Claim error:", err);
+                    showErrorPopup('Claim Failed', 'Network error occurred. Please try again.');
+                });
             }
 
-            // --- শুরু ---
-            listenUserData();
-            listenVIPSettings();
         });
 
-        /* --- Security --- */
         document.onkeydown = function(e) {
             if (e.keyCode == 123) return false;
             if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
