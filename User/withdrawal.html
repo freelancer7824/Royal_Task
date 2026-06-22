@@ -185,6 +185,21 @@
         .balance-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .balance-val { font-size: 32px; font-weight: 700; margin-top: 5px; color: var(--text-main); }
         .balance-val span { font-size: 16px; color: var(--accent-neon); }
+        
+        .gas-notice {
+            background: rgba(255, 204, 0, 0.05);
+            border: 1px solid rgba(255, 204, 0, 0.15);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: var(--warning-color);
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .gas-notice i { margin-top: 2px; flex-shrink: 0; }
 
         .security-hints { list-style: none; display: flex; flex-direction: column; gap: 14px; }
         .security-hints li { font-size: 13px; color: var(--text-muted); line-height: 1.5; display: flex; gap: 10px; }
@@ -231,12 +246,10 @@
         .popup-close-btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .popup-close-btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* Error Specific Styles */
         .error-icon-container { border-color: var(--alert-red); }
         .error-icon-container i { color: var(--alert-red); }
         .error-title { color: var(--alert-red) !important; }
 
-        /* Confirm Specific Styles */
         .confirm-actions { display: flex; gap: 12px; }
         .confirm-actions button { flex: 1; }
         .btn-cancel {
@@ -273,20 +286,25 @@
                 <label class="input-label">Select Destination Settlement Protocol</label>
                 <div class="network-grid">
                     <label>
-                        <input type="radio" name="crypto-net" class="network-radio" value="TRC20" checked onchange="updateProcessingFee(2.00)">
+                        <input type="radio" name="crypto-net" class="network-radio" value="TRC20" checked onchange="updateProcessingFee(1.50)">
                         <div class="network-option">
                             <p>USDT (TRC20)</p>
-                            <span>Fee: 2.00 USDT</span>
+                            <span>Fee: 1.50 USDT</span>
                         </div>
                     </label>
                     <label>
-                        <input type="radio" name="crypto-net" class="network-radio" value="BEP20" onchange="updateProcessingFee(0.80)">
+                        <input type="radio" name="crypto-net" class="network-radio" value="BEP20" onchange="updateProcessingFee(0.01)">
                         <div class="network-option">
                             <p>USDT (BEP20)</p>
-                            <span>Fee: 0.80 USDT</span>
+                            <span>Fee: 0.01 USDT</span>
                         </div>
                     </label>
                 </div>
+            </div>
+
+            <div class="gas-notice">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Withdrawal amount + gas fee must not exceed your balance. Net payout = Entered amount - Gas fee. To withdraw full balance, click "Use Max".</span>
             </div>
 
             <div class="input-wrapper">
@@ -304,14 +322,14 @@
                 </div>
                 <div class="input-group">
                     <i class="fa-solid fa-dollar-sign"></i>
-                    <input type="number" id="withdraw-amount" placeholder="0.00" step="any" min="1" oninput="calculateNetPayoutResult()">
+                    <input type="number" id="withdraw-amount" placeholder="0.00" step="any" min="0" oninput="calculateNetPayoutResult()">
                 </div>
             </div>
 
             <div class="fee-panel">
                 <div class="fee-row">
                     <span>Protocol Gas/Handling Fee:</span>
-                    <span class="highlight"><span id="gas-fee-readout">2.00</span> USDT</span>
+                    <span class="highlight"><span id="gas-fee-readout">1.50</span> USDT</span>
                 </div>
                 <div class="fee-row">
                     <span>Net Expected Distribution:</span>
@@ -350,7 +368,7 @@
                 </li>
                 <li>
                     <i class="fa-solid fa-circle-exclamation"></i>
-                    <span><strong>Minimum Settlement Limit:</strong> The lowest acceptable asset amount allowed out of the network tracking terminal is <strong>10.00 USDT</strong>.</span>
+                    <span><strong>Minimum Settlement Limit:</strong> The lowest acceptable asset amount allowed out of the network tracking terminal is <strong>5.00 USDT</strong>. Your balance must cover the amount plus the gas fee.</span>
                 </li>
             </ul>
         </div>
@@ -404,7 +422,7 @@
 
     <script>
         let internalLiquidityBalance = 0; 
-        let activeSelectedGasFee = 2.00;
+        let activeSelectedGasFee = 1.50;
         let currentUserId = null;
         let currentUsername = null;
         let database = null;
@@ -470,22 +488,26 @@
             calculateNetPayoutResult();
         }
 
+        // "Use Max" বাটন: ইউজার যেন পুরো ব্যালেন্স থেকে গ্যাস ফি বাদ দিয়ে বাকিটা উইথড্র করতে পারে
         function injectMaxVolumeLimit() {
-            const maxPossible = internalLiquidityBalance - activeSelectedGasFee;
-            if(maxPossible > 0) {
-                document.getElementById('withdraw-amount').value = maxPossible.toFixed(2);
+            const maxWithdrawable = internalLiquidityBalance - activeSelectedGasFee;
+            if (maxWithdrawable > 0) {
+                document.getElementById('withdraw-amount').value = maxWithdrawable.toFixed(2);
             } else {
-                document.getElementById('withdraw-amount').value = internalLiquidityBalance.toFixed(2);
+                // গ্যাস ফি কভার করার মতো ব্যালেন্স না থাকলে 0 দেখাবে
+                document.getElementById('withdraw-amount').value = "0.00";
             }
             calculateNetPayoutResult();
         }
 
+        // নেট পেআউট = ইনপুট ভ্যালু - গ্যাস ফি
         function calculateNetPayoutResult() {
             const rawInputVal = parseFloat(document.getElementById('withdraw-amount').value);
             const payoutDisplayElement = document.getElementById('net-payout-readout');
 
-            if (!isNaN(rawInputVal) && rawInputVal > activeSelectedGasFee) {
-                payoutDisplayElement.innerText = (rawInputVal - activeSelectedGasFee).toFixed(2);
+            if (!isNaN(rawInputVal) && rawInputVal > 0) {
+                const net = rawInputVal - activeSelectedGasFee;
+                payoutDisplayElement.innerText = net > 0 ? net.toFixed(2) : "0.00";
             } else {
                 payoutDisplayElement.innerText = "0.00";
             }
@@ -496,59 +518,67 @@
             const targetAddressString = document.getElementById('target-wallet').value.trim();
             const requestedVolumeValue = parseFloat(document.getElementById('withdraw-amount').value);
 
+            // বেসিক ফিল্ড চেক
             if (!targetAddressString || isNaN(requestedVolumeValue)) {
                 showError("Please ensure both the target wallet address and transfer amount inputs are complete.");
                 return;
             }
+
+            // মিনিমাম 5 USDT চেক (এটা হলো নেট পেআউট যা ইউজার পাবে)
             if (requestedVolumeValue < 5.00) {
-                showError("Protocol Violation! Minimum allowed vault settlement limit requires at least <strong>5.00 USDT</strong>.");
-                return;
-            }
-            if (requestedVolumeValue > internalLiquidityBalance) {
-                showError(`Insufficient Vault Balance! Requested execution volume overflows your active account balance.`);
+                showError("Protocol Violation! Minimum withdrawal amount is <strong>5.00 USDT</strong>.");
                 return;
             }
 
-            const netPayout = (requestedVolumeValue - activeSelectedGasFee).toFixed(2);
+            // ইউজারের ব্যালেন্সে কি প্রবেশ করা পরিমাণ + গ্যাস ফি আছে?
+            const totalDeduction = requestedVolumeValue + activeSelectedGasFee;
+            if (totalDeduction > internalLiquidityBalance) {
+                showError(`Insufficient balance! You need <strong>${totalDeduction.toFixed(2)} USDT</strong> (Amount: ${requestedVolumeValue.toFixed(2)} + Gas: ${activeSelectedGasFee.toFixed(2)}), but your balance is <strong>${internalLiquidityBalance.toFixed(2)} USDT</strong>.`);
+                return;
+            }
+
+            // নেট পেআউট ক্যালকুলেশন (যা ইউজার আসলে পেমেন্ট পাবে)
+            const netPayout = requestedVolumeValue - activeSelectedGasFee;
+            const netPayoutStr = netPayout.toFixed(2);
+
             document.getElementById('confirm-msg-text').innerHTML = `
-                Target Address: <br><span style="font-family:monospace; color:#fff; font-size:12px;">${targetAddressString}</span><br><br>
-                Gross Volume: <strong>${requestedVolumeValue.toFixed(2)} USDT</strong><br>
-                Protocol Fee: <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong><br>
-                Net Payout: <strong style="color:var(--accent-neon);">${netPayout} USDT</strong>
+                Target Address: <br><span style="font-family:monospace; color:#fff; font-size:12px; word-break:break-all;">${targetAddressString}</span><br><br>
+                Withdrawal Amount: <strong>${requestedVolumeValue.toFixed(2)} USDT</strong><br>
+                Gas Fee: <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong><br>
+                You Will Receive: <strong style="color:var(--accent-neon);">${netPayoutStr} USDT</strong><br>
+                <span style="font-size:11px; color:var(--text-muted);">(Total deduction from balance: ${totalDeduction.toFixed(2)} USDT)</span>
             `;
             
-            // Confirm বাটনে ক্লিক করলে যেন নির্দিষ্ট ডাটা নিয়ে এক্সিকিউট হয়
             confirmYesBtn.onclick = function() {
                 closePopup('confirm-popup');
-                executeWithdrawalRequest(targetAddressString, requestedVolumeValue, netPayout);
+                executeWithdrawalRequest(targetAddressString, requestedVolumeValue, netPayoutStr);
             };
 
             showPopup('confirm-popup');
         }
 
         function executeWithdrawalRequest(address, amount, netPayout) {
-            // বাটন ডিজেবল করে লোডিং দেখাও
             withdrawBtn.disabled = true;
             confirmYesBtn.disabled = true;
             withdrawBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Deducting Balance...';
 
+            // মোট যত টাকা কাটবে = উইথড্র পরিমাণ + গ্যাস ফি
+            const totalDeduction = amount + activeSelectedGasFee;
             const balanceRef = database.ref(`users/${currentUserId}/balance`);
 
-            // Firebase Transaction ব্যবহার করে একই সাথে ব্যালেন্স কাটা ও ডাটা সেভ করা হচ্ছে
             balanceRef.transaction((currentBalance) => {
-                if (currentBalance === null || currentBalance < amount) {
-                    return; // ব্যালেন্স কম থাকলে ট্রানজেকশন বাতিল হবে (undefined রিটার্ন করলে কাটবে না)
+                if (currentBalance === null || currentBalance < totalDeduction) {
+                    return; // ব্যালেন্স কম থাকলে ট্রানজেকশন বাতিল
                 }
-                return (currentBalance - amount); // ব্যালেন্স থেকে টাকা কেটে নেওয়া হচ্ছে
+                return (currentBalance - totalDeduction);
             })
             .then((transactionResult) => {
                 if (!transactionResult.committed) {
-                    // যদি ট্রানজেকশন ফেইল হয় (মিডওয়্যালে ব্যালেন্স কমে গেছে বা কম ছিল)
                     showError("Transaction failed! Insufficient balance or concurrent request detected.");
                     return;
                 }
 
-                // ব্যালেন্স সফলভাবে কাটা হয়ে গেছে, এখন উইথড্র ডাটা সেভ করো
+                // ব্যালেন্স সফলভাবে কাটা হয়ে গেছে, উইথড্র ডাটা সেভ করো
                 const newWithdrawalRef = database.ref('withdrawals').push();
                 const withdrawalData = {
                     withdrawal_id: newWithdrawalRef.key,
@@ -566,16 +596,17 @@
                 return newWithdrawalRef.set(withdrawalData);
             })
             .then(() => {
-                // সব কিছু সফল হলে সাকসেস পপআপ
                 document.getElementById('success-msg-text').innerHTML = `
                     Your withdrawal request has been securely queued.<br><br>
-                    Amount: <strong>${amount.toFixed(2)} USDT</strong><br>
+                    Requested Amount: <strong>${amount.toFixed(2)} USDT</strong><br>
+                    Gas Fee Deducted: <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong><br>
+                    You Will Receive: <strong style="color:var(--accent-neon);">${netPayout} USDT</strong><br>
                     Network: <strong>${selectedNetwork}</strong><br><br>
                     Status: <span style="color:var(--warning-color); font-weight:700;"><i class="fa-solid fa-clock"></i> Pending Admin Authorization</span>
                 `;
                 showPopup('success-popup');
                 
-                // ফর্ম রিসেট করা হলো
+                // ফর্ম রিসেট
                 document.getElementById('target-wallet').value = "";
                 document.getElementById('withdraw-amount').value = "";
                 document.getElementById('net-payout-readout').innerText = "0.00";
@@ -585,7 +616,6 @@
                 showError("Network failure! Could not transmit payload to the blockchain node.");
             })
             .finally(() => {
-                // বাটন আবার অ্যাক্টিভ করে দেওয়া হলো
                 withdrawBtn.disabled = false;
                 confirmYesBtn.disabled = false;
                 withdrawBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Request Settlement Authorization';
@@ -599,7 +629,7 @@
 
             database = firebase.database();
 
-            // রিয়েলটাইম ব্যালেন্স লোড (কাটার পর এখানে নতুন ব্যালেন্স চলে আসবে)
+            // রিয়েলটাইম ব্যালেন্স লোড
             database.ref(`users/${currentUserId}/balance`).on('value', (snapshot) => {
                 if (snapshot.exists() && snapshot.val() !== null) {
                     internalLiquidityBalance = parseFloat(snapshot.val());
