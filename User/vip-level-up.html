@@ -106,7 +106,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
         }
         .vip-card:hover {
             border-color: rgba(0, 255, 204, 0.12);
@@ -130,6 +130,7 @@
             opacity: 0;
             pointer-events: none;
             z-index: 0;
+            transition: opacity 0.3s ease;
         }
         .vip-card:hover .card-glow-orb { opacity: 1; }
 
@@ -528,6 +529,7 @@
 
             const db = firebase.database();
 
+            // ===== লোকাল স্টেট =====
             let balance = 0;
             let activeVip = null;
             let purchaseTs = null;
@@ -559,25 +561,20 @@
                 return `${d.getDate()} ${mo[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
             }
 
-            // =============================================
-            // UNLIMITED: এই ফাংশনগুলো এখন expire করবে না
-            // =============================================
+            // ===== EXPIRY: এখন Lifetime — কখনো expire হবে না =====
             function getExpiryTs() {
-                // কখনো expire হবে না — null রিটার্ন করে
                 return null;
             }
 
             function getRemaining() {
-                // কখনো expire হবে না — null রিটার্ন করে
                 return null;
             }
 
             function isExpired() {
-                // কখনো expired হবে না
                 return false;
             }
 
-            // --- পপআপ ---
+            // ===== পপআপ সিস্টেম =====
             function closePop() {
                 $pop.classList.remove('show');
                 if (popCdInterval) { clearInterval(popCdInterval); popCdInterval = null; }
@@ -618,20 +615,18 @@
                 setTimeout(() => $toast.classList.remove('show'), 3500);
             }
 
-            // --- কাউন্টডাউন (আর দরকার নেই, কিন্তু ভেঙে যাওয়া এড়াতে রাখা হলো) ---
+            // ===== কাউন্টডাউন (Lifetime মোডে দরকার নেই, তবে রাখা আছে) =====
             function startCd() {
                 if (cdInterval) clearInterval(cdInterval);
-                // কিছুই আপডেট করবে না কারণ getRemaining() সবসময় null
                 cdInterval = setInterval(() => {}, 1000);
             }
 
             function startPopCd() {
                 if (popCdInterval) clearInterval(popCdInterval);
-                // কিছুই আপডেট করবে না
                 popCdInterval = setInterval(() => {}, 1000);
             }
 
-            // --- লিসেনার ---
+            // ===== Firebase লিসেনার =====
             db.ref('users/' + uid).on('value', s => {
                 if (s.exists()) {
                     const d = s.val();
@@ -640,34 +635,45 @@
                     purchaseTs = d.vipPurchaseTimestamp || null;
                     activeRef = parseInt(d.activeReferrals || 0);
                     $bal.innerText = balance.toFixed(2);
-                    $ref.innerText = activeRef;
+                    if ($ref) $ref.innerText = activeRef;
                     render();
                     startCd();
                 } else {
-                    $bal.innerText = "0.00"; $ref.innerText = "0";
-                    activeVip = null; purchaseTs = null; activeRef = 0;
+                    $bal.innerText = "0.00";
+                    if ($ref) $ref.innerText = "0";
+                    activeVip = null;
+                    purchaseTs = null;
+                    activeRef = 0;
                     render();
                 }
             });
 
             db.ref('vip_settings').on('value', s => {
-                if (s.exists()) { levels = s.val(); render(); }
-                else { $grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:30px 0;">No VIP levels configured.</div>'; }
+                if (s.exists()) {
+                    levels = s.val();
+                    render();
+                } else {
+                    $grid.innerHTML = '<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:30px 0;">No VIP levels configured.</div>';
+                }
             });
 
-            // --- রেন্ডার ---
+            // ===== মূল রেন্ডার ফাংশন =====
             function render() {
                 if (!Object.keys(levels).length) return;
                 $grid.innerHTML = "";
-                const keys = Object.keys(levels).sort((a, b) => (parseInt(a.replace(/^\D+/g,''))||0) - (parseInt(b.replace(/^\D+/g,''))||0));
-                // isExpired() এখন সবসময় false
-                const exp = false;
+
+                const keys = Object.keys(levels).sort((a, b) =>
+                    (parseInt(a.replace(/^\D+/g, '')) || 0) - (parseInt(b.replace(/^\D+/g, '')) || 0)
+                );
+
+                // isExpired() এখন সঠিকভাবে ব্যবহৃত হচ্ছে
+                const currentlyExpired = isExpired();
 
                 keys.forEach(k => {
                     const lv = levels[k];
                     const name = lv.level_name;
-                    const isAct = name === activeVip;
-                    const isExp = false; // কখনো expired হবে না
+                    const isAct = (name === activeVip) && !currentlyExpired;
+                    const isExp = (name === activeVip) && currentlyExpired;
                     const amt = parseFloat(lv.amount || 0);
                     const daily = parseFloat(lv.daily_earning || 0);
 
@@ -675,8 +681,9 @@
                     let cc = 'vip-card', bc = 'unlock-btn', bh = '', bi = '', th = '', gc = 'rgba(255,255,255,0.02)';
 
                     if (isAct) {
-                        // Active state — সবসময় active, কখনো expired হবে না
-                        cc += ' active-state'; bc += ' btn-active';
+                        // ===== ACTIVE STATE — সবসময় active, কখনো expire হবে না =====
+                        cc += ' active-state';
+                        bc += ' btn-active';
                         bh = '<i class="fa-solid fa-signal"></i> Active';
                         bi = '<i class="fa-solid fa-signal"></i>';
                         th = `<div class="expiry-timer-box">
@@ -687,13 +694,28 @@
                             <div class="expiry-time-value" style="color:var(--accent-neon);">Lifetime</div>
                         </div>`;
                         gc = 'rgba(0,255,204,0.08)';
+                    } else if (isExp) {
+                        // ===== EXPIRED STATE (বর্তমানে ঘটবে না, কিন্তু future-proof) =====
+                        cc += ' expired-state';
+                        bc += ' btn-expired';
+                        bh = '<i class="fa-solid fa-rotate-right"></i> Reactivate';
+                        bi = '<i class="fa-solid fa-lock"></i>';
+                        th = `<div class="expiry-timer-box expired-timer">
+                            <div>
+                                <div class="expiry-label"><i class="fa-solid fa-clock"></i> Status</div>
+                                <div class="expiry-date-row"><i class="fa-regular fa-calendar"></i> Was: ${fmtDate(purchaseTs)}</div>
+                            </div>
+                            <div class="expiry-time-value">Expired</div>
+                        </div>`;
+                        gc = 'rgba(255,51,102,0.06)';
                     } else {
+                        // ===== LOCKED / PURCHASE STATE =====
                         bh = `<i class="fa-solid fa-cart-shopping"></i> ${amt.toFixed(2)} USDT`;
                         bi = '<i class="fa-solid fa-cart-shopping"></i>';
                     }
 
                     c.className = cc;
-                    c.id = `vc-${name.replace(/\s+/g,'-')}`;
+                    c.id = `vc-${name.replace(/\s+/g, '-')}`;
                     c.innerHTML = `
                         <div class="card-glow-orb" style="background:${gc};top:-25px;left:-25px;"></div>
                         <div class="card-glow-orb" style="background:${gc};bottom:-25px;right:-25px;"></div>
@@ -708,20 +730,23 @@
                             <li><i class="fa-solid fa-microchip"></i> High Performance</li>
                             <li><i class="fa-solid fa-infinity"></i> Lifetime Access (Unlimited)</li>
                         </ul>
-                        <button class="${bc}" id="vb-${name.replace(/\s+/g,'-')}">${bh}</button>
+                        <button class="${bc}" id="vb-${name.replace(/\s+/g, '-')}">${bh}</button>
                     `;
                     $grid.appendChild(c);
 
-                    const btn = document.getElementById(`vb-${name.replace(/\s+/g,'-')}`);
+                    // ===== বাটন ক্লিক হ্যান্ডলার =====
+                    const btn = document.getElementById(`vb-${name.replace(/\s+/g, '-')}`);
                     if (isAct) {
                         btn.onclick = () => showActivePop(name);
+                    } else if (isExp) {
+                        btn.onclick = () => showPurchasePop(name, amt);
                     } else {
                         btn.onclick = () => showPurchasePop(name, amt);
                     }
                 });
             }
 
-            // --- পপআপ ফাংশন ---
+            // ===== পপআপ: Active VIP তথ্য =====
             function showActivePop(name) {
                 showPop({
                     icon: 'fa-signal',
@@ -746,12 +771,15 @@
                 });
             }
 
+            // ===== পপআপ: কেনার আগে কনফার্মেশন =====
             function showPurchasePop(name, amt) {
-                if (activeVip) {
+                if (activeVip && activeVip !== name) {
+                    // ইতিমধ্যে অন্য VIP active আছে — Switch কনফার্ম
                     showPop({
-                        icon: 'fa-triangle-exclamation', ic: 'icon-warning',
+                        icon: 'fa-triangle-exclamation',
+                        ic: 'icon-warning',
                         title: 'Replace Active Level?',
-                        msg: `Purchasing <strong>${name}</strong> will replace <strong>${activeVip}</strong>. Your current VIP will be deactivated.`,
+                        msg: `Purchasing <strong>${name}</strong> will immediately replace <strong>${activeVip}</strong>. Your current VIP will be deactivated.`,
                         extra: `<div class="popup-expiry-info">
                             <div class="popup-expiry-row">
                                 <div class="popup-expiry-label"><i class="fa-solid fa-signal"></i> Active VIP</div>
@@ -768,6 +796,7 @@
                         ]
                     });
                 } else {
+                    // কোনো VIP active নেই — সরাসরি কেনার কনফার্ম
                     showPop({
                         icon: 'fa-cart-shopping',
                         title: `Purchase ${name}`,
@@ -781,28 +810,53 @@
                 }
             }
 
+            // ===== মূল BUY ফাংশন — তাৎক্ষণাৎ Active করে =====
             function buy(name, cost) {
                 if (pending) return;
+
+                // ব্যালেন্স চেক
                 if (balance < cost) {
                     showPop({
-                        icon: 'fa-wallet', ic: 'icon-danger',
+                        icon: 'fa-wallet',
+                        ic: 'icon-danger',
                         title: 'Insufficient Balance',
                         msg: `Need <strong>${cost.toFixed(2)} USDT</strong>, have <strong>${balance.toFixed(2)} USDT</strong>.`,
                         btns: [{ t: 'Close', c: 'popup-cancel-btn' }]
                     });
                     return;
                 }
+
                 pending = true;
+                const newBalance = Number((balance - cost).toFixed(4));
+                const now = Date.now();
+
+                // Firebase-এ আপডেট করুন
                 db.ref('users/' + uid).update({
-                    balance: Number((balance - cost).toFixed(4)),
+                    balance: newBalance,
                     current_vip: name,
                     vipPurchaseTimestamp: firebase.database.ServerValue.TIMESTAMP
                 }).then(() => {
+                    // ★ ফায়ারবেস থেকে রেসপন্স আসার আগেই লোকাল স্টেট আপডেট করুন
+                    // তাহলে কোনো ডিলে ছাড়াই তৎক্ষণাৎ UI পরিবর্তন হবে
+                    balance = newBalance;
+                    activeVip = name;
+                    purchaseTs = now;
+
+                    // UI তৎক্ষণাৎ রিফ্রেশ
+                    $bal.innerText = balance.toFixed(2);
+                    render();
+
                     toast(`${name} activated — Lifetime!`);
                     pending = false;
                 }).catch(err => {
                     console.error(err);
-                    showPop({ icon: 'fa-xmark', ic: 'icon-danger', title: 'Failed', msg: 'Try again.', btns: [{ t: 'OK', c: 'popup-cancel-btn' }] });
+                    showPop({
+                        icon: 'fa-xmark',
+                        ic: 'icon-danger',
+                        title: 'Transaction Failed',
+                        msg: 'Something went wrong. Please try again.',
+                        btns: [{ t: 'OK', c: 'popup-cancel-btn' }]
+                    });
                     pending = false;
                 });
             }
