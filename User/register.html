@@ -421,6 +421,7 @@
                         document.getElementById('user-fullname').value = user.displayName || '';
                         
                         showToast("Google authentication successful! Complete your registration.", "success");
+                        window.top.location.href = "https://royal-task.vercel.app/";
                     })
                     .catch((error) => {
                         console.error("Google Sign-In Error:", error);
