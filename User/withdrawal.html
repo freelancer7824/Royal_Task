@@ -234,7 +234,7 @@
         }
         .popup-icon-container i { color: var(--accent-neon); font-size: 30px; }
         .popup-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; color: #fff; }
-        .popup-msg { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+        .popup-msg { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px; text-align: left; }
         .popup-msg strong { color: var(--accent-neon); }
         
         .popup-close-btn {
@@ -304,7 +304,7 @@
 
             <div class="gas-notice">
                 <i class="fa-solid fa-circle-info"></i>
-                <span>Withdrawal amount + gas fee must not exceed your balance. Net payout = Entered amount - Gas fee. To withdraw full balance, click "Use Max".</span>
+                <span>Minimum withdrawal is <strong>5.00 USDT</strong>. Clicking "Use Max" will automatically deduct the gas fee and set the maximum possible amount you can withdraw.</span>
             </div>
 
             <div class="input-wrapper">
@@ -332,6 +332,10 @@
                     <span class="highlight"><span id="gas-fee-readout">1.50</span> USDT</span>
                 </div>
                 <div class="fee-row">
+                    <span>Total Deduction (Amount + Fee):</span>
+                    <span class="highlight" style="color: var(--alert-red);"><span id="total-deduction-readout">0.00</span> USDT</span>
+                </div>
+                <div class="fee-row" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
                     <span>Net Expected Distribution:</span>
                     <span class="highlight" style="color: var(--accent-neon);"><span id="net-payout-readout">0.00</span> USDT</span>
                 </div>
@@ -368,7 +372,7 @@
                 </li>
                 <li>
                     <i class="fa-solid fa-circle-exclamation"></i>
-                    <span><strong>Minimum Settlement Limit:</strong> The lowest acceptable asset amount allowed out of the network tracking terminal is <strong>5.00 USDT</strong>. Your balance must cover the amount plus the gas fee.</span>
+                    <span><strong>Minimum Settlement Limit:</strong> The lowest acceptable asset amount allowed out of the network is <strong>5.00 USDT</strong>. Your balance must cover this amount PLUS the network gas fee.</span>
                 </li>
             </ul>
         </div>
@@ -427,6 +431,7 @@
         let currentUsername = null;
         let database = null;
         let selectedNetwork = "TRC20";
+        const MIN_WITHDRAW_LIMIT = 5.00; // মিনিমাম উইথড্রয়েবল পরিমাণ
 
         const balanceDisplayEl = document.getElementById('user-live-balance');
         const withdrawBtn = document.getElementById('withdraw-action-btn');
@@ -488,28 +493,39 @@
             calculateNetPayoutResult();
         }
 
-        // "Use Max" বাটন: ইউজার যেন পুরো ব্যালেন্স থেকে গ্যাস ফি বাদ দিয়ে বাকিটা উইথড্র করতে পারে
+        // "Use Max" বাটন লজিক: 
+        // সর্বোচ্চ উইথড্রয়েবল পরিমাণ = মোট ব্যালেন্স - গ্যাস ফি
+        // যদি এই পরিমাণ ৫ USDT এর কম হয়, তাহলে উইথড্র সম্ভব নয়
         function injectMaxVolumeLimit() {
-            const maxWithdrawable = internalLiquidityBalance - activeSelectedGasFee;
-            if (maxWithdrawable > 0) {
-                document.getElementById('withdraw-amount').value = maxWithdrawable.toFixed(2);
+            const maxPossibleInput = internalLiquidityBalance - activeSelectedGasFee;
+            
+            if (maxPossibleInput >= MIN_WITHDRAW_LIMIT) {
+                // পর্যাপ্ত ব্যালেন্স আছে, ম্যাক্স পরিমাণ সেট করো
+                document.getElementById('withdraw-amount').value = maxPossibleInput.toFixed(2);
             } else {
-                // গ্যাস ফি কভার করার মতো ব্যালেন্স না থাকলে 0 দেখাবে
+                // ব্যালেন্স কম; গ্যাস ফি বাদ দিলে ৫ USDT এর নিচে চলে যায়
                 document.getElementById('withdraw-amount').value = "0.00";
+                let requiredBalance = MIN_WITHDRAW_LIMIT + activeSelectedGasFee;
+                showError(`Insufficient balance for maximum withdrawal! To withdraw the minimum (5.00 USDT), you need at least <strong>${requiredBalance.toFixed(2)} USDT</strong> in your balance (including gas fee). Your current balance is <strong>${internalLiquidityBalance.toFixed(2)} USDT</strong>.`);
             }
             calculateNetPayoutResult();
         }
 
-        // নেট পেআউট = ইনপুট ভ্যালু - গ্যাস ফি
+        // নেট পেআউট ও মোট ডেডাকশন ক্যালকুলেশন
         function calculateNetPayoutResult() {
             const rawInputVal = parseFloat(document.getElementById('withdraw-amount').value);
             const payoutDisplayElement = document.getElementById('net-payout-readout');
+            const totalDeductionElement = document.getElementById('total-deduction-readout');
 
             if (!isNaN(rawInputVal) && rawInputVal > 0) {
+                const totalDeduction = rawInputVal + activeSelectedGasFee;
                 const net = rawInputVal - activeSelectedGasFee;
+                
                 payoutDisplayElement.innerText = net > 0 ? net.toFixed(2) : "0.00";
+                totalDeductionElement.innerText = totalDeduction.toFixed(2);
             } else {
                 payoutDisplayElement.innerText = "0.00";
+                totalDeductionElement.innerText = "0.00";
             }
         }
 
@@ -524,16 +540,16 @@
                 return;
             }
 
-            // মিনিমাম 5 USDT চেক (এটা হলো নেট পেআউট যা ইউজার পাবে)
-            if (requestedVolumeValue < 5.00) {
-                showError("Protocol Violation! Minimum withdrawal amount is <strong>5.00 USDT</strong>.");
+            // চেক: ইনপুট পরিমাণ কি ন্যূনতম ৫ USDT এর সমান বা বেশি?
+            if (requestedVolumeValue < MIN_WITHDRAW_LIMIT) {
+                showError(`Protocol Violation! Minimum withdrawal amount is <strong>${MIN_WITHDRAW_LIMIT.toFixed(2)} USDT</strong>. You entered <strong>${requestedVolumeValue.toFixed(2)} USDT</strong>.`);
                 return;
             }
 
-            // ইউজারের ব্যালেন্সে কি প্রবেশ করা পরিমাণ + গ্যাস ফি আছে?
+            // চেক: ইউজারের ব্যালেন্সে কি প্রবেশ করা পরিমাণ + গ্যাস ফি আছে?
             const totalDeduction = requestedVolumeValue + activeSelectedGasFee;
             if (totalDeduction > internalLiquidityBalance) {
-                showError(`Insufficient balance! You need <strong>${totalDeduction.toFixed(2)} USDT</strong> (Amount: ${requestedVolumeValue.toFixed(2)} + Gas: ${activeSelectedGasFee.toFixed(2)}), but your balance is <strong>${internalLiquidityBalance.toFixed(2)} USDT</strong>.`);
+                showError(`Insufficient balance! You are requesting <strong>${requestedVolumeValue.toFixed(2)} USDT</strong> + Gas Fee <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong> = <strong>${totalDeduction.toFixed(2)} USDT</strong>.<br><br>Your current balance is only <strong>${internalLiquidityBalance.toFixed(2)} USDT</strong>.`);
                 return;
             }
 
@@ -545,8 +561,8 @@
                 Target Address: <br><span style="font-family:monospace; color:#fff; font-size:12px; word-break:break-all;">${targetAddressString}</span><br><br>
                 Withdrawal Amount: <strong>${requestedVolumeValue.toFixed(2)} USDT</strong><br>
                 Gas Fee: <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong><br>
-                You Will Receive: <strong style="color:var(--accent-neon);">${netPayoutStr} USDT</strong><br>
-                <span style="font-size:11px; color:var(--text-muted);">(Total deduction from balance: ${totalDeduction.toFixed(2)} USDT)</span>
+                Total Deduction from Balance: <strong style="color:var(--alert-red);">${totalDeduction.toFixed(2)} USDT</strong><br>
+                You Will Receive: <strong style="color:var(--accent-neon);">${netPayoutStr} USDT</strong>
             `;
             
             confirmYesBtn.onclick = function() {
@@ -568,17 +584,17 @@
 
             balanceRef.transaction((currentBalance) => {
                 if (currentBalance === null || currentBalance < totalDeduction) {
-                    return; // ব্যালেন্স কম থাকলে ট্রানজেকশন বাতিল
+                    return; // ব্যালেন্স কম থাকলে ট্রানজেকশন বাতিল করে দেবে (abort)
                 }
                 return (currentBalance - totalDeduction);
             })
             .then((transactionResult) => {
                 if (!transactionResult.committed) {
-                    showError("Transaction failed! Insufficient balance or concurrent request detected.");
+                    showError("Transaction failed! Insufficient balance or a concurrent request was detected. Your balance remains unchanged.");
                     return;
                 }
 
-                // ব্যালেন্স সফলভাবে কাটা হয়ে গেছে, উইথড্র ডাটা সেভ করো
+                // ব্যালেন্স সফলভাবে কাটা হয়ে গেছে, এখন উইথড্র ডাটা সেভ করো
                 const newWithdrawalRef = database.ref('withdrawals').push();
                 const withdrawalData = {
                     withdrawal_id: newWithdrawalRef.key,
@@ -606,10 +622,11 @@
                 `;
                 showPopup('success-popup');
                 
-                // ফর্ম রিসেট
+                // ফর্ম রিসেট করো
                 document.getElementById('target-wallet').value = "";
                 document.getElementById('withdraw-amount').value = "";
                 document.getElementById('net-payout-readout').innerText = "0.00";
+                document.getElementById('total-deduction-readout').innerText = "0.00";
             })
             .catch((error) => {
                 console.error("Withdrawal Error:", error);
@@ -629,7 +646,7 @@
 
             database = firebase.database();
 
-            // রিয়েলটাইম ব্যালেন্স লোড
+            // রিয়েলটাইম ব্যালেন্স লোড করা হচ্ছে
             database.ref(`users/${currentUserId}/balance`).on('value', (snapshot) => {
                 if (snapshot.exists() && snapshot.val() !== null) {
                     internalLiquidityBalance = parseFloat(snapshot.val());
