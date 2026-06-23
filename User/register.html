@@ -93,6 +93,48 @@
             margin-top: 6px;
         }
 
+        /* --- Divider --- */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: var(--text-muted);
+            font-size: 12px;
+            gap: 15px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* --- Google Sign-In Button --- */
+        .google-signin-btn {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 5px;
+        }
+        .google-signin-btn:hover {
+            background: rgba(255,255,255,0.08);
+            transform: scale(0.99);
+        }
+        .google-signin-btn i {
+            font-size: 18px;
+        }
+
         /* --- Form Structural Layout --- */
         .form-group {
             margin-bottom: 16px;
@@ -262,6 +304,13 @@
             <p>Register your parameters to establish a secure link with the core matrix</p>
         </div>
 
+        <!-- Google Sign-In Button -->
+        <button class="google-signin-btn" id="google-signin-btn">
+            <i class="fa-brands fa-google"></i> Continue with Google
+        </button>
+
+        <div class="divider">or register with email</div>
+
         <form id="signup-form-pipeline">
             
             <div class="form-group">
@@ -333,7 +382,7 @@
 
     </div>
 
-    <!-- Firebase SDKs (Realtime Database for consistency) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -354,11 +403,42 @@
                 firebase.initializeApp(firebaseConfig);
             }
             const auth = firebase.auth();
-            const rtdb = firebase.database(); // Realtime Database Initialization
+            const rtdb = firebase.database();
+
+            // --- Google Sign-In ---
+            const googleBtn = document.getElementById('google-signin-btn');
+            
+            googleBtn.addEventListener('click', () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+
+                auth.signInWithPopup(provider)
+                    .then((result) => {
+                        const user = result.user;
+                        // Auto-fill email and name
+                        document.getElementById('user-email').value = user.email || '';
+                        document.getElementById('user-fullname').value = user.displayName || '';
+                        
+                        showToast("Google authentication successful! Complete your registration.", "success");
+                    })
+                    .catch((error) => {
+                        console.error("Google Sign-In Error:", error);
+                        let errorMessage = "Google authentication failed. Please try again.";
+                        
+                        if (error.code === 'auth/popup-blocked') {
+                            errorMessage = "Popup was blocked. Please allow popups for this site.";
+                        } else if (error.code === 'auth/cancelled-popup-request') {
+                            errorMessage = "Sign-in was cancelled.";
+                        }
+                        
+                        showToast(errorMessage, "error");
+                    });
+            });
 
             // --- Auto-Fill Referral Link Logic ---
             const urlParams = new URLSearchParams(window.location.search);
-            const referralCode = urlParams.get('ref'); // URL tracking param '?ref='
+            const referralCode = urlParams.get('ref');
             if (referralCode) {
                 document.getElementById('user-referral').value = referralCode;
             }
@@ -424,13 +504,11 @@
                 const password = document.getElementById('user-password').value;
                 const confirmPassword = document.getElementById('user-confirm-password').value;
 
-                // Password Matching Check
                 if (password !== confirmPassword) {
                     showToast("Security Key mismatch. Control passcodes do not match.", "error");
                     return;
                 }
 
-                // Password Length Check
                 if (password.length < 6) {
                     showToast("Password depth insecure. Minimum 6 tokens required.", "error");
                     return;
@@ -438,13 +516,10 @@
 
                 setLoading(true);
 
-                // 1. Firebase Auth Step
                 auth.createUserWithEmailAndPassword(email, password)
                     .then((userCredential) => {
                         const user = userCredential.user;
                         
-                        // 2. Database Mapping Step (Saving profile data to Realtime Database)
-                        // যদি রেফারেল কোড দেওয়া থাকে তবে সেটি সেভ হবে, না হলে "none"
                         const referredBy = referral || "none";
 
                         const userData = {
@@ -462,34 +537,26 @@
                             createdAt: firebase.database.ServerValue.TIMESTAMP
                         };
 
-                        // ইউজার ডাটা সেভ করা হচ্ছে
                         return rtdb.ref('users/' + user.uid).set(userData);
                     })
                     .then(() => {
-                        // 3. Referral Count Increment Logic
-                        // যদি রেফারেল কোড দেওয়া থাকে, তবে রেফারারের কাউন্ট বাড়ানোর প্রসেস
                         const referralInput = document.getElementById('user-referral').value.trim();
                         
                         if (referralInput) {
-                            // রেফারারের পথ রেফারেন্স নেওয়া হচ্ছে
                             const referrerRef = rtdb.ref('users/' + referralInput);
                             
-                            // ট্রানজেকশন ব্যবহার করা হচ্ছে যাতে ডাটা লস না হয়
                             referrerRef.transaction((currentData) => {
                                 if (currentData) {
-                                    // referralCount বাড়ানো হচ্ছে (যদি আগে থেকে না থাকে তবে 1 দিয়ে শুরু হবে)
                                     currentData.referralCount = (currentData.referralCount || 0) + 1;
                                     return currentData;
                                 }
-                            }, (error, committed, snapshot) => {
+                            }, (error) => {
                                 if (error) {
                                     console.error("Referral count update failed:", error);
                                 }
-                                // এখানে কলব্যাক শেষ, ইউজারকে রিডাইরেক্ট করা যাবে
                             });
                         }
 
-                        // All Success
                         showToast("Operator Record Created. Redirecting to terminal...", "success");
                         signupForm.reset();
                         
