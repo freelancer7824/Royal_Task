@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* --- Dark Premium Variables --- */
         :root {
             --bg-body: #090a0f;
             --panel-card: #121420;
@@ -36,11 +37,13 @@
             overflow-y: auto; 
         }
 
+        /* Custom Scrollbar */
         body::-webkit-scrollbar { width: 6px; }
         body::-webkit-scrollbar-track { background: #090a0f; }
         body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
         body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
 
+        /* --- Welcome/Header Section --- */
         .dashboard-header { margin-bottom: 30px; }
         .dashboard-header h1 {
             font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px;
@@ -48,6 +51,7 @@
         .dashboard-header p { color: var(--text-muted); font-size: 14px; }
         .dashboard-header span { color: var(--accent-neon); font-weight: 600; }
 
+        /* --- Stat Cards Grid Layout --- */
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px; margin-bottom: 40px;
@@ -80,6 +84,12 @@
         .card:nth-child(2):hover .card-icon {
             background: var(--accent-blue); box-shadow: 0 0 15px var(--accent-blue);
         }
+        .card:nth-child(4):hover .card-icon {
+            background: #f59e0b; box-shadow: 0 0 15px #f59e0b;
+        }
+        .card:nth-child(5):hover .card-icon {
+            background: #a855f7; box-shadow: 0 0 15px #a855f7;
+        }
 
         .card-label {
             font-size: 13px; color: var(--text-muted); font-weight: 500;
@@ -95,6 +105,7 @@
             font-size: 14px; color: var(--accent-neon); font-weight: 500;
         }
 
+        /* --- Balance Update Animation --- */
         @keyframes balanceFlash {
             0% { color: var(--text-main); text-shadow: none; transform: scale(1); }
             50% { color: #fff; text-shadow: 0 0 15px var(--accent-neon); transform: scale(1.15); }
@@ -103,6 +114,7 @@
 
         .balance-update { animation: balanceFlash 0.8s ease-out; display: inline-block; }
 
+        /* --- Shimmer Skeleton Loader --- */
         .skeleton {
             background: linear-gradient(90deg, #1a1d30 25%, #242943 50%, #1a1d30 75%);
             background-size: 200% 100%; animation: shimmer 1.5s infinite;
@@ -114,35 +126,16 @@
             100% { background-position: -200% 0; }
         }
 
-        /* --- Referral Add Toast Notification --- */
-        .toast-container {
-            position: fixed; top: 20px; right: 20px; z-index: 9999;
-            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        /* --- Sync Indicator --- */
+        .sync-indicator {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 11px; color: var(--accent-neon); margin-top: 8px;
+            opacity: 0; transition: opacity 0.3s ease;
         }
-
-        .toast {
-            background: linear-gradient(135deg, #121420, #1a1d30);
-            border: 1px solid rgba(0, 255, 204, 0.4);
-            border-radius: 12px; padding: 14px 20px;
-            display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 8px 32px rgba(0, 255, 204, 0.15);
-            transform: translateX(120%); opacity: 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: auto; min-width: 280px;
-        }
-
-        .toast.show { transform: translateX(0); opacity: 1; }
-
-        .toast-icon {
-            width: 36px; height: 36px; min-width: 36px;
-            background: rgba(0, 255, 204, 0.15); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent-neon); font-size: 16px;
-        }
-
-        .toast-text { font-size: 13px; line-height: 1.4; }
-        .toast-text strong { color: var(--accent-neon); font-weight: 600; }
-        .toast-text .sub { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+        .sync-indicator.visible { opacity: 1; }
+        .sync-indicator i { font-size: 10px; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .sync-indicator.done i { animation: none; }
 
         /* --- Rules Section --- */
         .rules-section {
@@ -180,6 +173,7 @@
         .rule-content h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
         .rule-content p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 
+        /* --- Responsive --- */
         @media (max-width: 992px) { .rules-grid { grid-template-columns: 1fr; } }
         @media (max-width: 576px) {
             body { padding: 16px; }
@@ -187,14 +181,10 @@
             .card { padding: 20px; }
             .card-value { font-size: 20px; }
             .rules-section { padding: 20px; }
-            .toast { min-width: 240px; padding: 12px 16px; }
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
-
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
 
     <div class="dashboard-header">
         <h1>Welcome Back, <span id="username"><div class="skeleton" style="width: 120px; height: 26px; vertical-align: middle;"></div></span></h1>
@@ -203,11 +193,15 @@
 
     <div class="stats-grid">
         
+        <!-- USER BALANCE (Main Wallet — এখন referral যুক্ত হয়ে DB তে সেভ হবে) -->
         <div class="card">
             <div class="card-icon"><i class="fa-solid fa-coins"></i></div>
             <div class="card-label">User Balance</div>
             <div class="card-value">
                 <span id="user-balance"><div class="skeleton" style="width: 90px;"></div></span> <span class="currency">USDT</span>
+            </div>
+            <div class="sync-indicator" id="sync-indicator">
+                <i class="fa-solid fa-spinner"></i> <span>Syncing referral earnings...</span>
             </div>
         </div>
 
@@ -262,7 +256,7 @@
                 <div class="rule-number">02</div>
                 <div class="rule-content">
                     <h3>Referral Commission</h3>
-                    <p>Commission from active team members is automatically added to your main user balance in real-time.</p>
+                    <p>Commission from active team members is automatically synced and added to your main withdrawable balance.</p>
                 </div>
             </div>
             <div class="rule-item">
@@ -293,7 +287,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- Firebase Initialization ---
+            // --- 1. Firebase Initialization Safety Check ---
             if (typeof firebaseConfig === 'undefined') {
                 console.error("Config Missing!");
                 return;
@@ -311,11 +305,12 @@
             const auth = firebase.auth();
             const rtdb = firebase.database();
 
-            // ★ ফায়ারবেস থেকে আনা হবে যে ব্যালেন্স ইতিমধ্যে মেইন ব্যালেন্সে যোগ হয়ে গেছে
-            let lastProcessedRefEarnings = 0; 
-            let isProcessing = false; 
+            // --- ডাবল-সিঙ্ক প্রতিরোধের ফ্ল্যাগ ---
+            // একই সেশনে একাধিকবার balance আপডেট হলে ইনফিনিট লুপ রোধ করবে
+            let hasSyncedThisSession = false;
+            let isSyncingNow = false;
 
-            // --- Login Check ---
+            // --- 2. Login Check ---
             function checkLogin() {
                 const loggedInUser = localStorage.getItem('currentUser');
                 if (!loggedInUser) {
@@ -344,33 +339,15 @@
             }
 
             const currentUserId = checkLogin();
+
             if (!currentUserId) return;
 
-            // --- প্রথমে ডাটাবেস থেকে লগ চেক করে তারপর মূল লজিকে প্রবেশ করা হবে ---
-            rtdb.ref('users/' + currentUserId + '/clearedReferralEarnings').once('value')
-            .then((snapshot) => {
-                // ডাটাবেসে যত টাকা ইতিমধ্যে ব্যালেন্সে যোগ হয়েছে তা মেমোরিতে লোড করা হলো
-                lastProcessedRefEarnings = parseFloat(snapshot.val() || 0);
-                
-                // এবার মূল ডাটা ফেচ ফাংশন চালু করা হচ্ছে
-                fetchUserData(currentUserId);
-            }).catch((error) => {
-                console.error("Error fetching cleared log:", error);
-                fetchUserData(currentUserId); // এরর হলেও চালু হবে
-            });
-
+            // --- 3. Fetch & Sync User Data ---
+            fetchUserData(currentUserId);
 
             function fetchUserData(userId) {
                 const userRef = rtdb.ref('users/' + userId);
-                const balanceRef = rtdb.ref('users/' + userId + '/balance');
 
-                // ১. আলাদা লাইটওয়েট লিসেনার শুধুমাত্র ব্যালেন্স UI আপডেট করার জন্য
-                balanceRef.on('value', (snap) => {
-                    const mainBalance = parseFloat(snap.val() || 0);
-                    updateUI('user-balance', mainBalance.toFixed(2));
-                });
-
-                // ২. ইউজারের বাকি ডাটা রিয়েলটাইম (নাম, রেফারেল কাউন্ট, রেফারেল আয়)
                 userRef.on('value', (snapshot) => {
                     const data = snapshot.val();
                     if (!data) return;
@@ -382,57 +359,27 @@
                         updateUI('username', name);
                     }
 
-                    // রেফারেল আয় ও কাউন্ট
+                    const mainBalance = parseFloat(data.balance || 0);
                     const refEarn = parseFloat(data.referralEarnings || 0);
                     const activeRefCount = data.activeReferrals || 0;
 
-                    // রেফারেল UI আপডেট
+                    // Referral আয় কার্ড আপডেট
                     updateUI('referral-balance', refEarn.toFixed(2));
                     updateUI('referral-count', activeRefCount);
 
-                    // ৩. ★★★ মূল লজিক: রেফারেল আয় ব্যালেন্সে যোগ (Firebase লগ ব্যবহার করে) ★★★
-                    if (!isProcessing) {
-                        // যদি মোট রেফারেল আয় বেশি হয় ডাটাবেসে সেভ করা আগের ভ্যালু থেকে
-                        if (refEarn > lastProcessedRefEarnings) {
-                            const newEarnings = refEarn - lastProcessedRefEarnings;
-                            
-                            if (newEarnings > 0) {
-                                isProcessing = true; 
-
-                                // সুরক্ষিতভাবে balance এ যোগ করা হচ্ছে
-                                balanceRef.transaction((currentBalance) => {
-                                    return (currentBalance || 0) + newEarnings;
-                                }).then((result) => {
-                                    if (result.committed) {
-                                        
-                                        // ★ ডাটাবেসে নতুন লগ আপডেট করা হচ্ছে যাতে রিফ্রেশ করলেও আর যোগ না হয়
-                                        rtdb.ref('users/' + userId + '/clearedReferralEarnings').set(refEarn);
-
-                                        // মেমরিও আপডেট করে দিচ্ছি
-                                        lastProcessedRefEarnings = refEarn;
-
-                                        // সফল হলে টোস্ট নোটিফিকেশন দেখাও
-                                        showToast(
-                                            '+' + newEarnings.toFixed(2) + ' USDT',
-                                            'Referral commission added to balance'
-                                        );
-                                    } else {
-                                        console.warn('Transaction aborted.');
-                                    }
-                                    isProcessing = false;
-                                }).catch((error) => {
-                                    console.error('Transaction error:', error);
-                                    isProcessing = false;
-                                });
-                            }
-                        }
+                    // === CORE FIX: Referral আয় balance এর সাথে adjust ===
+                    // যদি referral আয় > 0 হয় এবং এখনো সিঙ্ক হয়নি
+                    if (refEarn > 0 && !hasSyncedThisSession && !isSyncingNow) {
+                        syncReferralToBalance(userId, mainBalance, refEarn);
+                    } else {
+                        // ইতিমধ্যে সিঙ্ক হয়ে গেছে, শুধু ব্যালেন্স দেখাও
+                        updateUI('user-balance', mainBalance.toFixed(2));
                     }
-
                 }, (error) => {
                     console.error("Realtime DB Error:", error);
                 });
 
-                // ৪. APPROVED DEPOSITS ক্যালকুলেশন
+                // --- CALCULATE APPROVED DEPOSITS ---
                 rtdb.ref('deposits').orderByChild('user_id').equalTo(userId).on('value', (snapshot) => {
                     let totalApprovedDeposits = 0;
                     if (snapshot.exists()) {
@@ -446,7 +393,7 @@
                     updateUI('deposit-balance', totalApprovedDeposits.toFixed(2));
                 });
 
-                // ৫. APPROVED WITHDRAWALS ক্যালকুলেশন
+                // --- CALCULATE APPROVED WITHDRAWALS ---
                 rtdb.ref('withdrawals').orderByChild('user_id').equalTo(userId).on('value', (snapshot) => {
                     let totalApprovedWithdrawals = 0;
                     if (snapshot.exists()) {
@@ -461,7 +408,60 @@
                 });
             }
 
-            // --- UI Helper Function ---
+            // === REFERRAL → BALANCE SYNC FUNCTION ===
+            function syncReferralToBalance(userId, currentBalance, referralEarnings) {
+                isSyncingNow = true;
+
+                // সিঙ্ক ইন্ডিকেটর দেখাও
+                const syncEl = document.getElementById('sync-indicator');
+                syncEl.classList.add('visible');
+                syncEl.classList.remove('done');
+                syncEl.querySelector('span').textContent = 'Syncing referral earnings...';
+                syncEl.querySelector('i').className = 'fa-solid fa-spinner';
+
+                const newTotalBalance = currentBalance + referralEarnings;
+
+                // Firebase-এ নতুন ব্যালেন্স সেভ করো
+                rtdb.ref('users/' + userId + '/balance').set(newTotalBalance)
+                    .then(() => {
+                        // referralEarnings কে 0 করে দিলে ডাবল-কাউন্টিং হবে না
+                        return rtdb.ref('users/' + userId + '/referralEarnings').set(0);
+                    })
+                    .then(() => {
+                        hasSyncedThisSession = true;
+                        isSyncingNow = false;
+
+                        // সিঙ্ক সফল হলে ইন্ডিকেটর আপডেট
+                        syncEl.querySelector('i').className = 'fa-solid fa-circle-check';
+                        syncEl.querySelector('span').textContent = 'Referral earnings added to balance';
+
+                        // আপডেটেড ব্যালেন্স দেখাও
+                        updateUI('user-balance', newTotalBalance.toFixed(2));
+                        updateUI('referral-balance', '0.00');
+
+                        // ৩ সেকেন্ড পর ইন্ডিকেটর লুকাও
+                        setTimeout(() => {
+                            syncEl.classList.remove('visible');
+                        }, 3000);
+
+                        console.log('✅ Referral synced! New balance:', newTotalBalance);
+                    })
+                    .catch((error) => {
+                        isSyncingNow = false;
+                        console.error('❌ Referral sync failed:', error);
+
+                        // ফেইল হলেও বর্তমান ব্যালেন্স দেখাও
+                        updateUI('user-balance', currentBalance.toFixed(2));
+
+                        syncEl.querySelector('i').className = 'fa-solid fa-triangle-exclamation';
+                        syncEl.querySelector('span').textContent = 'Sync failed, retrying...';
+                        setTimeout(() => {
+                            syncEl.classList.remove('visible');
+                        }, 3000);
+                    });
+            }
+
+            // --- 4. UI Helper Function with Animation ---
             function updateUI(id, value) {
                 const el = document.getElementById(id);
                 if (!el) return;
@@ -481,37 +481,9 @@
                     }
                 }
             }
-
-            // --- Toast Notification Function ---
-            function showToast(title, subtitle) {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                toast.innerHTML = `
-                    <div class="toast-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                    <div class="toast-text">
-                        <strong>${title}</strong>
-                        <div class="sub">${subtitle}</div>
-                    </div>
-                `;
-                container.appendChild(toast);
-
-                // সামান্য ডিলে দিয়ে অ্যানিমেশন শুরু
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        toast.classList.add('show');
-                    });
-                });
-
-                // ৪ সেকেন্ড পর টোস্ট সরিয়ে দেওয়া
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 400);
-                }, 4000);
-            }
         });
 
-        /* --- Security --- */
+        /* --- Security Scripts --- */
         document.onkeydown = function(e) {
             if (e.keyCode == 123) return false; 
             if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
