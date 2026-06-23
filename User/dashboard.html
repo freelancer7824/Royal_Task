@@ -311,8 +311,8 @@
             const auth = firebase.auth();
             const rtdb = firebase.database();
 
-            // মেমোরিতে লাস্ট প্রসেস করা রেফারেল আয় এবং প্রসেসিং লক
-            let lastProcessedRefEarnings = null;
+            // ★ ফায়ারবেস থেকে আনা হবে যে ব্যালেন্স ইতিমধ্যে মেইন ব্যালেন্সে যোগ হয়ে গেছে
+            let lastProcessedRefEarnings = 0; 
             let isProcessing = false; 
 
             // --- Login Check ---
@@ -344,18 +344,27 @@
             }
 
             const currentUserId = checkLogin();
-
             if (!currentUserId) return;
 
-            // --- Main Data Fetch ---
-            fetchUserData(currentUserId);
+            // --- প্রথমে ডাটাবেস থেকে লগ চেক করে তারপর মূল লজিকে প্রবেশ করা হবে ---
+            rtdb.ref('users/' + currentUserId + '/clearedReferralEarnings').once('value')
+            .then((snapshot) => {
+                // ডাটাবেসে যত টাকা ইতিমধ্যে ব্যালেন্সে যোগ হয়েছে তা মেমোরিতে লোড করা হলো
+                lastProcessedRefEarnings = parseFloat(snapshot.val() || 0);
+                
+                // এবার মূল ডাটা ফেচ ফাংশন চালু করা হচ্ছে
+                fetchUserData(currentUserId);
+            }).catch((error) => {
+                console.error("Error fetching cleared log:", error);
+                fetchUserData(currentUserId); // এরর হলেও চালু হবে
+            });
+
 
             function fetchUserData(userId) {
                 const userRef = rtdb.ref('users/' + userId);
                 const balanceRef = rtdb.ref('users/' + userId + '/balance');
 
                 // ১. আলাদা লাইটওয়েট লিসেনার শুধুমাত্র ব্যালেন্স UI আপডেট করার জন্য
-                // এটি ট্রানজেকশন কম্পিলিট হলে ইউজারকে নতুন ব্যালেন্স দেখাবে
                 balanceRef.on('value', (snap) => {
                     const mainBalance = parseFloat(snap.val() || 0);
                     updateUI('user-balance', mainBalance.toFixed(2));
@@ -381,40 +390,38 @@
                     updateUI('referral-balance', refEarn.toFixed(2));
                     updateUI('referral-count', activeRefCount);
 
-                    // ৩. ★★★ মূল লজিক: রেফারেল আয় ব্যালেন্সে যোগ ★★★
-                    // যদি এখনো কোনো প্রসেসিং চলে না থাকে, তাহলেই নতুন ক্যালকুলেশনে ঢুকবে
+                    // ৩. ★★★ মূল লজিক: রেফারেল আয় ব্যালেন্সে যোগ (Firebase লগ ব্যবহার করে) ★★★
                     if (!isProcessing) {
-                        if (lastProcessedRefEarnings === null) {
-                            // প্রথমবার লোড হওয়ার সময় — শুধু মনে রাখব, ব্যালেন্সে যোগ করব না
-                            lastProcessedRefEarnings = refEarn;
-                        } else if (refEarn > lastProcessedRefEarnings) {
-                            // রেফারেল আয় বেড়েছে! নতুন আয় কত এসেছে তা বের করি
+                        // যদি মোট রেফারেল আয় বেশি হয় ডাটাবেসে সেভ করা আগের ভ্যালু থেকে
+                        if (refEarn > lastProcessedRefEarnings) {
                             const newEarnings = refEarn - lastProcessedRefEarnings;
                             
                             if (newEarnings > 0) {
-                                isProcessing = true; // লক করে দিলাম, যাতে লুপ না হয়
+                                isProcessing = true; 
 
-                                // Firebase Transaction দিয়ে সুরক্ষিতভাবে balance এ যোগ করা হচ্ছে
+                                // সুরক্ষিতভাবে balance এ যোগ করা হচ্ছে
                                 balanceRef.transaction((currentBalance) => {
                                     return (currentBalance || 0) + newEarnings;
                                 }).then((result) => {
                                     if (result.committed) {
+                                        
+                                        // ★ ডাটাবেসে নতুন লগ আপডেট করা হচ্ছে যাতে রিফ্রেশ করলেও আর যোগ না হয়
+                                        rtdb.ref('users/' + userId + '/clearedReferralEarnings').set(refEarn);
+
+                                        // মেমরিও আপডেট করে দিচ্ছি
+                                        lastProcessedRefEarnings = refEarn;
+
                                         // সফল হলে টোস্ট নোটিফিকেশন দেখাও
                                         showToast(
                                             '+' + newEarnings.toFixed(2) + ' USDT',
                                             'Referral commission added to balance'
                                         );
-                                        console.log('Referral earning ' + newEarnings.toFixed(2) + ' added to balance successfully.');
                                     } else {
-                                        console.warn('Referral balance add transaction aborted:', result.error);
+                                        console.warn('Transaction aborted.');
                                     }
-                                    // লাস্ট প্রসেসড ভ্যালু আপডেট এবং লক খুলে দেওয়া
-                                    lastProcessedRefEarnings = refEarn;
                                     isProcessing = false;
                                 }).catch((error) => {
                                     console.error('Transaction error:', error);
-                                    // এরর হলেও ভ্যালু আপডেট করে লক খুলে দিতে হবে
-                                    lastProcessedRefEarnings = refEarn;
                                     isProcessing = false;
                                 });
                             }
