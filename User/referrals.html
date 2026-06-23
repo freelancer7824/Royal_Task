@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- Dark Premium Colors --- */
         :root {
             --bg-body: #090a0f;
             --panel-card: #121420;
@@ -43,117 +42,227 @@
         body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
 
         .page-header { margin-bottom: 30px; }
-        .page-header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .page-header h1 {
+            font-size: 26px; font-weight: 700;
+            letter-spacing: 0.5px; margin-bottom: 5px;
+        }
         .page-header p { color: var(--text-muted); font-size: 14px; }
 
         .referral-share-box {
             background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            max-width: 1100px;
+            border-radius: 20px; padding: 24px;
+            margin-bottom: 24px; max-width: 1100px;
         }
-        .share-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .share-title {
+            font-size: 15px; font-weight: 600; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
         .share-title i { color: var(--accent-neon); }
         
         .link-input-group {
-            display: flex; gap: 12px; background: var(--input-bg); padding: 8px 8px 8px 16px;
-            border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.04); align-items: center; margin-bottom: 16px;
+            display: flex; gap: 12px; background: var(--input-bg);
+            padding: 8px 8px 8px 16px; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            align-items: center; margin-bottom: 16px;
         }
         .link-input-group input {
-            flex-grow: 1; background: none; border: none; color: var(--text-main);
-            font-size: 14px; font-family: monospace; outline: none; -webkit-user-select: text; user-select: text;
+            flex-grow: 1; background: none; border: none;
+            color: var(--text-main); font-size: 14px;
+            font-family: monospace; outline: none;
+            -webkit-user-select: text; user-select: text;
         }
         .copy-link-btn {
-            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%); color: #000; border: none;
-            padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
-            transition: 0.3s ease; display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: 600; font-size: 13px;
+            cursor: pointer; transition: 0.3s ease;
+            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
         }
         .copy-link-btn:hover { opacity: 0.9; transform: scale(0.98); }
 
         .code-row {
-            display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02);
-            padding: 12px 16px; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.02); padding: 12px 16px;
+            border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.1);
         }
         .code-row span { font-size: 14px; color: var(--text-muted); }
-        .code-value { font-family: monospace; font-weight: 700; color: var(--accent-neon) !important; letter-spacing: 1px; font-size: 15px !important; }
-        .copy-icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; transition: color 0.2s; padding: 4px 8px; }
+        .code-value {
+            font-family: monospace; font-weight: 700;
+            color: var(--accent-neon) !important;
+            letter-spacing: 1px; font-size: 15px !important;
+        }
+        .copy-icon-btn {
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 16px; transition: color 0.2s; padding: 4px 8px;
+        }
         .copy-icon-btn:hover { color: var(--accent-neon); }
 
-        .ref-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; max-width: 1100px; }
+        .ref-stats-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 20px; margin-bottom: 24px; max-width: 1100px;
+        }
         .ref-card {
-            background: #121420; border: 1px solid var(--card-border); padding: 20px;
-            border-radius: 16px; display: flex; align-items: center; gap: 16px;
+            background: #121420; border: 1px solid var(--card-border);
+            padding: 20px; border-radius: 16px;
+            display: flex; align-items: center; gap: 16px;
         }
         .ref-card-icon {
-            width: 45px; height: 45px; background: rgba(0, 255, 204, 0.05); border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--accent-neon);
+            width: 45px; height: 45px; min-width: 45px;
+            background: rgba(0, 255, 204, 0.05); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: var(--accent-neon);
         }
-        .ref-card-info h3 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
-        .ref-card-info p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .ref-card-info h3 {
+            font-size: 20px; font-weight: 700;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .ref-card-info p {
+            font-size: 12px; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
+        }
+
+        /* --- Claim Section --- */
+        .claim-section {
+            max-width: 1100px; margin-bottom: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.04) 0%, rgba(0, 119, 255, 0.03) 100%);
+            border: 1px solid rgba(0, 255, 204, 0.08);
+            border-radius: 20px; padding: 24px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 20px; flex-wrap: wrap;
+            position: relative; overflow: hidden;
+        }
+        .claim-section::before {
+            content: ''; position: absolute; top: -50%; right: -10%;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 204, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .claim-left { display: flex; align-items: center; gap: 18px; z-index: 1; }
+        .claim-icon-box {
+            width: 52px; height: 52px; min-width: 52px;
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.12), rgba(0, 255, 204, 0.03));
+            border: 1px solid rgba(0, 255, 204, 0.15);
+            border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; font-size: 22px; color: var(--accent-neon);
+        }
+        .claim-info h3 { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; }
+        .claim-amount {
+            font-size: 28px; font-weight: 700; color: var(--text-main);
+            display: flex; align-items: baseline; gap: 6px;
+        }
+        .claim-amount .unit {
+            font-size: 13px; font-weight: 500; color: var(--accent-neon);
+        }
+        .claim-right { z-index: 1; }
+
+        .claim-btn {
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000; border: none; padding: 14px 32px;
+            border-radius: 12px; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+            letter-spacing: 0.3px; position: relative; overflow: hidden;
+        }
+        .claim-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 204, 0.25);
+        }
+        .claim-btn:active:not(:disabled) { transform: translateY(0); }
+        .claim-btn:disabled {
+            background: #1e2030; color: #555; cursor: not-allowed;
+            box-shadow: none; transform: none;
+        }
+        .claim-btn .spinner {
+            display: none; width: 16px; height: 16px;
+            border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
+            border-radius: 50%; animation: btnSpin 0.6s linear infinite;
+        }
+        .claim-btn.loading .spinner { display: inline-block; }
+        .claim-btn.loading .btn-label { display: none; }
+        @keyframes btnSpin { to { transform: rotate(360deg); } }
+
+        /* Claim Success Pulse */
+        @keyframes claimPulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 255, 204, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }
+        }
+        .claim-btn.success-pulse { animation: claimPulse 0.8s ease-out; }
 
         .skeleton {
             background: linear-gradient(90deg, #1a1d30 25%, #242943 50%, #1a1d30 75%);
-            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; height: 20px; display: inline-block;
+            background-size: 200% 100%; animation: shimmer 1.5s infinite;
+            border-radius: 4px; height: 20px; display: inline-block;
         }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @keyframes valueFlash {
+            0% { color: var(--text-main); text-shadow: none; transform: scale(1); }
+            50% { color: #fff; text-shadow: 0 0 12px var(--accent-neon); transform: scale(1.08); }
+            100% { color: var(--text-main); text-shadow: none; transform: scale(1); }
+        }
+        .value-update { animation: valueFlash 0.6s ease-out; display: inline-block; }
 
         .table-container {
-            background-color: var(--panel-card); border: 1px solid var(--card-border); border-radius: 20px;
-            padding: 24px; max-width: 1100px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background-color: var(--panel-card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px; padding: 24px;
+            max-width: 1100px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .table-header { font-size: 16px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .table-header {
+            font-size: 16px; font-weight: 600; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
         .table-header i { color: var(--accent-neon); }
         .responsive-table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th { color: var(--text-muted); font-weight: 500; padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; }
-        td { padding: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.02); color: var(--text-main); }
+        th {
+            color: var(--text-muted); font-weight: 500;
+            padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+        td {
+            padding: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: var(--text-main);
+        }
         tr:last-child td { border: none; }
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .badge.active { background: rgba(0, 255, 102, 0.1); color: #00ff66; }
         .badge.inactive { background: rgba(255, 255, 255, 0.05); color: #8a94a6; }
 
-        /* --- Toast Notification --- */
-        .toast-container {
-            position: fixed; top: 20px; right: 20px; z-index: 9999;
-            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        @keyframes rowSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .toast {
-            background: linear-gradient(135deg, #121420, #1a1d30);
-            border: 1px solid rgba(0, 255, 204, 0.4); border-radius: 12px; padding: 14px 20px;
-            display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 8px 32px rgba(0, 255, 204, 0.15);
-            transform: translateX(120%); opacity: 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: auto; min-width: 280px;
-        }
-        .toast.show { transform: translateX(0); opacity: 1; }
-        .toast-icon {
-            width: 36px; height: 36px; min-width: 36px; background: rgba(0, 255, 204, 0.15);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: var(--accent-neon); font-size: 16px;
-        }
-        .toast-text { font-size: 13px; line-height: 1.4; }
-        .toast-text strong { color: var(--accent-neon); font-weight: 600; }
-        .toast-text .sub { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+        .row-animate { animation: rowSlideIn 0.35s ease-out forwards; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 36px; margin-bottom: 12px; opacity: 0.3; display: block; }
+        .empty-state span { font-size: 13px; line-height: 1.5; }
 
         @media (max-width: 768px) {
             .ref-stats-grid { grid-template-columns: 1fr; gap: 14px; }
             .link-input-group { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
             .link-input-group input { padding: 4px 6px; text-align: center; }
             .copy-link-btn { justify-content: center; }
+            .claim-section { flex-direction: column; align-items: stretch; text-align: center; }
+            .claim-left { flex-direction: column; }
+            .claim-right { display: flex; justify-content: center; }
+            .claim-btn { width: 100%; justify-content: center; }
         }
         @media (max-width: 480px) {
             body { padding: 16px; }
             .table-container, .referral-share-box { padding: 16px; }
+            .claim-section { padding: 20px; }
+            .claim-amount { font-size: 24px; }
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
-
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
 
     <div class="page-header">
         <h1>Global Referral Network</h1>
@@ -161,7 +270,9 @@
     </div>
 
     <div class="referral-share-box">
-        <div class="share-title"><i class="fa-solid fa-link"></i> Your Unique Invite Link</div>
+        <div class="share-title">
+            <i class="fa-solid fa-link"></i> Your Unique Invite Link
+        </div>
         <div class="link-input-group">
             <input type="text" id="ref-url" value="Generating link..." readonly>
             <button class="copy-link-btn" id="copy-btn" disabled>
@@ -201,8 +312,32 @@
         </div>
     </div>
 
+    <!-- Claim Section -->
+    <div class="claim-section" id="claim-section">
+        <div class="claim-left">
+            <div class="claim-icon-box">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+            <div class="claim-info">
+                <h3>Unclaimed Commission</h3>
+                <div class="claim-amount">
+                    <span id="unclaimed-amount"><div class="skeleton" style="width: 80px; height: 28px;"></div></span>
+                    <span class="unit">USDT</span>
+                </div>
+            </div>
+        </div>
+        <div class="claim-right">
+            <button class="claim-btn" id="claim-btn" disabled>
+                <span class="spinner"></span>
+                <span class="btn-label"><i class="fa-solid fa-arrow-right-to-bracket"></i> Claim to Balance</span>
+            </button>
+        </div>
+    </div>
+
     <div class="table-container">
-        <div class="table-header"><i class="fa-solid fa-user-group"></i> Direct Referrals List</div>
+        <div class="table-header">
+            <i class="fa-solid fa-user-group"></i> Direct Referrals List
+        </div>
         <div class="responsive-table-wrapper">
             <table>
                 <thead>
@@ -222,10 +357,8 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
     <script src="config.js"></script>
 
     <script>
@@ -242,18 +375,25 @@
 
             const database = firebase.database();
 
+            /* --- Login Check --- */
             function checkLogin() {
                 const loggedInUser = localStorage.getItem('currentUser');
                 if (!loggedInUser) {
-                    if (window !== window.top) { window.top.location.href = "login.html"; } 
-                    else { window.location.href = "login.html"; }
+                    if (window !== window.top) {
+                        window.top.location.href = "login.html";
+                    } else {
+                        window.location.href = "login.html";
+                    }
                     return null;
                 }
                 try {
                     return JSON.parse(loggedInUser).uid; 
                 } catch (e) {
-                    if (window !== window.top) { window.top.location.href = "login.html"; } 
-                    else { window.location.href = "login.html"; }
+                    if (window !== window.top) {
+                        window.top.location.href = "login.html";
+                    } else {
+                        window.location.href = "login.html";
+                    }
                     return null;
                 }
             }
@@ -261,10 +401,11 @@
             const currentUserId = checkLogin();
             if (!currentUserId) return;
 
-            // --- Link & Code Setup ---
+            /* --- Referral Link & Code --- */
             function setupReferralData(uid) {
                 const origin = window.location.origin;
                 const refLink = `${origin}/../User/register?ref=${uid}`;
+                
                 const urlInput = document.getElementById('ref-url');
                 const copyBtn = document.getElementById('copy-btn');
                 urlInput.value = refLink;
@@ -274,9 +415,13 @@
                     const copyIcon = document.getElementById('copy-icon');
                     const btnText = document.getElementById('btn-text');
                     navigator.clipboard.writeText(urlInput.value).then(() => {
-                        copyIcon.className = "fa-solid fa-check"; btnText.innerText = "Copied!";
-                        setTimeout(() => { copyIcon.className = "fa-regular fa-clone"; btnText.innerText = "Copy Link"; }, 2000);
-                    });
+                        copyIcon.className = "fa-solid fa-check";
+                        btnText.innerText = "Copied!";
+                        setTimeout(() => {
+                            copyIcon.className = "fa-regular fa-clone";
+                            btnText.innerText = "Copy Link";
+                        }, 2000);
+                    }).catch(() => {});
                 };
 
                 const codeText = document.getElementById('ref-code-text');
@@ -287,87 +432,232 @@
                 copyCodeBtn.onclick = () => {
                     const codeIcon = document.getElementById('code-icon');
                     navigator.clipboard.writeText(uid).then(() => {
-                        codeIcon.className = "fa-solid fa-check"; codeIcon.style.color = "var(--accent-neon)";
-                        setTimeout(() => { codeIcon.className = "fa-regular fa-copy"; codeIcon.style.color = ""; }, 2000);
-                    });
+                        codeIcon.className = "fa-solid fa-check";
+                        codeIcon.style.color = "var(--accent-neon)";
+                        setTimeout(() => {
+                            codeIcon.className = "fa-regular fa-copy";
+                            codeIcon.style.color = "";
+                        }, 2000);
+                    }).catch(() => {});
                 };
             }
+
             setupReferralData(currentUserId);
 
-            // ★★★ সমাধান: মেমোরির বদলে ডাটাবেস থেকে যাচাই করা হবে ★★★
-            let processedActiveUids = new Set();
-            let isProcessing = false;
+            /* --- Recursive Downline Traversal --- */
+            function calculateDownlineStats(allUsersSnapshot) {
+                let totalTeamSize = 0;
+                let totalActiveNodes = 0;
+                const directReferralsList = [];
+                const usersMap = {};
 
-            // পেজ লোডের সময় যাদের জন্য আগেই পেমেন্ট হয়ে গেছে তাদের লিস্ট ডাটাবেস থেকে আনা হচ্ছে
-            database.ref('users/' + currentUserId + '/paidReferralUids').once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        processedActiveUids.add(child.key);
+                if (allUsersSnapshot.exists()) {
+                    allUsersSnapshot.forEach((child) => {
+                        usersMap[child.key] = child.val();
                     });
                 }
-                initListener(); // ডাটাবেসের তথ্য লোড হয়ে গেলে তারপর মূল লিসেনার চালু করা হবে
-            }).catch(err => {
-                console.error("Error loading paid UIDs:", err);
-                initListener();
-            });
 
-            function initListener() {
-                const allUsersRef = database.ref('users');
-                
-                allUsersRef.on('value', (snapshot) => {
-                    let totalTeamSize = 0;
-                    let totalActiveNodes = 0;
-                    let totalEarnings = 0.00;
-                    const directReferralsList = [];
-                    const currentActiveUids = new Set();
+                function traverse(uid) {
+                    if (!usersMap[uid]) return;
+                    Object.keys(usersMap).forEach((key) => {
+                        const user = usersMap[key];
+                        if (user.referredBy === uid) {
+                            totalTeamSize++;
+                            const userBalance = parseFloat(user.balance || 0);
 
-                    const usersMap = {};
-                    if (snapshot.exists()) {
-                        snapshot.forEach((child) => { usersMap[child.key] = child.val(); });
-                    }
-
-                    function traverse(uid) {
-                        if (!usersMap[uid]) return;
-                        Object.keys(usersMap).forEach((key) => {
-                            const user = usersMap[key];
-                            if (user.referredBy === uid) {
-                                totalTeamSize++;
-                                const userBalance = parseFloat(user.balance || 0);
-                                
-                                if (uid === currentUserId) {
-                                    directReferralsList.push({
-                                        name: user.fullName || user.username || "Unknown",
-                                        date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
-                                        balance: userBalance.toFixed(2),
-                                        status: userBalance > 0 ? "Active" : "Inactive"
-                                    });
-                                }
-
-                                if (userBalance > 0) {
-                                    totalActiveNodes++;
-                                    totalEarnings += 0.20; 
-                                    currentActiveUids.add(key);
-                                }
-
-                                traverse(key);
+                            if (uid === currentUserId) {
+                                directReferralsList.push({
+                                    name: user.fullName || user.username || "Unknown",
+                                    date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                                    balance: userBalance.toFixed(2),
+                                    status: userBalance > 0 ? "Active" : "Inactive"
+                                });
                             }
-                        });
+
+                            if (userBalance > 0) {
+                                totalActiveNodes++;
+                            }
+
+                            traverse(key);
+                        }
+                    });
+                }
+
+                traverse(currentUserId);
+
+                return { totalTeamSize, totalActiveNodes, directReferralsList };
+            }
+
+            /* --- State Trackers --- */
+            let prevStats = { totalTeamSize: -1, totalActiveNodes: -1 };
+            let isClaiming = false;
+
+            /* --- UI Helpers --- */
+            function updateStatCard(elementId, rawText) {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+                const hasSkeleton = el.querySelector('.skeleton');
+                const currentText = el.textContent.trim();
+
+                if (hasSkeleton) {
+                    el.innerHTML = rawText;
+                    return;
+                }
+                if (currentText !== rawText) {
+                    el.innerHTML = rawText;
+                    el.classList.remove('value-update');
+                    void el.offsetWidth;
+                    el.classList.add('value-update');
+                }
+            }
+
+            function updateClaimAmount(amount) {
+                const el = document.getElementById('unclaimed-amount');
+                const btn = document.getElementById('claim-btn');
+                const hasSkeleton = el.querySelector('.skeleton');
+
+                if (hasSkeleton) {
+                    el.textContent = amount.toFixed(2);
+                } else {
+                    const currentText = el.textContent.trim();
+                    if (currentText !== amount.toFixed(2)) {
+                        el.textContent = amount.toFixed(2);
+                        el.classList.remove('value-update');
+                        void el.offsetWidth;
+                        el.classList.add('value-update');
                     }
+                }
 
-                    traverse(currentUserId);
+                // ক্লেমযোগ্য থাকলে বাটন অন করো, না থাকলে অফ
+                if (amount > 0 && !isClaiming) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            }
 
-                    // UI Update
-                    document.getElementById('total-ref').textContent = totalTeamSize;
-                    document.getElementById('active-ref').textContent = totalActiveNodes;
-                    document.getElementById('earned-ref').innerHTML = `${totalEarnings.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`;
+            /* --- Claim Function --- */
+            function claimEarnings() {
+                if (isClaiming) return;
+                isClaiming = true;
 
-                    // টেবিল রেন্ডার
-                    const tbody = document.getElementById('referral-table-body');
+                const btn = document.getElementById('claim-btn');
+                const userRef = database.ref('users/' + currentUserId);
+
+                btn.classList.add('loading');
+                btn.disabled = true;
+
+                // একটা ট্রানজেকশন ব্যবহার করে অ্যাটমিক রিড-রাইট
+                userRef.transaction((currentData) => {
+                    if (currentData === null) return currentData;
+
+                    const unclaimed = parseFloat(currentData.referralEarnings || 0);
+                    const mainBalance = parseFloat(currentData.balance || 0);
+
+                    // ক্লেমযোগ্য কিছু না থাকলে রিটার্ন
+                    if (unclaimed <= 0) return undefined;
+
+                    // referralEarnings কে 0 করে balance এ যোগ
+                    return {
+                        ...currentData,
+                        balance: mainBalance + unclaimed,
+                        referralEarnings: 0
+                    };
+                })
+                .then((result) => {
+                    btn.classList.remove('loading');
+
+                    if (result.committed) {
+                        // সফল ক্লেম
+                        btn.classList.add('success-pulse');
+                        const label = btn.querySelector('.btn-label');
+                        const origHTML = label.innerHTML;
+                        label.innerHTML = '<i class="fa-solid fa-check"></i> Claimed!';
+                        btn.style.background = 'linear-gradient(135deg, #00ff66, #00b340)';
+
+                        updateClaimAmount(0);
+
+                        setTimeout(() => {
+                            btn.style.background = '';
+                            label.innerHTML = origHTML;
+                            btn.classList.remove('success-pulse');
+                            isClaiming = false;
+                        }, 2200);
+                    } else {
+                        // ক্লেমযোগ্য ছিল না (অন্য কেউ আগেই ক্লেম করে থাকলে)
+                        isClaiming = false;
+                        updateClaimAmount(0);
+                    }
+                })
+                .catch((error) => {
+                    btn.classList.remove('loading');
+                    isClaiming = false;
+
+                    const label = btn.querySelector('.btn-label');
+                    const origHTML = label.innerHTML;
+                    label.innerHTML = '<i class="fa-solid fa-xmark"></i> Failed';
+                    btn.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
+
+                    setTimeout(() => {
+                        btn.style.background = '';
+                        label.innerHTML = origHTML;
+                    }, 2000);
+
+                    console.error("Claim failed:", error);
+                });
+            }
+
+            // ক্লেম বাটনে ইভেন্ট বাইন্ড
+            document.getElementById('claim-btn').addEventListener('click', claimEarnings);
+
+            /* --- Realtime Data Fetching --- */
+            const allUsersRef = database.ref('users');
+            
+            allUsersRef.on('value', (snapshot) => {
+                const stats = calculateDownlineStats(snapshot);
+                
+                // --- Stats Cards ---
+                updateStatCard('total-ref', String(stats.totalTeamSize));
+                updateStatCard('active-ref', String(stats.totalActiveNodes));
+
+                // --- Earned Total: DB তে যা আছে + বর্তমান ক্যালকুলেটেড (লাইভ) ---
+                // এটি শুধু ডিসপ্লের জন্য, আসল ক্লেম DB এর referralEarnings থেকে হবে
+                const liveEarnings = stats.totalActiveNodes * 0.20;
+                updateStatCard('earned-ref', `${liveEarnings.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`);
+
+                // --- DB Update (শুধুমাত্র পরিবর্তন হলে) ---
+                const needsUpdate = (
+                    stats.totalTeamSize !== prevStats.totalTeamSize ||
+                    stats.totalActiveNodes !== prevStats.totalActiveNodes
+                );
+
+                if (needsUpdate) {
+                    database.ref('users/' + currentUserId).update({
+                        referralCount: stats.totalTeamSize,
+                        activeReferrals: stats.totalActiveNodes
+                        // referralEarnings এখানে আর আপডেট করা হচ্ছে না
+                        // কারণ ক্লেম করার পর এটি 0 হয়ে যায়, আবার এখানে ওভাররাইট হলে সমস্যা
+                    }).catch((err) => console.error("DB update failed:", err));
+
+                    prevStats = {
+                        totalTeamSize: stats.totalTeamSize,
+                        activeReferrals: stats.totalActiveNodes
+                    };
+                }
+
+                // --- Table Render ---
+                const tbody = document.getElementById('referral-table-body');
+                const currentRowCount = tbody.querySelectorAll('tr:not(.empty-row)').length;
+
+                if (currentRowCount !== stats.directReferralsList.length) {
                     tbody.innerHTML = '';
-                    if (directReferralsList.length > 0) {
-                        directReferralsList.forEach(member => {
+
+                    if (stats.directReferralsList.length > 0) {
+                        stats.directReferralsList.forEach((member, index) => {
                             const statusClass = member.status === 'Active' ? 'active' : 'inactive';
                             const tr = document.createElement('tr');
+                            tr.classList.add('row-animate');
+                            tr.style.animationDelay = `${index * 0.06}s`;
                             tr.innerHTML = `
                                 <td>${member.name}</td>
                                 <td>${member.date}</td>
@@ -377,74 +667,27 @@
                             tbody.appendChild(tr);
                         });
                     } else {
-                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No direct referrals found. Start sharing your link!</td></tr>`;
+                        tbody.innerHTML = `
+                            <tr class="empty-row">
+                                <td colspan="4">
+                                    <div class="empty-state">
+                                        <i class="fa-solid fa-user-slash"></i>
+                                        <span>No direct referrals found.<br>Start sharing your link to build your team!</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
                     }
+                }
+            });
 
-                    // ★★★ মূল লজিক: ডাটাবেস যাচাই করে নতুন অ্যাক্টিভ হওয়া রেফারেলদের টাকা যোগ করা ★★★
-                    if (!isProcessing) {
-                        let newActiveCount = 0;
-                        let updates = {}; // একসাথে ডাটাবেসে পাঠানোর জন্য অবজেক্ট
-                        
-                        // চেক করুন নতুন কেউ অ্যাক্টিভ হয়েছে কিনা (যাদের আগে পেমেন্ট হয়নি)
-                        currentActiveUids.forEach(uid => {
-                            if (!processedActiveUids.has(uid)) {
-                                newActiveCount++;
-                                processedActiveUids.add(uid); // মেমোরিতেও সেভ করলাম
-                                // ডাটাবেসে লগ করে রাখলাম যে এই UID এর জন্য পেমেন্ট হয়ে গেছে (true মান দিয়ে)
-                                updates['users/' + currentUserId + '/paidReferralUids/' + uid] = true;
-                            }
-                        });
-
-                        // যদি নতুন অ্যাক্টিভ রেফারেল থাকে
-                        if (newActiveCount > 0) {
-                            isProcessing = true;
-                            const amountToAdd = newActiveCount * 0.20;
-
-                            // ব্যালেন্সে যোগ করার ট্রানজেকশন
-                            database.ref('users/' + currentUserId + '/balance').transaction((currentBal) => {
-                                return (currentBal || 0) + amountToAdd;
-                            }).then((result) => {
-                                if (result.committed) {
-                                    // referralEarnings আপডেট
-                                    database.ref('users/' + currentUserId + '/referralEarnings').transaction((curr) => {
-                                        return (curr || 0) + amountToAdd;
-                                    });
-
-                                    // ★ সবচেয়ে গুরুত্বপূর্ণ পার্ট: ডাটাবেসে পেমেন্ট লগ সেভ করা হচ্ছে
-                                    database.ref().update(updates);
-
-                                    // টোস্ট নোটিফিকেশন
-                                    showToast(
-                                        '+' + amountToAdd.toFixed(2) + ' USDT', 
-                                        newActiveCount + ' new active referral(s) commission added'
-                                    );
-                                }
-                                isProcessing = false;
-                            }).catch((err) => {
-                                console.error("Balance update error:", err);
-                                isProcessing = false;
-                            });
-                        }
-                    }
-                });
-            }
-
-            // --- Toast Notification Function ---
-            function showToast(title, subtitle) {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                toast.innerHTML = `
-                    <div class="toast-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                    <div class="toast-text">
-                        <strong>${title}</strong>
-                        <div class="sub">${subtitle}</div>
-                    </div>
-                `;
-                container.appendChild(toast);
-                requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.add('show'); }); });
-                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
-            }
+            /* --- Unclaimed Amount আলাদা লিসেনার --- */
+            // এটি শুধুমাত্র ক্লেম সেকশনের জন্য, প্রতি পেজ লোডে DB থেকে পড়বে
+            // এবং ক্লেম করলে রিয়েলটাইমে 0 দেখাবে
+            database.ref('users/' + currentUserId + '/referralEarnings').on('value', (snap) => {
+                const unclaimed = parseFloat(snap.val() || 0);
+                updateClaimAmount(unclaimed);
+            });
 
         });
 
