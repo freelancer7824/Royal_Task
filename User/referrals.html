@@ -294,122 +294,140 @@
             }
             setupReferralData(currentUserId);
 
-            // ★ মেমোরিতে অ্যাক্টিভ রেফারেলদের লিস্ট রাখার সিস্টেম (ডুপ্লিকেট পেমেন্ট এড়াতে)
+            // ★★★ সমাধান: মেমোরির বদলে ডাটাবেস থেকে যাচাই করা হবে ★★★
             let processedActiveUids = new Set();
             let isProcessing = false;
 
-            // --- Realtime Data Fetching & Balance Logic ---
-            const allUsersRef = database.ref('users');
-            
-            allUsersRef.on('value', (snapshot) => {
-                let totalTeamSize = 0;
-                let totalActiveNodes = 0;
-                let totalEarnings = 0.00;
-                const directReferralsList = [];
-                const currentActiveUids = new Set(); // বর্তমানে যারা অ্যাক্টিভ তাদের সেট
-
-                const usersMap = {};
+            // পেজ লোডের সময় যাদের জন্য আগেই পেমেন্ট হয়ে গেছে তাদের লিস্ট ডাটাবেস থেকে আনা হচ্ছে
+            database.ref('users/' + currentUserId + '/paidReferralUids').once('value').then((snapshot) => {
                 if (snapshot.exists()) {
-                    snapshot.forEach((child) => { usersMap[child.key] = child.val(); });
-                }
-
-                // রিকার্সিভ ফাংশন
-                function traverse(uid) {
-                    if (!usersMap[uid]) return;
-                    Object.keys(usersMap).forEach((key) => {
-                        const user = usersMap[key];
-                        if (user.referredBy === uid) {
-                            totalTeamSize++;
-                            const userBalance = parseFloat(user.balance || 0);
-                            
-                            if (uid === currentUserId) {
-                                directReferralsList.push({
-                                    name: user.fullName || user.username || "Unknown",
-                                    date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
-                                    balance: userBalance.toFixed(2),
-                                    status: userBalance > 0 ? "Active" : "Inactive"
-                                });
-                            }
-
-                            // অ্যাক্টিভ হলে কমিশন হিসাব
-                            if (userBalance > 0) {
-                                totalActiveNodes++;
-                                totalEarnings += 0.20; 
-                                currentActiveUids.add(key); // অ্যাক্টিভ ইউজারের UID সংগ্রহ করা হচ্ছে
-                            }
-
-                            traverse(key);
-                        }
+                    snapshot.forEach(child => {
+                        processedActiveUids.add(child.key);
                     });
                 }
+                initListener(); // ডাটাবেসের তথ্য লোড হয়ে গেলে তারপর মূল লিসেনার চালু করা হবে
+            }).catch(err => {
+                console.error("Error loading paid UIDs:", err);
+                initListener();
+            });
 
-                traverse(currentUserId);
+            function initListener() {
+                const allUsersRef = database.ref('users');
+                
+                allUsersRef.on('value', (snapshot) => {
+                    let totalTeamSize = 0;
+                    let totalActiveNodes = 0;
+                    let totalEarnings = 0.00;
+                    const directReferralsList = [];
+                    const currentActiveUids = new Set();
 
-                // UI Update
-                document.getElementById('total-ref').textContent = totalTeamSize;
-                document.getElementById('active-ref').textContent = totalActiveNodes;
-                document.getElementById('earned-ref').innerHTML = `${totalEarnings.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`;
+                    const usersMap = {};
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => { usersMap[child.key] = child.val(); });
+                    }
 
-                // টেবিল রেন্ডার
-                const tbody = document.getElementById('referral-table-body');
-                tbody.innerHTML = '';
-                if (directReferralsList.length > 0) {
-                    directReferralsList.forEach(member => {
-                        const statusClass = member.status === 'Active' ? 'active' : 'inactive';
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${member.name}</td>
-                            <td>${member.date}</td>
-                            <td>${member.balance} USDT</td>
-                            <td><span class="badge ${statusClass}">${member.status}</span></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No direct referrals found. Start sharing your link!</td></tr>`;
-                }
+                    function traverse(uid) {
+                        if (!usersMap[uid]) return;
+                        Object.keys(usersMap).forEach((key) => {
+                            const user = usersMap[key];
+                            if (user.referredBy === uid) {
+                                totalTeamSize++;
+                                const userBalance = parseFloat(user.balance || 0);
+                                
+                                if (uid === currentUserId) {
+                                    directReferralsList.push({
+                                        name: user.fullName || user.username || "Unknown",
+                                        date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                                        balance: userBalance.toFixed(2),
+                                        status: userBalance > 0 ? "Active" : "Inactive"
+                                    });
+                                }
 
-                // ★★★ মূল লজিক: নতুন অ্যাক্টিভ হওয়া রেফারেলদের টাকা সরাসরি Balance এ যোগ করা ★★★
-                if (!isProcessing) {
-                    let newActiveCount = 0;
-                    
-                    // চেক করুন নতুন কেউ অ্যাক্টিভ হয়েছে কিনা
-                    currentActiveUids.forEach(uid => {
-                        if (!processedActiveUids.has(uid)) {
-                            newActiveCount++;
-                            processedActiveUids.add(uid); // মনে রাখলাম যে এর টাকা দেওয়া হয়ে গেছে
-                        }
-                    });
+                                if (userBalance > 0) {
+                                    totalActiveNodes++;
+                                    totalEarnings += 0.20; 
+                                    currentActiveUids.add(key);
+                                }
 
-                    // যদি নতুন অ্যাক্টিভ রেফারেল থাকে
-                    if (newActiveCount > 0) {
-                        isProcessing = true;
-                        const amountToAdd = newActiveCount * 0.20;
-
-                        // সরাসরি ব্যালেন্সে যোগ করার ট্রানজেকশন
-                        database.ref('users/' + currentUserId + '/balance').transaction((currentBal) => {
-                            return (currentBal || 0) + amountToAdd;
-                        }).then((result) => {
-                            if (result.committed) {
-                                // সাথে সাথে ড্যাশবোর্ডে দেখানোর জন্য referralEarnings আপডেট
-                                database.ref('users/' + currentUserId + '/referralEarnings').transaction((curr) => {
-                                    return (curr || 0) + amountToAdd;
-                                });
-
-                                // টোস্ট নোটিফিকেশন
-                                showToast(
-                                    '+' + amountToAdd.toFixed(2) + ' USDT', 
-                                    newActiveCount + ' new active referral(s) commission added'
-                                );
+                                traverse(key);
                             }
-                            isProcessing = false;
-                        }).catch((err) => {
-                            console.error("Balance update error:", err);
-                            isProcessing = false;
                         });
                     }
-                }
-            });
+
+                    traverse(currentUserId);
+
+                    // UI Update
+                    document.getElementById('total-ref').textContent = totalTeamSize;
+                    document.getElementById('active-ref').textContent = totalActiveNodes;
+                    document.getElementById('earned-ref').innerHTML = `${totalEarnings.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`;
+
+                    // টেবিল রেন্ডার
+                    const tbody = document.getElementById('referral-table-body');
+                    tbody.innerHTML = '';
+                    if (directReferralsList.length > 0) {
+                        directReferralsList.forEach(member => {
+                            const statusClass = member.status === 'Active' ? 'active' : 'inactive';
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${member.name}</td>
+                                <td>${member.date}</td>
+                                <td>${member.balance} USDT</td>
+                                <td><span class="badge ${statusClass}">${member.status}</span></td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No direct referrals found. Start sharing your link!</td></tr>`;
+                    }
+
+                    // ★★★ মূল লজিক: ডাটাবেস যাচাই করে নতুন অ্যাক্টিভ হওয়া রেফারেলদের টাকা যোগ করা ★★★
+                    if (!isProcessing) {
+                        let newActiveCount = 0;
+                        let updates = {}; // একসাথে ডাটাবেসে পাঠানোর জন্য অবজেক্ট
+                        
+                        // চেক করুন নতুন কেউ অ্যাক্টিভ হয়েছে কিনা (যাদের আগে পেমেন্ট হয়নি)
+                        currentActiveUids.forEach(uid => {
+                            if (!processedActiveUids.has(uid)) {
+                                newActiveCount++;
+                                processedActiveUids.add(uid); // মেমোরিতেও সেভ করলাম
+                                // ডাটাবেসে লগ করে রাখলাম যে এই UID এর জন্য পেমেন্ট হয়ে গেছে (true মান দিয়ে)
+                                updates['users/' + currentUserId + '/paidReferralUids/' + uid] = true;
+                            }
+                        });
+
+                        // যদি নতুন অ্যাক্টিভ রেফারেল থাকে
+                        if (newActiveCount > 0) {
+                            isProcessing = true;
+                            const amountToAdd = newActiveCount * 0.20;
+
+                            // ব্যালেন্সে যোগ করার ট্রানজেকশন
+                            database.ref('users/' + currentUserId + '/balance').transaction((currentBal) => {
+                                return (currentBal || 0) + amountToAdd;
+                            }).then((result) => {
+                                if (result.committed) {
+                                    // referralEarnings আপডেট
+                                    database.ref('users/' + currentUserId + '/referralEarnings').transaction((curr) => {
+                                        return (curr || 0) + amountToAdd;
+                                    });
+
+                                    // ★ সবচেয়ে গুরুত্বপূর্ণ পার্ট: ডাটাবেসে পেমেন্ট লগ সেভ করা হচ্ছে
+                                    database.ref().update(updates);
+
+                                    // টোস্ট নোটিফিকেশন
+                                    showToast(
+                                        '+' + amountToAdd.toFixed(2) + ' USDT', 
+                                        newActiveCount + ' new active referral(s) commission added'
+                                    );
+                                }
+                                isProcessing = false;
+                            }).catch((err) => {
+                                console.error("Balance update error:", err);
+                                isProcessing = false;
+                            });
+                        }
+                    }
+                });
+            }
 
             // --- Toast Notification Function ---
             function showToast(title, subtitle) {
