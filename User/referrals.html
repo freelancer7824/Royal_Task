@@ -122,7 +122,6 @@
             text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
         }
 
-        /* --- Claim Section --- */
         .claim-section {
             max-width: 1100px; margin-bottom: 30px;
             background: linear-gradient(135deg, rgba(0, 255, 204, 0.04) 0%, rgba(0, 119, 255, 0.03) 100%);
@@ -242,6 +241,10 @@
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .badge.active { background: rgba(0, 255, 102, 0.1); color: #00ff66; }
         .badge.inactive { background: rgba(255, 255, 255, 0.05); color: #8a94a6; }
+        .badge.chain-broken {
+            background: rgba(255, 170, 0, 0.08); color: #ffaa00;
+            font-size: 11px;
+        }
         .badge.claimed {
             background: rgba(0, 255, 204, 0.08); color: var(--accent-neon);
             display: inline-flex; align-items: center; gap: 4px;
@@ -318,7 +321,7 @@
 
     <div class="page-header">
         <h1>Global Referral Network</h1>
-        <p>Track your team growth. You earn 0.20 USDT for each active referral (only through active chains).</p>
+        <p>Track your team growth. You earn 0.20 USDT for each active referral in your active chain only.</p>
     </div>
 
     <div class="referral-share-box">
@@ -520,46 +523,55 @@
 
             setupReferralData(currentUserId);
 
-            /* ====== Active Chain Traversal ====== */
-            /*
-                লজিক:
-                - আমার ডাইরেক্ট রেফার যদি Active (balance > 0) হয় → সে কাউন্ট হবে
-                - আমার ডাইরেক্ট রেফার যদি Inactive হয় → সে কাউন্ট হবে না এবং তার নিচে কেউ কাউন্ট হবে না
-                - Active রেফারের নিচে যারা আছে → তাদেরও চেক করব (recursive)
-                - শুধুমাত্র Active chain-এ থাকা ইউজাররাই কাউন্ট হবে
-            */
+            /* ============================================================
+               ACTIVE CHAIN TRAVERSAL — মূল লজিক
+               ============================================================
+               নিয়ম:
+               ১. আমি যাকে সরাসরি রেফার করি → যদি তার balance > 0 (deposit করেছে)
+                  তাহলে সে Active এবং আমি তার জন্য কমিশন পাবো।
+                  এরপর তার রেফারগুলোও চেক করা হবে (recursive)।
 
-            function traverseActiveChain(startingUid, usersMap, visited) {
-                // এই ফাংশন startingUid থেকে শুরু করে সম্পূর্ণ active chain traverse করবে
-                // শুধুমাত্র সেই ইউজারদেরই return করবে যারা active chain-এ আছে
+               ২. আমি যাকে সরাসরি রেফার করি → যদি তার balance = 0 (deposit করেনি)
+                  তাহলে সে Inactive, আমি তার জন্য কমিশন পাবো না,
+                  এবং তার নিচে যে যত রেফারই থাকুক না কেন — কেউই কাউন্ট হবে না।
+                  চেইন সেখানেই ভাঙবে, নিচে আর খোঁজা হবে না।
+
+               ৩. Active ইউজারের রেফার যদি Inactive হয় → সেই শাখায়ও চেইন ভাঙবে।
+            ============================================================ */
+
+            function traverseActiveChain(parentUid, usersMap, visited) {
                 const result = [];
 
-                // startingUid এর সরাসরি রেফারগুলো খুঁজি
                 Object.keys(usersMap).forEach((key) => {
-                    if (visited.has(key)) return; // ইতিমধ্যে প্রসেস হয়ে গেছে
+                    if (visited.has(key)) return;
 
                     const user = usersMap[key];
-                    if (user.referredBy === startingUid) {
-                        visited.add(key);
+                    if (user.referredBy !== parentUid) return;
 
-                        const userBalance = parseFloat(user.balance || 0);
-                        const isActive = userBalance > 0;
+                    visited.add(key);
 
-                        if (isActive) {
-                            // এই ইউজার Active → কাউন্টে যোগ হবে এবং এর নিচেও খুঁজবো
-                            result.push({
-                                uid: key,
-                                name: user.fullName || user.username || "Unknown",
-                                date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
-                                balance: userBalance.toFixed(2),
-                                isActive: true
-                            });
+                    const userBalance = parseFloat(user.balance || 0);
+                    // === মূল শর্ত: balance > 0 হলেই Active, না হলে Inactive ===
+                    const isActive = userBalance > 0;
 
-                            // Recursive: এই active ইউজারের রেফারগুলোও চেক করি
-                            const subChain = traverseActiveChain(key, usersMap, visited);
-                            result.push(...subChain);
-                        }
-                        // Inactive হলে এখানেই থামবে — নিচের কেউ কাউন্ট হবে না
+                    if (isActive) {
+                        // Active → কমিশন যোগ্য এবং নিচের লেভেলগুলোও চেক করা হবে
+                        result.push({
+                            uid: key,
+                            name: user.fullName || user.username || "Unknown",
+                            date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                            balance: userBalance.toFixed(2),
+                            isActive: true
+                        });
+
+                        // Recursive: এই active ইউজারের সরাসরি রেফারগুলো চেক করি
+                        const subChain = traverseActiveChain(key, usersMap, visited);
+                        result.push(...subChain);
+
+                    } else {
+                        // === Inactive → চেইন এখানেই বন্ধ ===
+                        // এই ইউজারের জন্য কমিশন নেই, এবং তার নিচে কাউকে খুঁজবো না
+                        // কিছুই push করছি না, শুধু visited-এ আছে যাতে ডুপ্লিকেট প্রসেসিং না হয়
                     }
                 });
 
@@ -575,45 +587,51 @@
                     });
                 }
 
-                // সম্পূর্ণ active chain traverse করি
+                // সম্পূর্ণ active chain traverse — শুধুমাত্র balance > 0 থাকা ইউজাররাই আসবে
                 const visited = new Set();
                 const activeChainMembers = traverseActiveChain(currentUserId, usersMap, visited);
 
-                // ডাইরেক্ট রেফারাল লিস্ট (শুধুমাত্র সরাসরি referredBy === currentUserId)
+                // Active chain-এ থাকা ইউজারদের UID-এর Set (দ্রুত lookup-এর জন্য)
+                const activeChainUidSet = new Set(activeChainMembers.map(m => m.uid));
+
+                // ডাইরেক্ট রেফারাল লিস্ট (টেবিলে দেখানোর জন্য)
                 const directReferralsList = [];
                 let totalDirectCount = 0;
 
                 Object.keys(usersMap).forEach((key) => {
                     const user = usersMap[key];
-                    if (user.referredBy === currentUserId) {
-                        totalDirectCount++;
-                        const userBalance = parseFloat(user.balance || 0);
-                        const isActive = userBalance > 0;
-                        const isClaimed = claimedReferrals && claimedReferrals[key] === true;
+                    if (user.referredBy !== currentUserId) return;
 
-                        // এই ডাইরেক্ট রেফার active chain-এ আছে কিনা চেক করি
-                        const isInActiveChain = activeChainMembers.some(m => m.uid === key);
+                    totalDirectCount++;
+                    const userBalance = parseFloat(user.balance || 0);
+                    const isActive = userBalance > 0;
+                    const isClaimed = claimedReferrals && claimedReferrals[key] === true;
 
-                        let earning = 'none';
-                        if (isActive && isInActiveChain) {
-                            earning = isClaimed ? 'claimed' : 'pending';
-                        }
+                    // এই ডাইরেক্ট রেফার active chain-এ আছে কিনা
+                    // (ডাইরেক্ট রেফারের ক্ষেত্রে isActive === isInActiveChain সবসময় সত্য,
+                    // কারণ উপরে আমি নিজেই আছি — কিন্তু কোডে স্পষ্টতার জন্য রাখছি)
+                    const isInActiveChain = activeChainUidSet.has(key);
 
-                        directReferralsList.push({
-                            uid: key,
-                            name: user.fullName || user.username || "Unknown",
-                            date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
-                            balance: userBalance.toFixed(2),
-                            isActive: isActive,
-                            isInActiveChain: isInActiveChain,
-                            isClaimed: isClaimed,
-                            status: isActive ? "Active" : "Inactive",
-                            earning: earning
-                        });
+                    let earning = 'none';
+                    if (isInActiveChain && !isClaimed) {
+                        earning = 'pending';
+                    } else if (isInActiveChain && isClaimed) {
+                        earning = 'claimed';
                     }
+
+                    directReferralsList.push({
+                        uid: key,
+                        name: user.fullName || user.username || "Unknown",
+                        date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                        balance: userBalance.toFixed(2),
+                        isActive: isActive,
+                        isInActiveChain: isInActiveChain,
+                        isClaimed: isClaimed,
+                        earning: earning
+                    });
                 });
 
-                // Active chain-এ থাকা সব ইউজারদের মধ্যে যাদের আগে claimed হয়নি তাদের unclaimed হিসাব
+                // === Unclaimed ক্যালকুলেশন: পুরো active chain থেকে, যাদের আগে claimed হয়নি ===
                 let newUnclaimed = 0;
                 activeChainMembers.forEach((member) => {
                     const isClaimed = claimedReferrals && claimedReferrals[member.uid] === true;
@@ -624,7 +642,8 @@
 
                 return {
                     totalTeamSize: totalDirectCount,
-                    totalActiveNodes: activeChainMembers.length, // শুধুমাত্র active chain-এ থাকা সবাই
+                    totalActiveNodes: activeChainMembers.length,
+                    unclaimedCount: activeChainMembers.filter(m => !(claimedReferrals && claimedReferrals[m.uid])).length,
                     newUnclaimed: newUnclaimed,
                     directReferralsList: directReferralsList
                 };
@@ -634,7 +653,7 @@
             let prevStats = { totalTeamSize: -1, totalActiveNodes: -1, newUnclaimed: -1 };
             let isClaiming = false;
             let cachedClaimedReferrals = {};
-            let lastKnownUnclaimed = 0; // ক্লেমের আগের অ্যামাউন্ট ট্র্যাক করতে
+            let lastKnownUnclaimed = 0;
 
             /* ====== UI Helpers ====== */
             function updateStatCard(elementId, rawText) {
@@ -674,7 +693,7 @@
                 }
 
                 if (claimableCount > 0) {
-                    sub.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${claimableCount} active referral${claimableCount > 1 ? 's' : ''} ready to claim (${claimableCount * PER_REFERRAL_EARNING} USDT)</span>`;
+                    sub.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${claimableCount} active referral${claimableCount > 1 ? 's' : ''} in your chain ready to claim (${(claimableCount * PER_REFERRAL_EARNING).toFixed(2)} USDT)</span>`;
                 } else {
                     sub.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>No new claimable earnings</span>`;
                 }
@@ -694,7 +713,6 @@
                 const btn = document.getElementById('claim-btn');
                 const userRef = database.ref('users/' + currentUserId);
 
-                // ক্লেমের আগের অ্যামাউন্ট সেভ করি
                 lastKnownUnclaimed = prevStats.newUnclaimed;
 
                 btn.classList.add('loading');
@@ -729,7 +747,7 @@
 
                         updateClaimAmount(0, 0);
 
-                        // claimedReferrals আপডেট করি — active chain-এ থাকা সব unclaimed কে claimed মার্ক করি
+                        // Claimed referrals আপডেট — active chain-এ থাকা সব unclaimed কে claimed মার্ক করি
                         database.ref('users').once('value').then((snapshot) => {
                             const usersMap = {};
                             if (snapshot.exists()) {
@@ -753,7 +771,7 @@
                             if (updated) {
                                 cachedClaimedReferrals = newClaimed;
                                 userRef.child('claimedReferrals').set(newClaimed)
-                                    .then(() => console.log('Claimed referrals updated after claim.'))
+                                    .then(() => console.log('Claimed referrals updated.'))
                                     .catch(err => console.error('Failed to update claimedReferrals:', err));
                             }
                         });
@@ -818,15 +836,12 @@
                 updateStatCard('total-ref', String(stats.totalTeamSize));
                 updateStatCard('active-ref', String(stats.totalActiveNodes));
 
-                // Total Earned = claimed count * 0.20 + current unclaimed
+                // Total Earned = (সব claimed এর সংখ্যা × 0.20) + বর্তমান unclaimed
                 const totalClaimedCount = Object.keys(cachedClaimedReferrals).length;
                 const totalEarned = (totalClaimedCount * PER_REFERRAL_EARNING) + stats.newUnclaimed;
                 updateStatCard('earned-ref', `${totalEarned.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`);
 
-                // --- Claimable Count ---
-                const claimableCount = stats.directReferralsList.filter(r => r.earning === 'pending').length;
-
-                // --- DB Update ---
+                // --- DB Update (শুধুমাত্র পরিবর্তন হলে) ---
                 const needsUpdate = (
                     stats.totalTeamSize !== prevStats.totalTeamSize ||
                     stats.totalActiveNodes !== prevStats.totalActiveNodes ||
@@ -849,8 +864,8 @@
                     };
                 }
 
-                // --- Claim Section ---
-                updateClaimAmount(stats.newUnclaimed, claimableCount);
+                // --- Claim Section (পুরো chain থেকে unclaimed count দেখাচ্ছি) ---
+                updateClaimAmount(stats.newUnclaimed, stats.unclaimedCount);
 
                 // --- Table Render ---
                 const tbody = document.getElementById('referral-table-body');
@@ -867,25 +882,20 @@
                         tr.classList.add('row-animate');
                         tr.style.animationDelay = `${index * 0.05}s`;
 
-                        // Status badge
+                        // Status badge — ডাইরেক্ট রেফার সবসময় শুধু Active বা Inactive
                         let statusHTML = '';
-                        if (member.isActive) {
+                        if (member.isActive && member.isInActiveChain) {
                             statusHTML = `<span class="badge active">Active</span>`;
                         } else {
                             statusHTML = `<span class="badge inactive">Inactive</span>`;
                         }
 
-                        // Earning column — শুধুমাত্র active chain-এ থাকলেই দেখাবো
+                        // Earning column
                         let earningHTML = '';
                         if (member.earning === 'pending') {
                             earningHTML = `<span class="earn-col pending"><i class="fa-solid fa-clock"></i> +${PER_REFERRAL_EARNING.toFixed(2)}</span>`;
                         } else if (member.earning === 'claimed') {
                             earningHTML = `<span class="earn-col"><i class="fa-solid fa-check"></i> +${PER_REFERRAL_EARNING.toFixed(2)}</span>`;
-                        } else if (member.isActive && !member.isInActiveChain) {
-                            // Active কিন্তু chain ভাঙা হয়ে গেছে (উপরে কেউ inactive) — এটা আসলে ঘটে না কারণ 
-                            // ডাইরেক্ট রেফারের উপরে আমি নিজেই আছি, আমি তো active
-                            // তাই ডাইরেক্ট রেফারের ক্ষেত্রে isActive === isInActiveChain সবসময়
-                            earningHTML = `<span class="earn-col zero">--</span>`;
                         } else {
                             earningHTML = `<span class="earn-col zero">--</span>`;
                         }
