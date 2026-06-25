@@ -187,7 +187,6 @@
         .claim-btn.loading .btn-label { display: none; }
         @keyframes btnSpin { to { transform: rotate(360deg); } }
 
-        /* Claim Success Pulse */
         @keyframes claimPulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.4); }
             70% { box-shadow: 0 0 0 15px rgba(0, 255, 204, 0); }
@@ -265,7 +264,6 @@
         .empty-state i { font-size: 36px; margin-bottom: 12px; opacity: 0.3; display: block; }
         .empty-state span { font-size: 13px; line-height: 1.5; }
 
-        /* Toast Notification */
         .toast-container {
             position: fixed; top: 24px; right: 24px; z-index: 9999;
             display: flex; flex-direction: column; gap: 10px;
@@ -316,12 +314,11 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
     <div class="page-header">
         <h1>Global Referral Network</h1>
-        <p>Track your team growth across all levels. You earn 0.20 USDT for each active referral.</p>
+        <p>Track your team growth. You earn 0.20 USDT for each active referral (only through active chains).</p>
     </div>
 
     <div class="referral-share-box">
@@ -367,7 +364,6 @@
         </div>
     </div>
 
-    <!-- Claim Section -->
     <div class="claim-section" id="claim-section">
         <div class="claim-left">
             <div class="claim-icon-box">
@@ -437,7 +433,7 @@
             const database = firebase.database();
             const PER_REFERRAL_EARNING = 0.20;
 
-            /* ====== Toast Notification ====== */
+            /* ====== Toast ====== */
             function showToast(message, type = 'info') {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
@@ -449,7 +445,6 @@
                 };
                 toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i><span>${message}</span>`;
                 container.appendChild(toast);
-
                 setTimeout(() => {
                     toast.style.animation = 'toastOut 0.3s ease-in forwards';
                     setTimeout(() => toast.remove(), 300);
@@ -525,35 +520,83 @@
 
             setupReferralData(currentUserId);
 
-            /* ====== Downline Calculation ====== */
-            function calculateDownlineStats(allUsersSnapshot, claimedReferrals) {
-                let totalTeamSize = 0;
-                let totalActiveNodes = 0;
-                let newUnclaimed = 0; // নতুন যোগ হওয়া অ্যাক্টিভ রেফারালের আয়
-                const directReferralsList = [];
-                const usersMap = {};
+            /* ====== Active Chain Traversal ====== */
+            /*
+                লজিক:
+                - আমার ডাইরেক্ট রেফার যদি Active (balance > 0) হয় → সে কাউন্ট হবে
+                - আমার ডাইরেক্ট রেফার যদি Inactive হয় → সে কাউন্ট হবে না এবং তার নিচে কেউ কাউন্ট হবে না
+                - Active রেফারের নিচে যারা আছে → তাদেরও চেক করব (recursive)
+                - শুধুমাত্র Active chain-এ থাকা ইউজাররাই কাউন্ট হবে
+            */
 
+            function traverseActiveChain(startingUid, usersMap, visited) {
+                // এই ফাংশন startingUid থেকে শুরু করে সম্পূর্ণ active chain traverse করবে
+                // শুধুমাত্র সেই ইউজারদেরই return করবে যারা active chain-এ আছে
+                const result = [];
+
+                // startingUid এর সরাসরি রেফারগুলো খুঁজি
+                Object.keys(usersMap).forEach((key) => {
+                    if (visited.has(key)) return; // ইতিমধ্যে প্রসেস হয়ে গেছে
+
+                    const user = usersMap[key];
+                    if (user.referredBy === startingUid) {
+                        visited.add(key);
+
+                        const userBalance = parseFloat(user.balance || 0);
+                        const isActive = userBalance > 0;
+
+                        if (isActive) {
+                            // এই ইউজার Active → কাউন্টে যোগ হবে এবং এর নিচেও খুঁজবো
+                            result.push({
+                                uid: key,
+                                name: user.fullName || user.username || "Unknown",
+                                date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                                balance: userBalance.toFixed(2),
+                                isActive: true
+                            });
+
+                            // Recursive: এই active ইউজারের রেফারগুলোও চেক করি
+                            const subChain = traverseActiveChain(key, usersMap, visited);
+                            result.push(...subChain);
+                        }
+                        // Inactive হলে এখানেই থামবে — নিচের কেউ কাউন্ট হবে না
+                    }
+                });
+
+                return result;
+            }
+
+            /* ====== Main Calculation ====== */
+            function calculateDownlineStats(allUsersSnapshot, claimedReferrals) {
+                const usersMap = {};
                 if (allUsersSnapshot.exists()) {
                     allUsersSnapshot.forEach((child) => {
                         usersMap[child.key] = child.val();
                     });
                 }
 
-                // শুধুমাত্র ডাইরেক্ট রেফারাল খুঁজি
+                // সম্পূর্ণ active chain traverse করি
+                const visited = new Set();
+                const activeChainMembers = traverseActiveChain(currentUserId, usersMap, visited);
+
+                // ডাইরেক্ট রেফারাল লিস্ট (শুধুমাত্র সরাসরি referredBy === currentUserId)
+                const directReferralsList = [];
+                let totalDirectCount = 0;
+
                 Object.keys(usersMap).forEach((key) => {
                     const user = usersMap[key];
                     if (user.referredBy === currentUserId) {
-                        totalTeamSize++;
+                        totalDirectCount++;
                         const userBalance = parseFloat(user.balance || 0);
                         const isActive = userBalance > 0;
                         const isClaimed = claimedReferrals && claimedReferrals[key] === true;
 
-                        if (isActive) {
-                            totalActiveNodes++;
-                            // যদি এই রেফারালের জন্য আগে ক্লেম না হয়ে থাকে
-                            if (!isClaimed) {
-                                newUnclaimed += PER_REFERRAL_EARNING;
-                            }
+                        // এই ডাইরেক্ট রেফার active chain-এ আছে কিনা চেক করি
+                        const isInActiveChain = activeChainMembers.some(m => m.uid === key);
+
+                        let earning = 'none';
+                        if (isActive && isInActiveChain) {
+                            earning = isClaimed ? 'claimed' : 'pending';
                         }
 
                         directReferralsList.push({
@@ -562,20 +605,36 @@
                             date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
                             balance: userBalance.toFixed(2),
                             isActive: isActive,
+                            isInActiveChain: isInActiveChain,
                             isClaimed: isClaimed,
                             status: isActive ? "Active" : "Inactive",
-                            earning: isActive ? (isClaimed ? 'claimed' : 'pending') : 'none'
+                            earning: earning
                         });
                     }
                 });
 
-                return { totalTeamSize, totalActiveNodes, newUnclaimed, directReferralsList };
+                // Active chain-এ থাকা সব ইউজারদের মধ্যে যাদের আগে claimed হয়নি তাদের unclaimed হিসাব
+                let newUnclaimed = 0;
+                activeChainMembers.forEach((member) => {
+                    const isClaimed = claimedReferrals && claimedReferrals[member.uid] === true;
+                    if (!isClaimed) {
+                        newUnclaimed += PER_REFERRAL_EARNING;
+                    }
+                });
+
+                return {
+                    totalTeamSize: totalDirectCount,
+                    totalActiveNodes: activeChainMembers.length, // শুধুমাত্র active chain-এ থাকা সবাই
+                    newUnclaimed: newUnclaimed,
+                    directReferralsList: directReferralsList
+                };
             }
 
             /* ====== State Trackers ====== */
             let prevStats = { totalTeamSize: -1, totalActiveNodes: -1, newUnclaimed: -1 };
             let isClaiming = false;
-            let cachedClaimedReferrals = {}; // ক্লায়েন্ট সাইড ক্যাশ
+            let cachedClaimedReferrals = {};
+            let lastKnownUnclaimed = 0; // ক্লেমের আগের অ্যামাউন্ট ট্র্যাক করতে
 
             /* ====== UI Helpers ====== */
             function updateStatCard(elementId, rawText) {
@@ -614,7 +673,6 @@
                     }
                 }
 
-                // সাব টেক্সট আপডেট
                 if (claimableCount > 0) {
                     sub.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${claimableCount} active referral${claimableCount > 1 ? 's' : ''} ready to claim (${claimableCount * PER_REFERRAL_EARNING} USDT)</span>`;
                 } else {
@@ -635,6 +693,9 @@
 
                 const btn = document.getElementById('claim-btn');
                 const userRef = database.ref('users/' + currentUserId);
+
+                // ক্লেমের আগের অ্যামাউন্ট সেভ করি
+                lastKnownUnclaimed = prevStats.newUnclaimed;
 
                 btn.classList.add('loading');
                 btn.disabled = true;
@@ -663,12 +724,39 @@
                         label.innerHTML = '<i class="fa-solid fa-check"></i> Claimed!';
                         btn.style.background = 'linear-gradient(135deg, #00ff66, #00b340)';
 
-                        showToast(`Successfully claimed ${parseFloat(result.snapshot.val().referralEarnings !== undefined ? 0 : 0).toFixed(2)} USDT to balance!`, 'success');
-
-                        // ক্লায়েন্ট ক্যাশ আপডেট - সব বর্তমান অ্যাক্টিভ রেফারালকে claimed মার্ক করি
-                        // এটি nextTick-এ হবে কারণ ট্রানজেকশনের পর DB আপডেট আসতে সময় লাগে
+                        const claimedAmount = lastKnownUnclaimed;
+                        showToast(`Successfully claimed ${claimedAmount.toFixed(2)} USDT to balance!`, 'success');
 
                         updateClaimAmount(0, 0);
+
+                        // claimedReferrals আপডেট করি — active chain-এ থাকা সব unclaimed কে claimed মার্ক করি
+                        database.ref('users').once('value').then((snapshot) => {
+                            const usersMap = {};
+                            if (snapshot.exists()) {
+                                snapshot.forEach((child) => {
+                                    usersMap[child.key] = child.val();
+                                });
+                            }
+
+                            const visited = new Set();
+                            const activeChainMembers = traverseActiveChain(currentUserId, usersMap, visited);
+                            const newClaimed = { ...cachedClaimedReferrals };
+
+                            let updated = false;
+                            activeChainMembers.forEach((member) => {
+                                if (!newClaimed[member.uid]) {
+                                    newClaimed[member.uid] = true;
+                                    updated = true;
+                                }
+                            });
+
+                            if (updated) {
+                                cachedClaimedReferrals = newClaimed;
+                                userRef.child('claimedReferrals').set(newClaimed)
+                                    .then(() => console.log('Claimed referrals updated after claim.'))
+                                    .catch(err => console.error('Failed to update claimedReferrals:', err));
+                            }
+                        });
 
                         setTimeout(() => {
                             btn.style.background = '';
@@ -708,7 +796,6 @@
             const allUsersRef = database.ref('users');
             const myUserRef = database.ref('users/' + currentUserId);
 
-            // প্রথমে আমার ডেটা লোড করি (claimedReferrals পাওয়ার জন্য)
             let myDataLoaded = false;
 
             myUserRef.on('value', (mySnap) => {
@@ -716,16 +803,14 @@
 
                 const myData = mySnap.val();
                 cachedClaimedReferrals = myData.claimedReferrals || {};
-                const dbUnclaimed = parseFloat(myData.referralEarnings || 0);
 
                 if (!myDataLoaded) {
                     myDataLoaded = true;
                 }
             });
 
-            // সব ইউজারের ডেটা লিসেন করি
             allUsersRef.on('value', (snapshot) => {
-                if (!myDataLoaded) return; // আমার ডেটা লোড না হলে এগোবো না
+                if (!myDataLoaded) return;
 
                 const stats = calculateDownlineStats(snapshot, cachedClaimedReferrals);
                 
@@ -733,8 +818,7 @@
                 updateStatCard('total-ref', String(stats.totalTeamSize));
                 updateStatCard('active-ref', String(stats.totalActiveNodes));
 
-                // --- Total Earned = যতগুলো রেফারাল থেকে ক্লেম হয়েছে বা হবে ---
-                // claimedReferrals এর সংখ্যা * 0.20 + current unclaimed
+                // Total Earned = claimed count * 0.20 + current unclaimed
                 const totalClaimedCount = Object.keys(cachedClaimedReferrals).length;
                 const totalEarned = (totalClaimedCount * PER_REFERRAL_EARNING) + stats.newUnclaimed;
                 updateStatCard('earned-ref', `${totalEarned.toFixed(2)} <span style="font-size: 11px; color: var(--accent-neon);">USDT</span>`);
@@ -742,11 +826,11 @@
                 // --- Claimable Count ---
                 const claimableCount = stats.directReferralsList.filter(r => r.earning === 'pending').length;
 
-                // --- DB Update: referralEarnings ও referralCount ---
+                // --- DB Update ---
                 const needsUpdate = (
                     stats.totalTeamSize !== prevStats.totalTeamSize ||
                     stats.totalActiveNodes !== prevStats.totalActiveNodes ||
-                    stats.newUnclaimed !== prevStats.newUnclaimed
+                    Math.abs(stats.newUnclaimed - prevStats.newUnclaimed) > 0.001
                 );
 
                 if (needsUpdate) {
@@ -756,8 +840,6 @@
                         referralEarnings: stats.newUnclaimed
                     };
 
-                    // নতুন অ্যাক্টিভ রেফারালগুলোকে claimedReferrals-এ যোগ করবো না
-                    // শুধু referralEarnings আপডেট করবো
                     myUserRef.update(updatePayload).catch((err) => console.error("DB update failed:", err));
 
                     prevStats = {
@@ -767,7 +849,7 @@
                     };
                 }
 
-                // --- Claim Section Update ---
+                // --- Claim Section ---
                 updateClaimAmount(stats.newUnclaimed, claimableCount);
 
                 // --- Table Render ---
@@ -793,12 +875,17 @@
                             statusHTML = `<span class="badge inactive">Inactive</span>`;
                         }
 
-                        // Earning column
+                        // Earning column — শুধুমাত্র active chain-এ থাকলেই দেখাবো
                         let earningHTML = '';
                         if (member.earning === 'pending') {
                             earningHTML = `<span class="earn-col pending"><i class="fa-solid fa-clock"></i> +${PER_REFERRAL_EARNING.toFixed(2)}</span>`;
                         } else if (member.earning === 'claimed') {
                             earningHTML = `<span class="earn-col"><i class="fa-solid fa-check"></i> +${PER_REFERRAL_EARNING.toFixed(2)}</span>`;
+                        } else if (member.isActive && !member.isInActiveChain) {
+                            // Active কিন্তু chain ভাঙা হয়ে গেছে (উপরে কেউ inactive) — এটা আসলে ঘটে না কারণ 
+                            // ডাইরেক্ট রেফারের উপরে আমি নিজেই আছি, আমি তো active
+                            // তাই ডাইরেক্ট রেফারের ক্ষেত্রে isActive === isInActiveChain সবসময়
+                            earningHTML = `<span class="earn-col zero">--</span>`;
                         } else {
                             earningHTML = `<span class="earn-col zero">--</span>`;
                         }
@@ -827,51 +914,9 @@
                 }
             });
 
-            /* ====== Claim এর পর claimedReferrals আপডেট ====== */
-            // referralEarnings লিসেনার - ক্লেমের পর 0 হলে ক্লায়েন্ট ক্যাশ আপডেট
-            myUserRef.child('referralEarnings').on('value', (snap) => {
-                const val = parseFloat(snap.val() || 0);
-                
-                // যদি 0 হয়ে যায় এবং আগে 0 ছিল না, মানে ক্লেম হয়েছে
-                if (val === 0 && prevStats.newUnclaimed > 0) {
-                    // বর্তমান পেন্ডিং রেফারালগুলোকে claimed মার্ক করি
-                    const pendingUids = [];
-                    const allUsersRefOnce = database.ref('users').once('value');
-                    allUsersRefOnce.then((snapshot) => {
-                        const usersMap = {};
-                        if (snapshot.exists()) {
-                            snapshot.forEach((child) => {
-                                usersMap[child.key] = child.val();
-                            });
-                        }
-                        Object.keys(usersMap).forEach((key) => {
-                            const user = usersMap[key];
-                            if (user.referredBy === currentUserId) {
-                                const bal = parseFloat(user.balance || 0);
-                                if (bal > 0 && !cachedClaimedReferrals[key]) {
-                                    pendingUids.push(key);
-                                }
-                            }
-                        });
-
-                        if (pendingUids.length > 0) {
-                            const newClaimed = { ...cachedClaimedReferrals };
-                            pendingUids.forEach(uid => { newClaimed[uid] = true; });
-                            
-                            cachedClaimedReferrals = newClaimed;
-                            myUserRef.child('claimedReferrals').set(newClaimed)
-                                .then(() => {
-                                    console.log('Claimed referrals updated:', pendingUids);
-                                })
-                                .catch(err => console.error('Failed to update claimedReferrals:', err));
-                        }
-                    });
-                }
-            });
-
         });
 
-        /* --- Security Scripts --- */
+        /* --- Security --- */
         document.onkeydown = function(e) {
             if (e.keyCode == 123) return false; 
             if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
