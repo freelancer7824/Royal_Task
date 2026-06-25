@@ -11,20 +11,15 @@
 <meta property="og:url" content="https://royal-task.vercel.app">
 <meta property="og:type" content="website">
 
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Royal Task - Best Mining for Referral & Daily Earning">
-<meta name="twitter:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities. Invite friends, grow your network, complete tasks, and maximize your daily crypto earnings with our easy-to-use platform.">
+<meta name="twitter:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities.">
 <meta name="twitter:image" content="https://royal-task.vercel.app/image.png">
     
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons Icons (CDN) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- Premium Color Palette & Global Variables --- */
         :root {
             --bg-dark: #090a0f;
             --panel-dark: #121420;
@@ -41,7 +36,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
-            -webkit-user-select: none; /* Anti-copy protection */
+            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -76,7 +71,6 @@
             gap: 15px;
         }
 
-        /* Mobile Menu Toggle (Hamburger) */
         .menu-toggle {
             display: none;
             background: none;
@@ -116,7 +110,6 @@
             gap: 15px;
         }
 
-        /* Premium Login Button Layout */
         .login-btn {
             background: rgba(255, 255, 255, 0.03);
             color: var(--text-main);
@@ -151,9 +144,8 @@
             transform: translateX(3px);
         }
 
-        /* Profile Icon Button */
         .profile-icon-btn {
-            display: none; /* Hidden by default */
+            display: none;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -165,13 +157,31 @@
             transition: all 0.3s ease;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
         .profile-icon-btn:hover {
             background: rgba(0, 255, 204, 0.1);
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
             transform: scale(1.05);
+        }
+
+        /* Blocked badge on profile */
+        .blocked-badge {
+            display: none;
+            background: rgba(255, 68, 102, 0.1);
+            border: 1px solid rgba(255, 68, 102, 0.3);
+            color: #ff4466;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: blockedPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes blockedPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; box-shadow: 0 0 12px rgba(255, 68, 102, 0.2); }
         }
 
         /* --- Toast Notification System --- */
@@ -201,14 +211,8 @@
             backdrop-filter: blur(10px);
         }
 
-        .toast-msg.show { 
-            transform: translateX(0); 
-        }
-
-        .toast-msg i { 
-            font-size: 20px; 
-            color: var(--accent-glow); 
-        }
+        .toast-msg.show { transform: translateX(0); }
+        .toast-msg i { font-size: 20px; color: var(--accent-glow); }
 
         .toast-text-container {
             display: flex;
@@ -216,14 +220,14 @@
             gap: 3px;
         }
 
-        .toast-title {
-            font-size: 14px;
-            font-weight: 600;
-        }
+        .toast-title { font-size: 14px; font-weight: 600; }
+        .toast-subtitle { font-size: 12px; color: var(--text-muted); }
 
-        .toast-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
+        .toast-msg.toast-error {
+            border-color: rgba(255, 68, 102, 0.3);
+        }
+        .toast-msg.toast-error i {
+            color: #ff4466;
         }
 
         /* --- Main Layout Wrapper --- */
@@ -246,6 +250,7 @@
             gap: 6px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 99;
+            overflow-y: auto;
         }
 
         .sidebar-title {
@@ -304,6 +309,37 @@
             color: var(--accent-glow);
         }
 
+        /* Live Chat special styling */
+        .sidebar a.nav-chat {
+            position: relative;
+        }
+        .sidebar a.nav-chat .chat-dot {
+            position: absolute;
+            top: 12px;
+            left: 32px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ffcc;
+            box-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+            animation: chatPulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes chatPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        /* Blocked user link disabled state */
+        .sidebar a.nav-blocked {
+            opacity: 0.3;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .sidebar a.nav-blocked i {
+            color: var(--text-muted) !important;
+        }
+
         /* --- Content Dashboard Panel --- */
         .content-container {
             flex-grow: 1;
@@ -319,7 +355,6 @@
             background-color: transparent;
         }
 
-        /* Mobile Backdrop Overlay Blur */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -353,6 +388,11 @@
             .sidebar-overlay.show {
                 display: block;
             }
+
+            .blocked-badge {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -370,12 +410,18 @@
             .toast-msg {
                 min-width: 240px;
             }
+            .blocked-badge {
+                display: none !important;
+            }
         }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2a3048; border-radius: 20px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- Toast Notification Container -->
     <div id="toastContainer"></div>
 
     <!-- Top Navbar Section -->
@@ -390,13 +436,16 @@
             </div>
         </div>
         <div class="nav-actions">
-            <!-- Sign In Button -->
+            <!-- Blocked Badge (hidden by default, shown when user is blocked) -->
+            <span class="blocked-badge" id="blockedBadge">
+                <i class="fa-solid fa-ban" style="margin-right:4px;"></i> ACCOUNT BLOCKED
+            </span>
+
             <button class="login-btn" id="signInBtn">
                 <span>Sign In</span>
                 <i class="fa-solid fa-arrow-right-to-bracket"></i>
             </button>
             
-            <!-- Profile Icon (Shown when logged in) -->
             <button class="profile-icon-btn" id="profileBtn" title="My Profile">
                 <i class="fa-solid fa-user"></i>
             </button>
@@ -406,52 +455,52 @@
     <!-- Main Container Dynamic Dashboard Core -->
     <div class="main-wrapper">
         
-        <!-- Mobile Sidebar Backdrop Overlay -->
         <div class="sidebar-overlay" id="overlay"></div>
 
         <!-- Left Sidebar Navigation Framework -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-title">Core Features</div>
-            <a class="nav-link active" data-url="../User/dashboard">
-    <i class="fa-solid fa-gauge-high"></i> Dashboard
-</a>
 
-<a class="nav-link" data-url="../User/leaderboard">
-    <i class="fa-solid fa-trophy"></i> Leaderboard
-</a>
-
-
-<a class="nav-link" data-url="../User/vip-level-up">
-    <i class="fa-solid fa-crown"></i> Vip Level Up
-</a>
-
-<a class="nav-link" data-url="../User/level-claim">
-    <i class="fa-solid fa-gift"></i> Daily Claimed
-</a>
-
-<a class="nav-link" data-url="../User/referrals">
-    <i class="fa-solid fa-users"></i> Referrals
-</a>
-
-<a class="nav-link" data-url="../User/deposit">
-    <i class="fa-solid fa-money-bill-wave"></i> Deposit
-</a>
-
-<a class="nav-link" data-url="../User/deposit-history">
-    <i class="fa-solid fa-clock-rotate-left"></i> Deposit History
-</a>
-
-<a class="nav-link" data-url="../User/withdrawal">
-    <i class="fa-solid fa-wallet"></i> Withdrawal
-</a>
-
-<a class="nav-link" data-url="../User/withdraw-history">
-    <i class="fa-solid fa-file-invoice-dollar"></i> Withdraw History
-</a>
+            <!-- এই সব লিংকে data-blockable="true" আছে — ব্লকড ইউজারের জন্য ডিজেবল হবে -->
+            <a class="nav-link" data-url="../User/dashboard" data-blockable="true">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+            <a class="nav-link" data-url="../User/leaderboard" data-blockable="true">
+                <i class="fa-solid fa-trophy"></i> Leaderboard
+            </a>
+            <a class="nav-link" data-url="../User/vip-level-up" data-blockable="true">
+                <i class="fa-solid fa-crown"></i> Vip Level Up
+            </a>
+            <a class="nav-link" data-url="../User/level-claim" data-blockable="true">
+                <i class="fa-solid fa-gift"></i> Daily Claimed
+            </a>
+            <a class="nav-link" data-url="../User/referrals" data-blockable="true">
+                <i class="fa-solid fa-users"></i> Referrals
+            </a>
+            <a class="nav-link" data-url="../User/deposit" data-blockable="true">
+                <i class="fa-solid fa-money-bill-wave"></i> Deposit
+            </a>
+            <a class="nav-link" data-url="../User/deposit-history" data-blockable="true">
+                <i class="fa-solid fa-clock-rotate-left"></i> Deposit History
+            </a>
+            <a class="nav-link" data-url="../User/withdrawal" data-blockable="true">
+                <i class="fa-solid fa-wallet"></i> Withdrawal
+            </a>
+            <a class="nav-link" data-url="../User/withdraw-history" data-blockable="true">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Withdraw History
+            </a>
             
             <div class="sidebar-title">Support</div>
-            <a class="nav-link" data-url="../User/profile">
-                <i class="fa-solid fa-user-gear"></i>Settings
+
+            <!-- Settings ও ব্লকেবল -->
+            <a class="nav-link" data-url="../User/profile" data-blockable="true">
+                <i class="fa-solid fa-user-gear"></i> Settings
+            </a>
+
+            <!-- Live Chat — data-blockable নেই, তাই ব্লকড ইউজারও ব্যবহার করতে পারবে -->
+            <a class="nav-link nav-chat" data-url="../User/live-chat" data-blockable="false">
+                <i class="fa-solid fa-comments"></i> Live Chat
+                <span class="chat-dot"></span>
             </a>
         </nav>
 
@@ -461,23 +510,36 @@
         </main>
     </div>
 
-    <!-- Firebase SDKs (Compat version) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
-    <!-- Your Custom Config File -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="config.js"></script>
 
     <script>
         // ========================================
-        // 1. FIREBASE INITIALIZATION & AUTH STATE
+        // FIREBASE INITIALIZATION
         // ========================================
-        firebase.initializeApp(firebaseConfig);
+        if (typeof firebaseConfig === 'undefined') {
+            console.error('config.js missing');
+        } else {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        }
+
         const auth = firebase.auth();
+        const rtdb = firebase.database();
 
+        // ========================================
+        // GLOBAL STATE VARIABLES
+        // ========================================
         let isUserLoggedIn = false;
+        let isUserBlocked = false;   // ব্লক স্ট্যাটাস
+        let currentUserUid = null;
+        let statusListenerAttached = false; // স্ট্যাটাস লিসেনার একবারই আটাচ হবে
 
-        // --- Function to Update UI based on Login Status ---
+        // ========================================
+        // UI UPDATE FUNCTION
+        // ========================================
         function updateUI(isLoggedIn) {
             if (isLoggedIn) {
                 document.getElementById('signInBtn').style.display = 'none';
@@ -485,28 +547,132 @@
             } else {
                 document.getElementById('signInBtn').style.display = 'flex';
                 document.getElementById('profileBtn').style.display = 'none';
+                // লগআউট অবস্থায় ব্লক মোড অফ
+                if (isUserBlocked) {
+                    setBlockedMode(false);
+                }
             }
         }
 
-        // --- Check LocalStorage on Page Load (Restore Session) ---
+        // ========================================
+        // BLOCKED MODE — পুরো UI পরিবর্তন
+        // ========================================
+        function setBlockedMode(blocked) {
+            isUserBlocked = blocked;
+
+            const allLinks = document.querySelectorAll('.nav-link[data-blockable="true"]');
+            const chatLink = document.querySelector('.nav-link[data-blockable="false"]');
+            const badge = document.getElementById('blockedBadge');
+            const iframe = document.getElementById('main-frame');
+
+            if (blocked) {
+                // ১. টপবারে BLOCKED ব্যাজ দেখাও
+                badge.style.display = 'inline-flex';
+
+                // ২. সব blockable লিংকে nav-blocked ক্লাস যোগ → opacity কমে যাবে, ক্লিক বন্ধ
+                allLinks.forEach(link => {
+                    link.classList.add('nav-blocked');
+                    link.classList.remove('active');
+                });
+
+                // ৩. শুধু Live Chat লিংক অ্যাক্টিভ রাখো (যদি আগে থেকে অ্যাক্টিভ না থাকে তবে এটাকে অ্যাক্টিভ করো)
+                if (chatLink) {
+                    chatLink.classList.remove('nav-blocked');
+                    // কোনো অ্যাক্টিভ লিংক না থাকলে চ্যাটকে অ্যাক্টিভ করো
+                    const anyActive = document.querySelector('.nav-link.active');
+                    if (!anyActive) {
+                        chatLink.classList.add('active');
+                    }
+                }
+
+                // ৪. iframe এ blocked.html লোড করো
+                iframe.src = 'blocked.html';
+
+                // ৫. টোস্ট দেখাও
+                showToast(
+                    "Account Restricted",
+                    "Your account has been blocked by admin. Contact support via Live Chat.",
+                    "fa-solid fa-shield-halved",
+                    true
+                );
+
+            } else {
+                // ব্লক মোড বন্ধ — সব ঠিক করো
+                badge.style.display = 'none';
+
+                allLinks.forEach(link => {
+                    link.classList.remove('nav-blocked');
+                });
+
+                // হোমপেজে ফিরিয়ে দাও
+                const dashboardLink = document.querySelector('.nav-link[data-url="../User/dashboard"]');
+                if (dashboardLink) {
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    dashboardLink.classList.add('active');
+                    iframe.src = '../User/dashboard';
+                } else {
+                    iframe.src = 'homepage';
+                }
+            }
+        }
+
+        // ========================================
+        // REALTIME STATUS LISTENER
+        // ========================================
+        function attachStatusListener(uid) {
+            if (statusListenerAttached) return; // ডুপ্লিকেট লিসেনার প্রতিরোধ
+            statusListenerAttached = true;
+
+            rtdb.ref('users/' + uid + '/status').on('value', (snapshot) => {
+                const status = snapshot.val();
+
+                if (status === 'blocked') {
+                    // ইউজার ব্লক — ব্লকড মোড চালু
+                    if (!isUserBlocked) {
+                        setBlockedMode(true);
+                    }
+                } else {
+                    // ইউজার আনব্লক বা active
+                    if (isUserBlocked) {
+                        setBlockedMode(false);
+                    }
+                }
+            });
+        }
+
+        // ========================================
+        // AUTH STATE — পেজ লোড
+        // ========================================
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('currentUser');
             
             if (savedUser) {
-                // লোকাল স্টোরেজে ইউজার ডাটা পাওয়া গেছে
                 try {
                     const userData = JSON.parse(savedUser);
-                    // ইউজার অথেন্টিকেটেড আছে কিনা আরেকবার সার্ভার থেকে ভেরিফাই করার চেষ্টা করবে (অপশনাল)
-                    // তবে দ্রুত UI লোড করার জন্য আমরা লোকাল স্টোরেজ ডাটাকেই প্রায়োরিটি দিচ্ছি
                     isUserLoggedIn = true;
+                    currentUserUid = userData.uid;
                     updateUI(true);
-                    
-                    // Firebase Auth State যদি পিছিয়ে থাকে, তাও সিঙ্ক করার চেষ্টা করবে
+
+                    // রিয়েল-টাইম স্ট্যাটাস লিসেনার আটাচ
+                    attachStatusListener(currentUserUid);
+
+                    // Firebase Auth সিঙ্ক
                     auth.onAuthStateChanged((user) => {
                         if (!user) {
-                            // ফায়ারবেসে সেশন নেই কিন্তু লোকাল স্টোরেজে আছে (টোকেন এক্সপায়ার্ড হয়ে যেতে পারে)
-                            // তাই লোকাল স্টোরেজ ক্লিয়ার করে লগআউট করা ভালো
-                            handleLogout(); 
+                            handleLogout();
+                        } else if (user.uid !== currentUserUid) {
+                            // UID ম্যাচ করছে না — রিফ্রেশ
+                            currentUserUid = user.uid;
+                            localStorage.setItem('currentUser', JSON.stringify({
+                                uid: user.uid,
+                                email: user.email,
+                                displayName: user.displayName || "User",
+                                photoURL: user.photoURL || null
+                            }));
+                            // পুরনো লিসেনার ডিটাচ, নতুন আটাচ
+                            rtdb.ref('users/' + currentUserUid + '/status').off();
+                            statusListenerAttached = false;
+                            attachStatusListener(currentUserUid);
                         }
                     });
 
@@ -516,13 +682,22 @@
                     updateUI(false);
                 }
             } else {
-                // লোকাল স্টোরেজে ডাটা নেই, Firebase Auth চেক করবে
+                // লোকাল স্টোরেজে নেই — Firebase Auth চেক
                 auth.onAuthStateChanged(user => {
                     if (user) {
-                        // Firebase Auth এ আছে, তাই localStorage এ সেভ করবে
-                        saveUserToLocalStorage(user);
+                        const userData = {
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || "User",
+                            photoURL: user.photoURL || null
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(userData));
                         isUserLoggedIn = true;
+                        currentUserUid = user.uid;
                         updateUI(true);
+
+                        // রিয়েল-টাইম স্ট্যাটাস লিসেনার আটাচ
+                        attachStatusListener(currentUserUid);
                     } else {
                         isUserLoggedIn = false;
                         updateUI(false);
@@ -531,48 +706,45 @@
             }
         });
 
-        // --- Function to Save User Data to LocalStorage ---
-        function saveUserToLocalStorage(user) {
-            const userData = {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || "User",
-                photoURL: user.photoURL || null
-            };
-            localStorage.setItem('currentUser', JSON.stringify(userData));
-        }
-
-        // --- Function to Handle Logout ---
+        // ========================================
+        // LOGOUT
+        // ========================================
         function handleLogout() {
+            // স্ট্যাটাস লিসেনার ডিটাচ
+            if (currentUserUid) {
+                rtdb.ref('users/' + currentUserUid + '/status').off();
+            }
+            statusListenerAttached = false;
+
             auth.signOut().then(() => {
                 localStorage.removeItem('currentUser');
                 isUserLoggedIn = false;
+                isUserBlocked = false;
+                currentUserUid = null;
                 updateUI(false);
-                // ইউজারকে লগইন পেজে রিডাইরেক্ট করতে চাইলে নিচের লাইনটি এক্টিভ করুন
-                // window.location.href = 'login.html'; 
-                
-                // অথবা হোমপেজে ফিরিয়ে দিন
                 document.getElementById('main-frame').src = 'homepage';
             }).catch((error) => {
                 console.error("Sign out error", error);
             });
         }
         
-        // প্রোফাইল বাটন ক্লিক করলে লগআউট অপশন যোগ করা যেতে পারে (অপশনাল)
-        // এখানে আমি প্রোফাইল বাটনে ক্লিক করলে প্রোফাইল পেজ লোড করছি, তবে সেখানে লগআউট বাটন থাকবে
         document.getElementById('profileBtn').addEventListener('click', () => {
-             document.getElementById('main-frame').src = '../User/profile';
+            // ব্লকড থাকলে প্রোফাইলে যাওয়া যাবে না
+            if (isUserBlocked) {
+                showToast("Access Denied", "Blocked accounts cannot access settings.", "fa-solid fa-lock", true);
+                return;
+            }
+            document.getElementById('main-frame').src = '../User/profile';
         });
 
-
         // ========================================
-        // 2. TOAST NOTIFICATION SYSTEM
+        // TOAST NOTIFICATION
         // ========================================
-        function showToast(title, subtitle, iconClass) {
+        function showToast(title, subtitle, iconClass, isError) {
             const container = document.getElementById('toastContainer');
             
             const toast = document.createElement('div');
-            toast.className = 'toast-msg';
+            toast.className = 'toast-msg' + (isError ? ' toast-error' : '');
             toast.innerHTML = `
                 <i class="${iconClass}"></i>
                 <div class="toast-text-container">
@@ -582,20 +754,15 @@
             `;
             
             container.appendChild(toast);
-
-            // Trigger slide-in animation
             setTimeout(() => toast.classList.add('show'), 50);
-
-            // Auto remove after 3.5 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
-                // Remove from DOM after transition ends
                 setTimeout(() => toast.remove(), 500);
-            }, 3500);
+            }, 4000);
         }
 
         // ========================================
-        // 3. NAVIGATION & AUTH LOGIC
+        // NAVIGATION CLICK HANDLER
         // ========================================
         const links = document.querySelectorAll('.nav-link');
         const iframe = document.getElementById('main-frame');
@@ -605,47 +772,70 @@
         const toggleIcon = document.getElementById('toggleIcon');
         const signInBtn = document.getElementById('signInBtn');
 
-        // Sidebar Navigation Click Handler
         links.forEach(link => {
             link.addEventListener('click', function(e) {
-                e.preventDefault(); // Prevent default jump
+                e.preventDefault();
 
-                // If user is not logged in, show toast and block navigation
+                // --- চেক ১: লগইন আছে কিনা ---
                 if (!isUserLoggedIn) {
-                    showToast("Access Restricted", "Please sign in to continue", "fa-solid fa-lock");
-                    if(window.innerWidth <= 768 && sidebar.classList.contains('active')) {
-                        toggleSidebar(); // Close mobile menu
+                    showToast("Access Restricted", "Please sign in to continue", "fa-solid fa-lock", false);
+                    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                        toggleSidebar();
                     }
                     return;
                 }
 
-                // If logged in, allow navigation
+                // --- চেক ২: ব্লকড ইউজার কি blockable লিংকে ক্লিক করছে ---
+                const isBlockable = this.getAttribute('data-blockable') === 'true';
+                if (isUserBlocked && isBlockable) {
+                    // ইউজার ব্লক + এটা ব্লকেবল লিংক → ব্লক করো
+                    showToast(
+                        "Access Denied",
+                        "Your account is blocked. Only Live Chat is available.",
+                        "fa-solid fa-ban",
+                        true
+                    );
+                    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                        toggleSidebar();
+                    }
+                    return;
+                }
+
+                // --- চেক ৩: ব্লকড ইউজার যদি Live Chat এ ক্লিক করে ---
+                if (isUserBlocked && !isBlockable) {
+                    // লাইভ চ্যাট — ব্লকড ইউজারের জন্যও অনুমোদিত
+                    links.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    iframe.src = this.getAttribute('data-url');
+                    
+                    if (window.innerWidth <= 768) toggleSidebar();
+                    return;
+                }
+
+                // --- স্বাভাবিক নেভিগেশন (লগইন + আনব্লকড) ---
                 links.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
-                
-                const targetUrl = this.getAttribute('data-url');
-                iframe.src = targetUrl;
+                iframe.src = this.getAttribute('data-url');
 
-                // Auto collapse navigation panel when mobile size triggers active navigation 
-                if(window.innerWidth <= 768) {
+                if (window.innerWidth <= 768) {
                     toggleSidebar();
                 }
             });
         });
 
-        // Sign In Button Click Handler -> Load login.html in iframe
+        // Sign In Button
         signInBtn.addEventListener('click', () => {
             iframe.src = '../User/login';
         });
 
         // ========================================
-        // 4. MOBILE VIEW NAVIGATION TOGGLER
+        // MOBILE SIDEBAR TOGGLER
         // ========================================
         function toggleSidebar() {
             sidebar.classList.toggle('active');
             overlay.classList.toggle('show');
             
-            if(sidebar.classList.contains('active')) {
+            if (sidebar.classList.contains('active')) {
                 toggleIcon.className = "fa-solid fa-xmark";
             } else {
                 toggleIcon.className = "fa-solid fa-bars";
@@ -656,7 +846,7 @@
         overlay.addEventListener('click', toggleSidebar);
 
         // ========================================
-        // 5. SECURITY & PROTECTION CODE
+        // SECURITY
         // ========================================
         document.onkeydown = function(e) {
             if (e.keyCode == 123) return false;
