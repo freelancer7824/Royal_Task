@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Maintenance</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #16213e;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .scene {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Animated People */
+        .person {
+            font-size: 70px;
+            animation: bounce 1.5s infinite;
+        }
+
+        /* Animated Gear/Quip */
+        .gear {
+            font-size: 50px;
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 { margin: 10px 0; letter-spacing: 2px; }
+        p { color: #888; }
+
+        .loader {
+            width: 250px;
+            height: 8px;
+            background: #0f3460;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loader-fill {
+            height: 100%;
+            background: #e94560;
+            width: 0%;
+            animation: progress 4s linear infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="person">👨‍💻</div>
+        <div class="gear">⚙️</div>
+        <div class="person">👨‍🔧</div>
+    </div>
+
+    <h1>SYSTEM MAINTENANCE</h1>
+    <p>Our team is currently optimizing the server. We'll be back shortly.</p>
+
+    <div class="loader">
+        <div class="loader-fill"></div>
+    </div>
+
+</body>
+</html>
