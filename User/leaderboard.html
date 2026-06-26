@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Level Rankings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #05060a;
+            --panel-card: rgba(18, 20, 32, 0.75);
+            --accent-neon: #00ffcc;
+            --text-main: #f1f3f9;
+            --text-muted: #6b7280;
+            --card-border: rgba(255, 255, 255, 0.04);
+            --vip-gold: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; user-select: none; }
+        body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; overflow-x: hidden; padding: 40px 20px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #1a1d30; border-radius: 10px; }
+
+        #network-canvas-map { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.15; }
+        .content-terminal-layer { position: relative; z-index: 10; max-width: 960px; margin: 0 auto; }
+
+        .hero-section { background: var(--panel-card); backdrop-filter: blur(20px); border: 1px solid var(--card-border); padding: 30px 28px; border-radius: 22px; margin-bottom: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--vip-gold); background: rgba(251, 191, 36, 0.08); padding: 6px 14px; border-radius: 30px; border: 1px solid rgba(251, 191, 36, 0.12); margin-bottom: 16px; }
+        .pulse-dot { width: 6px; height: 6px; background: var(--vip-gold); border-radius: 50%; box-shadow: 0 0 8px var(--vip-gold); animation: pulseFlash 1.5s infinite alternate; }
+        @keyframes pulseFlash { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        .hero-section h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, #fff 30%, var(--vip-gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-section > p { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+
+        .tree-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .summary-card { background: var(--panel-card); backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; text-align: center; }
+        .summary-card .num { font-size: 24px; font-weight: 800; color: var(--vip-gold); line-height: 1; margin-bottom: 4px; }
+        .summary-card .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; }
+        .summary-card.my-pos .num { color: var(--accent-neon); }
+
+        .tree-container { background: var(--panel-card); backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 22px; padding: 28px 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.45); }
+        .tree-header { font-size: 15px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+        .tree-header i { color: var(--vip-gold); }
+
+        .loading-state { text-align: center; padding: 50px 0; color: var(--text-muted); font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.06); border-top-color: var(--vip-gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .ranked-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .rank-card {
+            background: rgba(9, 10, 15, 0.9);
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .rank-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .rank-card:hover { transform: translateX(4px); border-color: rgba(255,255,255,0.08); }
+
+        .rank-position {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 900;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+        }
+
+        /* Top 1 — সোনালী */
+        .rank-card.pos-1 {
+            border-color: rgba(251, 191, 36, 0.3);
+            background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(9,10,15,0.95));
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.1), 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .rank-card.pos-1 .rank-position {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            box-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+        }
+        .rank-card.pos-1::before {
+            background: linear-gradient(90deg, rgba(251,191,36,0.05), transparent);
+            opacity: 1;
+        }
+
+        /* Top 2 — রূপালী */
+        .rank-card.pos-2 {
+            border-color: rgba(192, 192, 192, 0.25);
+            background: linear-gradient(135deg, rgba(192,192,192,0.04), rgba(9,10,15,0.95));
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.06), 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .rank-card.pos-2 .rank-position {
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            color: #1a1a2e;
+            box-shadow: 0 0 12px rgba(192, 192, 192, 0.3);
+        }
+        .rank-card.pos-2::before {
+            background: linear-gradient(90deg, rgba(192,192,192,0.03), transparent);
+            opacity: 1;
+        }
+
+        /* Top 3 — ব্রোঞ্জ */
+        .rank-card.pos-3 {
+            border-color: rgba(205, 127, 50, 0.25);
+            background: linear-gradient(135deg, rgba(205,127,50,0.04), rgba(9,10,15,0.95));
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.06), 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .rank-card.pos-3 .rank-position {
+            background: linear-gradient(135deg, #d4956a, #b87333);
+            color: #1a1a2e;
+            box-shadow: 0 0 12px rgba(205, 127, 50, 0.3);
+        }
+        .rank-card.pos-3::before {
+            background: linear-gradient(90deg, rgba(205,127,50,0.03), transparent);
+            opacity: 1;
+        }
+
+        /* লগইন ইউজার — রঙিন গ্লোয়িং হাইলাইট */
+        .rank-card.is-me {
+            border-color: rgba(0, 255, 204, 0.45) !important;
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.08), rgba(0, 200, 255, 0.04), rgba(9,10,15,0.95)) !important;
+            box-shadow: 0 0 35px rgba(0, 255, 204, 0.15), 0 0 70px rgba(0, 255, 204, 0.05), 0 4px 15px rgba(0,0,0,0.4) !important;
+            animation: meGlow 2.5s ease-in-out infinite alternate;
+        }
+        .rank-card.is-me::before {
+            background: linear-gradient(90deg, rgba(0,255,204,0.06), rgba(0,200,255,0.03), transparent) !important;
+            opacity: 1 !important;
+        }
+        @keyframes meGlow {
+            0% { box-shadow: 0 0 25px rgba(0, 255, 204, 0.12), 0 0 50px rgba(0, 255, 204, 0.04), 0 4px 15px rgba(0,0,0,0.4); }
+            100% { box-shadow: 0 0 40px rgba(0, 255, 204, 0.2), 0 0 80px rgba(0, 255, 204, 0.08), 0 4px 15px rgba(0,0,0,0.4); }
+        }
+        .rank-card.is-me .rank-position {
+            background: linear-gradient(135deg, #00ffcc, #00c9ff) !important;
+            color: #000 !important;
+            box-shadow: 0 0 18px rgba(0, 255, 204, 0.5) !important;
+        }
+
+        /* ক্রাউন */
+        .crown-icon {
+            position: absolute;
+            top: -8px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #fbbf24;
+            filter: drop-shadow(0 0 6px rgba(251,191,36,0.6));
+            animation: crownBounce 2s ease-in-out infinite;
+        }
+        @keyframes crownBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-3px); }
+        }
+
+        /* অ্যাভাটার */
+        .node-avatar {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+            flex-shrink: 0; color: #000;
+            position: relative;
+        }
+        .active-avatar { background: linear-gradient(135deg, #00ffcc, #00b38f); }
+        .inactive-avatar { background: #2a2d3a; color: var(--text-muted); }
+        .online-dot { position: absolute; bottom: -2px; right: -2px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid #090a0f; }
+        .active-dot { background: #00ff66; box-shadow: 0 0 6px #00ff66; }
+        .inactive-dot { background: #4b5563; }
+
+        /* ইনফো */
+        .node-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+        .node-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .node-name { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .rank-card.is-me .node-name { font-weight: 800 !important; color: #fff !important; text-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
+
+        .node-you-tag { font-size: 8px; font-weight: 700; color: #000; background: linear-gradient(135deg, #00ffcc, #00c9ff); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(0, 255, 204, 0.3); }
+
+        .top1-badge { font-size: 8px; font-weight: 800; color: #000; background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+        .top2-badge { font-size: 8px; font-weight: 800; color: #1a1a2e; background: linear-gradient(135deg, #e2e8f0, #94a3b8); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(192, 192, 192, 0.3); }
+        .top3-badge { font-size: 8px; font-weight: 800; color: #1a1a2e; background: linear-gradient(135deg, #d4956a, #b87333); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 8px rgba(205, 127, 50, 0.3); }
+
+        /* VIP লেভেল ব্যাজ */
+        .vip-level-badge { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 5px; flex-shrink: 0; letter-spacing: 0.5px; }
+        .vl-0 { background: rgba(255,255,255,0.04); color: var(--text-muted); }
+        .vl-1 { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.18); }
+        .vl-2 { background: rgba(167, 139, 250, 0.12); color: #a78bfa; border: 1px solid rgba(167, 139, 250, 0.18); }
+        .vl-3 { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+        .vl-4 { background: rgba(251, 191, 36, 0.18); color: #f59e0b; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .vl-5 { background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(167,139,250,0.25)); color: #fbbf24; border: 1px solid rgba(251,191,36,0.35); box-shadow: 0 0 10px rgba(251,191,36,0.15); }
+
+        .node-sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .node-sub i { font-size: 8px; }
+        .stat-active { color: #00ff66; }
+        .stat-vip { color: var(--vip-gold); }
+        .stat-total { color: #818cf8; }
+
+        /* স্কোর বার */
+        .score-bar-wrap { width: 70px; height: 4px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+        .score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .pos-1 .score-bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .pos-2 .score-bar-fill { background: linear-gradient(90deg, #e2e8f0, #94a3b8); }
+        .pos-3 .score-bar-fill { background: linear-gradient(90deg, #d4956a, #b87333); }
+        .is-me .score-bar-fill { background: linear-gradient(90deg, #00ffcc, #00c9ff) !important; }
+        .rank-card:not(.pos-1):not(.pos-2):not(.pos-3):not(.is-me) .score-bar-fill { background: rgba(255,255,255,0.12); }
+
+        .show-more-btn { display: block; width: 100%; margin-top: 20px; padding: 14px; background: rgba(251,191,36,0.05); border: 1px dashed rgba(251,191,36,0.2); color: var(--vip-gold); font-size: 13px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .show-more-btn:hover { background: rgba(251,191,36,0.1); border-color: var(--vip-gold); }
+
+        .top-separator { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px 0; padding: 0 4px; }
+        .top-separator .line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent); }
+        .top-separator .line:last-child { background: linear-gradient(270deg, rgba(255,255,255,0.06), transparent); }
+        .top-separator span { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+
+        .empty-tree { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .empty-tree i { font-size: 40px; margin-bottom: 16px; opacity: 0.3; display: block; }
+
+        @media (max-width: 640px) {
+            body { padding: 20px 12px; }
+            .hero-section { padding: 22px 16px; }
+            .hero-section h1 { font-size: 20px; }
+            .tree-container { padding: 20px 14px; }
+            .tree-summary { grid-template-columns: repeat(2, 1fr); }
+            .node-name { max-width: 90px; font-size: 11px; }
+            .rank-card { padding: 12px 14px; gap: 10px; }
+            .rank-position { width: 36px; height: 36px; font-size: 12px; border-radius: 8px; }
+            .node-avatar { width: 36px; height: 36px; font-size: 11px; }
+            .score-bar-wrap { width: 45px; }
+            .node-sub { gap: 8px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <canvas id="network-canvas-map"></canvas>
+
+    <div class="content-terminal-layer">
+        <section class="hero-section">
+            <div class="hero-badge"><div class="pulse-dot"></div> VIP Level Rankings</div>
+            <h1>Unlocked Level Leaderboard</h1>
+            <p>Users ranked by total VIP levels unlocked first, then Active Referrals, then Total Invited Referrals. No same position — everyone gets a unique rank.</p>
+        </section>
+
+        <div class="tree-summary" id="treeSummary" style="display:none;">
+            <div class="summary-card">
+                <div class="num" id="sumTotal">0</div>
+                <div class="lbl">Total Users</div>
+            </div>
+            <div class="summary-card">
+                <div class="num" id="sumVip">0</div>
+                <div class="lbl">VIP Members</div>
+            </div>
+            <div class="summary-card">
+                <div class="num" id="sumTopLevel">0</div>
+                <div class="lbl">Max Unlocked</div>
+            </div>
+            <div class="summary-card my-pos">
+                <div class="num" id="sumMyPos">-</div>
+                <div class="lbl">Your Position</div>
+            </div>
+        </div>
+
+        <section class="tree-container">
+            <div class="tree-header">
+                <i class="fa-solid fa-crown"></i> VIP Level Rankings
+            </div>
+            <div id="treeLoading" class="loading-state">
+                <div class="spinner"></div>
+                <span>Syncing rankings...</span>
+            </div>
+            <div id="treeRenderArea" style="display: none;">
+                <div class="ranked-list" id="rankedList"></div>
+                <button class="show-more-btn" id="showMoreBtn" style="display:none;">
+                    <i class="fa-solid fa-chevron-down"></i> Load More Users
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cpanel-ebon.vercel.app/Royal%20Task/royaltaskroyaltaskroyaltask.js"></script>
+
+    <script>
+        // ==========================================
+        // 1. CANVAS BACKGROUND
+        // ==========================================
+        const canvas = document.getElementById('network-canvas-map');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+        const pts = Array.from({length: 30}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2}));
+        function drawCanvas() {
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle = "rgba(251, 191, 36, 0.03)"; ctx.beginPath();
+            pts.forEach((p,i) => { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width)p.vx*=-1; if(p.y<0||p.y>canvas.height)p.vy*=-1; ctx.moveTo(p.x,p.y); ctx.lineTo(pts[(i+1)%pts.length].x, pts[(i+1)%pts.length].y); });
+            ctx.stroke(); requestAnimationFrame(drawCanvas);
+        } drawCanvas();
+
+        // ==========================================
+        // 2. GLOBALS
+        // ==========================================
+        let db = null;
+        let currentUserId = null;
+        let rankedUserList = [];
+        let maxScore = 1;
+        let currentRenderCount = 0;
+        const LIMIT_PER_LOAD = 15;
+
+        // ==========================================
+        // 3. HELPERS
+        // ==========================================
+        function getLoggedInUID() {
+            try {
+                const raw = localStorage.getItem('currentUser');
+                if (!raw) return null;
+                return JSON.parse(raw).uid;
+            } catch(e) { return null; }
+        }
+
+        function getDisplayName(user, uid) { return user.username || user.fullName || user.email || uid.substring(0, 8); }
+        function getInitials(name) { if (!name) return '?'; const p = name.trim().split(/\s+/); return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : name.substring(0,2).toUpperCase(); }
+        
+        /**
+         * VIP Level = কতগুলো VIP আনলক করেছে (unlockedVips অ্যারের length)
+         * যদি unlockedVips না থাকে, তাহলে 0
+         */
+        function getVIPLevel(user) {
+            if (Array.isArray(user.unlockedVips) && user.unlockedVips.length > 0) {
+                return Math.min(user.unlockedVips.length, 5);
+            }
+            return 0;
+        }
+
+        const vipNames = ['Standard', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+        function vipBadgeHTML(l) { return '<span class="vip-level-badge vl-' + l + '">LV ' + l + ' &middot; ' + vipNames[l] + '</span>'; }
+        
+        function topRankBadgeHTML(pos) {
+            if (pos === 1) return '<span class="top1-badge">TOP 1</span>';
+            if (pos === 2) return '<span class="top2-badge">TOP 2</span>';
+            if (pos === 3) return '<span class="top3-badge">TOP 3</span>';
+            return '';
+        }
+        
+        function escapeHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        
+        function showEmpty(msg) {
+            document.getElementById('treeLoading').style.display = 'none';
+            document.getElementById('treeRenderArea').style.display = 'block';
+            document.getElementById('rankedList').innerHTML = '<div class="empty-tree"><i class="fa-solid fa-users-slash"></i><p>' + msg + '</p></div>';
+            document.getElementById('showMoreBtn').style.display = 'none';
+        }
+
+        // ==========================================
+        // 4. FIREBASE INIT
+        // ==========================================
+        if (typeof firebaseConfig === 'undefined') {
+            document.getElementById('treeLoading').innerHTML = '<span style="color:#ff4d4d">Config missing</span>';
+        } else {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database(); 
+            currentUserId = getLoggedInUID();
+            if (!currentUserId) { 
+                window.location.href = "login.html"; 
+            } else {
+                initSystem();
+            }
+        }
+
+        // ==========================================
+        // 5. DATA FETCH WITH CACHE
+        // ==========================================
+        async function getSmartData() {
+            const localCache = localStorage.getItem('vipRankCache');
+            let localData = localCache ? JSON.parse(localCache) : null;
+            let serverData = null;
+
+            try {
+                const snap = await db.ref('users').once('value');
+                if (snap.exists()) {
+                    serverData = {};
+                    snap.forEach(child => { serverData[child.key] = child.val(); });
+                }
+            } catch(e) {
+                console.error("FB Fetch failed, using cache");
+            }
+
+            if (serverData) {
+                localStorage.setItem('vipRankCache', JSON.stringify({ data: serverData, timestamp: Date.now() }));
+                return serverData;
+            } else if (localData) {
+                return localData.data; 
+            }
+            return null;
+        }
+
+        // ==========================================
+        // 6. RANKING LOGIC
+        // প্রায়োরিটি:
+        //   ১ম: VIP Level (unlockedVips.length) — বেশি আনলক = উপরে
+        //   ২য়: Active Referral — যাদের balance > 0
+        //   ৩য়: Total Invited Referral — সব রেফারেল কাউন্ট
+        //   ৪র্থ: UID tie-break — কখনো একই পজিশন নয়
+        // ==========================================
+        function rankAllUsers(usersMap) {
+            // চিলড্রেন ম্যাপ তৈরি — কে কাকে রেফার করেছে
+            const childrenMap = {};
+            Object.keys(usersMap).forEach(key => {
+                const refBy = usersMap[key].referredBy;
+                if (refBy && usersMap[refBy]) {
+                    if (!childrenMap[refBy]) childrenMap[refBy] = [];
+                    childrenMap[refBy].push(key);
+                }
+            });
+
+            // প্রতিটি ইউজারের ডাটা প্রসেস
+            const userDataMap = {};
+            Object.keys(usersMap).forEach(uid => {
+                const user = usersMap[uid];
+
+                // VIP Level = unlockedVips অ্যারের দৈর্ঘ্য
+                const vip = getVIPLevel(user);
+
+                // Total Invited Referral = সরাসরি রেফার করা সব ইউজার
+                const directChildren = childrenMap[uid] || [];
+                const totalRefs = directChildren.length;
+
+                // Active Referral = যেসব রেফারেলের balance > 0
+                let activeRefs = 0;
+                directChildren.forEach(cUid => {
+                    if (parseFloat(usersMap[cUid].balance || 0) > 0) activeRefs++;
+                });
+
+                // ইউজার নিজে অ্যাক্টিভ কিনা (balance > 0)
+                const isActive = parseFloat(user.balance || 0) > 0;
+
+                userDataMap[uid] = { vip, totalRefs, activeRefs, isActive };
+            });
+
+            // সর্টিং
+            const allUids = Object.keys(usersMap);
+            allUids.sort((a, b) => {
+                const dA = userDataMap[a];
+                const dB = userDataMap[b];
+
+                // ১ম প্রায়োরিটি: VIP Level (বেশি আনলক = ভালো = উপরে)
+                if (dB.vip !== dA.vip) return dB.vip - dA.vip;
+
+                // ২য় প্রায়োরিটি: Active Referral (বেশি = ভালো)
+                if (dB.activeRefs !== dA.activeRefs) return dB.activeRefs - dA.activeRefs;
+
+                // ৩য় প্রায়োরিটি: Total Invited Referral (বেশি = ভালো)
+                if (dB.totalRefs !== dA.totalRefs) return dB.totalRefs - dA.totalRefs;
+
+                // ৪র্থ: UID দিয়ে tie-break — কখনো একই পজিশন হবে না
+                return a < b ? -1 : 1;
+            });
+
+            // র‍্যাংকড লিস্ট তৈরি — প্রতিটি ইউনিক পজিশন
+            const ranked = allUids.map((uid, index) => {
+                const d = userDataMap[uid];
+                // কম্পোজিট স্কোর (শুধু বার ভিজ্যুয়ালের জন্য)
+                const compositeScore = (d.vip * 10000) + (d.activeRefs * 100) + d.totalRefs;
+                return {
+                    uid,
+                    position: index + 1,
+                    score: compositeScore,
+                    vip: d.vip,
+                    activeRefs: d.activeRefs,
+                    totalRefs: d.totalRefs,
+                    isActive: d.isActive,
+                    isMe: uid === currentUserId
+                };
+            });
+
+            maxScore = ranked.length > 0 ? ranked[0].score : 1;
+            if (maxScore === 0) maxScore = 1;
+
+            return { ranked, childrenMap };
+        }
+
+        // ==========================================
+        // 7. INIT
+        // ==========================================
+        function initSystem() {
+            document.getElementById('treeLoading').style.display = 'flex';
+            
+            getSmartData().then(usersMap => {
+                if (!usersMap || Object.keys(usersMap).length === 0) {
+                    showEmpty("No users found in the network.");
+                    return;
+                }
+
+                const result = rankAllUsers(usersMap);
+                rankedUserList = result.ranked;
+                currentRenderCount = 0;
+
+                // সামারি আপডেট
+                const totalUsers = rankedUserList.length;
+                const vipMembers = rankedUserList.filter(u => u.vip >= 1).length;
+                const highestLevel = rankedUserList.length > 0 ? rankedUserList[0].vip : 0;
+                const myEntry = rankedUserList.find(u => u.isMe);
+
+                document.getElementById('sumTotal').textContent = totalUsers;
+                document.getElementById('sumVip').textContent = vipMembers;
+                document.getElementById('sumTopLevel').textContent = 'LV ' + highestLevel;
+                document.getElementById('sumMyPos').textContent = myEntry ? '#' + myEntry.position : 'N/A';
+                document.getElementById('treeSummary').style.display = 'grid';
+
+                renderRankedList(usersMap);
+            });
+        }
+
+        // ==========================================
+        // 8. RENDER
+        // ==========================================
+        function renderRankedList(usersMap) {
+            const listEl = document.getElementById('rankedList');
+            const end = Math.min(currentRenderCount + LIMIT_PER_LOAD, rankedUserList.length);
+
+            if (currentRenderCount === 0) {
+                let html = '';
+                for (let i = 0; i < end; i++) {
+                    html += buildCardHTML(usersMap, rankedUserList[i]);
+                }
+                listEl.innerHTML = html;
+            } else {
+                let appendHTML = '';
+                for (let i = currentRenderCount; i < end; i++) {
+                    appendHTML += buildCardHTML(usersMap, rankedUserList[i]);
+                }
+                listEl.insertAdjacentHTML('beforeend', appendHTML);
+            }
+
+            currentRenderCount = end;
+
+            document.getElementById('treeLoading').style.display = 'none';
+            document.getElementById('treeRenderArea').style.display = 'block';
+
+            const btn = document.getElementById('showMoreBtn');
+            if (currentRenderCount < rankedUserList.length) {
+                btn.style.display = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Load More (' + (rankedUserList.length - currentRenderCount) + ' remaining)';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function buildCardHTML(usersMap, userData) {
+            const user = usersMap[userData.uid];
+            if (!user) return '';
+
+            const pos = userData.position;
+            const name = getDisplayName(user, userData.uid);
+            const avatarClass = userData.isActive ? 'active-avatar' : 'inactive-avatar';
+            const dotClass = userData.isActive ? 'active-dot' : 'inactive-dot';
+
+            let cardClasses = 'rank-card';
+            if (pos === 1) cardClasses += ' pos-1';
+            else if (pos === 2) cardClasses += ' pos-2';
+            else if (pos === 3) cardClasses += ' pos-3';
+            if (userData.isMe) cardClasses += ' is-me';
+
+            let tags = '';
+            if (userData.isMe) tags += '<span class="node-you-tag">YOU</span>';
+            if (pos <= 3) tags += topRankBadgeHTML(pos);
+            tags += vipBadgeHTML(userData.vip);
+
+            let crown = pos === 1 ? '<div class="crown-icon"><i class="fa-solid fa-crown"></i></div>' : '';
+            const barPercent = Math.max(Math.round((userData.score / maxScore) * 100), 2);
+
+            let html = '';
+            // ৪র্থ পজিশনের আগে সেপারেটর
+            if (pos === 4) {
+                html += '<div class="top-separator"><div class="line"></div><span>Other Rankings</span><div class="line"></div></div>';
+            }
+
+            html += '<div class="' + cardClasses + '">';
+            html += crown;
+            html += '  <div class="rank-position">' + pos + '</div>';
+            html += '  <div class="node-avatar ' + avatarClass + '">' + getInitials(name) + '<div class="online-dot ' + dotClass + '"></div></div>';
+            html += '  <div class="node-info">';
+            html += '    <div class="node-name-row">' + tags + '<span class="node-name">' + escapeHTML(name) + '</span></div>';
+            html += '    <div class="node-sub">';
+            html += '      <span class="stat-vip"><i class="fa-solid fa-crown"></i> LV ' + userData.vip + ' unlocked</span>';
+            html += '      <span class="stat-active"><i class="fa-solid fa-circle"></i> ' + userData.activeRefs + ' active ref</span>';
+            html += '      <span class="stat-total"><i class="fa-solid fa-users"></i> ' + userData.totalRefs + ' invited</span>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '  <div class="score-bar-wrap"><div class="score-bar-fill" style="width: ' + barPercent + '%"></div></div>';
+            html += '</div>';
+
+            return html;
+        }
+
+        // Show More বাটন
+        document.getElementById('showMoreBtn').addEventListener('click', function() {
+            const localCache = localStorage.getItem('vipRankCache');
+            if (!localCache) return;
+            const usersMap = JSON.parse(localCache).data;
+            renderRankedList(usersMap);
+        });
+
+        // Security
+        document.onkeydown = function(e) {
+            if(e.keyCode==123)return false;
+            if(e.ctrlKey&&e.shiftKey&&(e.keyCode=='I'.charCodeAt(0)||e.keyCode=='J'.charCodeAt(0)))return false;
+            if(e.ctrlKey&&e.keyCode=='U'.charCodeAt(0))return false;
+        };
+    </script>
+</body>
+</html>

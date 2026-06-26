@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Terminal Access - Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Dark Premium Theme Palette --- */
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --input-bg: #1a1d30;
+            --error-color: #ff3366;
+            --success-color: #00ffcc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        /* --- Auth Card Matrix Wrap --- */
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 100px;
+            height: 100px;
+            background: var(--accent-neon);
+            opacity: 0.03;
+            filter: blur(50px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* --- Brand Header Section --- */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .auth-logo {
+            font-size: 28px;
+            color: var(--accent-neon);
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+        .auth-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+        }
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        /* --- Form Structural Layout --- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .input-label {
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+        }
+        .input-block {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        .input-block:focus-within {
+            border-color: rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.03);
+        }
+        .input-block i {
+            color: var(--text-muted);
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+        .input-block:focus-within i {
+            color: var(--accent-neon);
+        }
+        .input-block input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+            font-size: 13.5px;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .input-block input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-password-btn {
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .toggle-password-btn:hover {
+            color: var(--accent-neon);
+        }
+
+        /* --- Form Access Trigger Button --- */
+        .submit-auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.1);
+            margin-top: 20px;
+        }
+        .submit-auth-btn:hover {
+            transform: scale(0.99);
+            opacity: 0.95;
+        }
+        .submit-auth-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- Footer Context Route Link --- */
+        .auth-footer-nav {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 18px;
+        }
+        .auth-footer-nav a {
+            color: var(--accent-neon);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .auth-footer-nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Toast Notification --- */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(18, 20, 32, 0.95);
+            border: 1px solid var(--card-border);
+            padding: 12px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .toast-notification.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast-icon { font-size: 18px; }
+        .toast-message { font-size: 13px; font-weight: 500; }
+        
+        .toast-notification.success { border-left: 4px solid var(--success-color); }
+        .toast-notification.success .toast-icon { color: var(--success-color); }
+        .toast-notification.error { border-left: 4px solid var(--error-color); }
+        .toast-notification.error .toast-icon { color: var(--error-color); }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 15px rgba(0, 255, 204, 0.6); }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
+        /* --- RESPONSIVE OPTIMIZATION --- */
+        @media (max-width: 480px) {
+            .auth-container { padding: 24px; border-radius: 20px; }
+            .auth-header h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="toast" class="toast-notification">
+        <i id="toast-icon" class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toast-msg" class="toast-message">Operation Successful</span>
+    </div>
+
+    <div class="auth-container">
+        
+        <div class="auth-header">
+            <div class="auth-logo"><i class="fa-solid fa-user-plus"></i></div>
+            <h1>Create Operator Account</h1>
+            <p>Register your parameters to establish a secure link with the core matrix</p>
+        </div>
+
+        <form id="signup-form-pipeline">
+            
+            <div class="form-group">
+                <label class="input-label">Operator Full Name</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="user-fullname" placeholder="enter your full name..." autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Physical Address</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <input type="text" id="user-address" placeholder="city, country..." autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Secure Phone Number</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-phone"></i>
+                    <input type="tel" id="user-phone" placeholder="+8801xxxxxxxxx" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Network Account Email</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="user-email" placeholder="name@domain.com" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Referral Code (Optional)</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-gift"></i>
+                    <input type="text" id="user-referral" placeholder="referral code node..." autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Security Password</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="user-password" placeholder="min 6 characters" required>
+                    <i class="fa-solid fa-eye toggle-password-btn" id="pass-visibility-toggle" onclick="togglePasswordSecurityMask('user-password', 'pass-visibility-toggle')"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Confirm Security Password</label>
+                <div class="input-block">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <input type="password" id="user-confirm-password" placeholder="re-enter password" required>
+                    <i class="fa-solid fa-eye toggle-password-btn" id="confirm-pass-visibility-toggle" onclick="togglePasswordSecurityMask('user-confirm-password', 'confirm-pass-visibility-toggle')"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-auth-btn" id="signup-btn">
+                <i class="fa-solid fa-user-check"></i> <span id="btn-text">Initialize Network Registry</span>
+            </button>
+        </form>
+
+        <div class="auth-footer-nav">
+            Already verified operator? <a href="login.html">Access Terminal Login</a>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs (Realtime Database for consistency) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cpanel-ebon.vercel.app/Royal%20Task/royaltaskroyaltaskroyaltask.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            if (typeof firebaseConfig === 'undefined') {
+                console.error("Configuration Error: config.js not found or firebaseConfig object missing.");
+                showToast("System Configuration Error", "error");
+                return;
+            }
+
+            // Initialize Firebase
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const auth = firebase.auth();
+            const rtdb = firebase.database(); // Realtime Database Initialization
+
+            // --- Auto-Fill Referral Link Logic ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const referralCode = urlParams.get('ref'); // URL tracking param '?ref='
+            if (referralCode) {
+                document.getElementById('user-referral').value = referralCode;
+            }
+
+            // --- UI Helper Functions ---
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toast-msg');
+                const toastIcon = document.getElementById('toast-icon');
+
+                toastMsg.textContent = message;
+                toast.className = `toast-notification ${type} active`;
+
+                if (type === 'success') {
+                    toastIcon.className = 'fa-solid fa-circle-check toast-icon';
+                } else {
+                    toastIcon.className = 'fa-solid fa-circle-exclamation toast-icon';
+                }
+
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 3000);
+            }
+
+            function setLoading(isLoading) {
+                const btn = document.getElementById('signup-btn');
+                const btnText = document.getElementById('btn-text');
+                
+                if (isLoading) {
+                    btn.disabled = true;
+                    btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Registering Operator...';
+                } else {
+                    btn.disabled = false;
+                    btnText.innerHTML = 'Initialize Network Registry';
+                }
+            }
+
+            // --- Password Visibility Toggle ---
+            window.togglePasswordSecurityMask = function(inputId, iconId) {
+                const secretInputField = document.getElementById(inputId);
+                const componentIconElement = document.getElementById(iconId);
+
+                if (secretInputField.type === 'password') {
+                    secretInputField.type = 'text';
+                    componentIconElement.className = "fa-solid fa-eye-slash toggle-password-btn";
+                } else {
+                    secretInputField.type = 'password';
+                    componentIconElement.className = "fa-solid fa-eye toggle-password-btn";
+                }
+            };
+
+            // --- Core Signup Logic ---
+            const signupForm = document.getElementById('signup-form-pipeline');
+            
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const fullName = document.getElementById('user-fullname').value.trim();
+                const address = document.getElementById('user-address').value.trim();
+                const phone = document.getElementById('user-phone').value.trim();
+                const email = document.getElementById('user-email').value.trim();
+                const referral = document.getElementById('user-referral').value.trim();
+                const password = document.getElementById('user-password').value;
+                const confirmPassword = document.getElementById('user-confirm-password').value;
+
+                // Password Matching Check
+                if (password !== confirmPassword) {
+                    showToast("Security Key mismatch. Control passcodes do not match.", "error");
+                    return;
+                }
+
+                // Password Length Check
+                if (password.length < 6) {
+                    showToast("Password depth insecure. Minimum 6 tokens required.", "error");
+                    return;
+                }
+
+                setLoading(true);
+
+                // 1. Firebase Auth Step
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        
+                        // 2. Database Mapping Step (Saving profile data to Realtime Database)
+                        // যদি রেফারেল কোড দেওয়া থাকে তবে সেটি সেভ হবে, না হলে "none"
+                        const referredBy = referral || "none";
+
+                        const userData = {
+                            uid: user.uid,
+                            fullName: fullName,
+                            address: address,
+                            phone: phone,
+                            email: email,
+                            referredBy: referredBy,
+                            balance: 0,
+                            current_vip: "VIP 0",
+                            referralCount: 0,
+                            activeReferrals: 0,
+                            referralEarnings: 0,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        };
+
+                        // ইউজার ডাটা সেভ করা হচ্ছে
+                        return rtdb.ref('users/' + user.uid).set(userData);
+                    })
+                    .then(() => {
+                        // 3. Referral Count Increment Logic
+                        // যদি রেফারেল কোড দেওয়া থাকে, তবে রেফারারের কাউন্ট বাড়ানোর প্রসেস
+                        const referralInput = document.getElementById('user-referral').value.trim();
+                        
+                        if (referralInput) {
+                            // রেফারারের পথ রেফারেন্স নেওয়া হচ্ছে
+                            const referrerRef = rtdb.ref('users/' + referralInput);
+                            
+                            // ট্রানজেকশন ব্যবহার করা হচ্ছে যাতে ডাটা লস না হয়
+                            referrerRef.transaction((currentData) => {
+                                if (currentData) {
+                                    // referralCount বাড়ানো হচ্ছে (যদি আগে থেকে না থাকে তবে 1 দিয়ে শুরু হবে)
+                                    currentData.referralCount = (currentData.referralCount || 0) + 1;
+                                    return currentData;
+                                }
+                            }, (error, committed, snapshot) => {
+                                if (error) {
+                                    console.error("Referral count update failed:", error);
+                                }
+                                // এখানে কলব্যাক শেষ, ইউজারকে রিডাইরেক্ট করা যাবে
+                            });
+                        }
+
+                        // All Success
+                        showToast("Operator Record Created. Redirecting to terminal...", "success");
+                        signupForm.reset();
+                        
+                        setTimeout(() => {
+                            window.location.href = "login.html";
+                        }, 2000);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        let errorMessage = "Registration aborted by security layers.";
+
+                        switch (error.code) {
+                            case 'auth/email-already-in-use':
+                                errorMessage = "This email node is already registered.";
+                                break;
+                            case 'auth/invalid-email':
+                                errorMessage = "Malformed core string structure in email.";
+                                break;
+                            case 'auth/weak-password':
+                                errorMessage = "Provided password matrix is too easy to bypass.";
+                                break;
+                            default:
+                                errorMessage = error.message;
+                        }
+
+                        showToast(errorMessage, "error");
+                        setLoading(false);
+                    });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
+        setInterval(function() {
+            const start = new Date().getTime();
+            debugger; 
+            if (new Date().getTime() - start > 100) {
+                document.body.innerHTML = `
+                    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#090a0f; color:#ff3366; font-size:20px; font-weight:700; flex-direction:column; gap:15px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:40px;"></i>
+                        <div>[Security Rule Triggered: Execution Paused]</div>
+                    </div>`;
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

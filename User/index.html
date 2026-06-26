@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Mining Dashboard</title>
+    
+<meta property="og:title" content="Royal Task - Best Mining for Referral & Daily Earning">
+<meta property="og:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities. Invite friends, grow your network, complete tasks, and maximize your daily crypto earnings with our easy-to-use platform.">
+<meta property="og:image" content="https://royal-task.vercel.app/image.png">
+<meta property="og:url" content="https://royal-task.vercel.app">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Royal Task - Best Mining for Referral & Daily Earning">
+<meta name="twitter:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities.">
+<meta name="twitter:image" content="https://royal-task.vercel.app/image.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #090a0f;
+            --panel-dark: #121420;
+            --accent-glow: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body, html {
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* --- Top Navbar --- */
+        .topnav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: rgba(18, 20, 32, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1100;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #00ffcc, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            font-size: 24px;
+            color: var(--accent-glow);
+            -webkit-text-fill-color: initial; 
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .login-btn {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 22px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-btn i {
+            font-size: 14px;
+            color: var(--accent-glow);
+            transition: transform 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--text-main);
+            color: #000;
+            border-color: var(--text-main);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+        }
+        
+        .login-btn:hover i {
+            color: #000;
+            transform: translateX(3px);
+        }
+
+        .profile-icon-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 255, 204, 0.05);
+            border: 1.5px solid rgba(0, 255, 204, 0.2);
+            color: var(--accent-glow);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-icon-btn:hover {
+            background: rgba(0, 255, 204, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Blocked badge on profile */
+        .blocked-badge {
+            display: none;
+            background: rgba(255, 68, 102, 0.1);
+            border: 1px solid rgba(255, 68, 102, 0.3);
+            color: #ff4466;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: blockedPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes blockedPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; box-shadow: 0 0 12px rgba(255, 68, 102, 0.2); }
+        }
+
+        /* --- Toast Notification System --- */
+        #toastContainer {
+            position: fixed;
+            top: 85px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast-msg {
+            background: rgba(18, 20, 32, 0.95);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            color: var(--text-main);
+            padding: 16px 22px;
+            border-radius: 14px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transform: translateX(120%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 280px;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast-msg.show { transform: translateX(0); }
+        .toast-msg i { font-size: 20px; color: var(--accent-glow); }
+
+        .toast-text-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .toast-title { font-size: 14px; font-weight: 600; }
+        .toast-subtitle { font-size: 12px; color: var(--text-muted); }
+
+        .toast-msg.toast-error {
+            border-color: rgba(255, 68, 102, 0.3);
+        }
+        .toast-msg.toast-error i {
+            color: #ff4466;
+        }
+
+        /* --- Main Layout Wrapper --- */
+        .main-wrapper {
+            display: flex;
+            margin-top: 70px;
+            height: calc(100% - 70px);
+            position: relative;
+        }
+
+        /* --- Left Sidebar Panel --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-dark);
+            height: 100%;
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 99;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin: 18px 0 8px 0;
+            padding-left: 12px;
+            font-weight: 600;
+        }
+        
+        .sidebar-title:first-child {
+            margin-top: 0;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            padding: 14px 16px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            gap: 14px;
+        }
+
+        .sidebar a i {
+            font-size: 18px;
+            width: 24px; 
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        
+        .sidebar a:hover i {
+            color: var(--text-main);
+        }
+
+        .sidebar a.active {
+            background: linear-gradient(90deg, rgba(0, 255, 204, 0.08) 0%, rgba(0, 255, 204, 0) 100%);
+            color: var(--accent-glow);
+            font-weight: 600;
+            border-left: 3px solid var(--accent-glow);
+            border-radius: 0 12px 12px 0; 
+        }
+        
+        .sidebar a.active i {
+            color: var(--accent-glow);
+        }
+
+        /* Live Chat special styling */
+        .sidebar a.nav-chat {
+            position: relative;
+        }
+        .sidebar a.nav-chat .chat-dot {
+            position: absolute;
+            top: 12px;
+            left: 32px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ffcc;
+            box-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+            animation: chatPulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes chatPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        /* Blocked user link disabled state */
+        .sidebar a.nav-blocked {
+            opacity: 0.3;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .sidebar a.nav-blocked i {
+            color: var(--text-muted) !important;
+        }
+
+        /* --- Content Dashboard Panel --- */
+        .content-container {
+            flex-grow: 1;
+            height: 100%;
+            background-color: var(--bg-dark);
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: transparent;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 90;
+        }
+
+        /* --- RESPONSIVE CSS STYLING --- */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex; 
+            }
+
+            .sidebar {
+                position: fixed;
+                left: calc(-1 * var(--sidebar-width)); 
+                top: 70px;
+                height: calc(100% - 70px);
+                box-shadow: 15px 0 40px rgba(0,0,0,0.6);
+            }
+
+            .sidebar.active {
+                left: 0; 
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .blocked-badge {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+                border-radius: 8px;
+            }
+            .logo {
+                font-size: 18px;
+            }
+            .logo i {
+                font-size: 20px;
+            }
+            .toast-msg {
+                min-width: 240px;
+            }
+            .blocked-badge {
+                display: none !important;
+            }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2a3048; border-radius: 20px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="toastContainer"></div>
+
+    <!-- Top Navbar Section -->
+    <header class="topnav">
+        <div class="nav-left">
+            <button class="menu-toggle" id="menuBtn" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars" id="toggleIcon"></i>
+            </button>
+            <div class="logo">
+                <i class="fa-solid fa-cubes-stacked"></i>
+                ROYAL TASK
+            </div>
+        </div>
+        <div class="nav-actions">
+            <!-- Blocked Badge (hidden by default, shown when user is blocked) -->
+            <span class="blocked-badge" id="blockedBadge">
+                <i class="fa-solid fa-ban" style="margin-right:4px;"></i> ACCOUNT BLOCKED
+            </span>
+
+            <button class="login-btn" id="signInBtn">
+                <span>Sign In</span>
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+            
+            <button class="profile-icon-btn" id="profileBtn" title="My Profile">
+                <i class="fa-solid fa-user"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container Dynamic Dashboard Core -->
+    <div class="main-wrapper">
+        
+        <div class="sidebar-overlay" id="overlay"></div>
+
+        <!-- Left Sidebar Navigation Framework -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-title">Core Features</div>
+
+            <!-- এই সব লিংকে data-blockable="true" আছে — ব্লকড ইউজারের জন্য ডিজেবল হবে -->
+            <a class="nav-link" data-url="../User/dashboard" data-blockable="true">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+            <a class="nav-link" data-url="../User/leaderboard" data-blockable="true">
+                <i class="fa-solid fa-trophy"></i> Leaderboard
+            </a>
+            <a class="nav-link" data-url="../User/vip-level-up" data-blockable="true">
+                <i class="fa-solid fa-crown"></i> Vip Level Up
+            </a>
+            <a class="nav-link" data-url="../User/level-claim" data-blockable="true">
+                <i class="fa-solid fa-gift"></i> Daily Claimed
+            </a>
+            <a class="nav-link" data-url="../User/referrals" data-blockable="true">
+                <i class="fa-solid fa-users"></i> Referrals
+            </a>
+            <a class="nav-link" data-url="../User/deposit" data-blockable="true">
+                <i class="fa-solid fa-money-bill-wave"></i> Deposit
+            </a>
+            <a class="nav-link" data-url="../User/deposit-history" data-blockable="true">
+                <i class="fa-solid fa-clock-rotate-left"></i> Deposit History
+            </a>
+            <a class="nav-link" data-url="../User/withdrawal" data-blockable="true">
+                <i class="fa-solid fa-wallet"></i> Withdrawal
+            </a>
+            <a class="nav-link" data-url="../User/withdraw-history" data-blockable="true">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Withdraw History
+            </a>
+            
+            <div class="sidebar-title">Support</div>
+
+            <!-- Settings ও ব্লকেবল -->
+            <a class="nav-link" data-url="../User/profile" data-blockable="true">
+                <i class="fa-solid fa-user-gear"></i> Settings
+            </a>
+
+            <!-- Live Chat — data-blockable নেই, তাই ব্লকড ইউজারও ব্যবহার করতে পারবে -->
+            <a class="nav-link nav-chat" data-url="../User/live-chat" data-blockable="false">
+                <i class="fa-solid fa-comments"></i> Live Chat
+                <span class="chat-dot"></span>
+            </a>
+        </nav>
+
+        <!-- Main Content (Iframe Area) -->
+        <main class="content-container">
+            <iframe id="main-frame" src="homepage" name="main-frame"></iframe>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cpanel-ebon.vercel.app/Royal%20Task/royaltaskroyaltaskroyaltask.js"></script>
+
+    <script>
+        // ========================================
+        // FIREBASE INITIALIZATION
+        // ========================================
+        if (typeof firebaseConfig === 'undefined') {
+            console.error('config.js missing');
+        } else {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        const rtdb = firebase.database();
+
+        // ========================================
+        // GLOBAL STATE VARIABLES
+        // ========================================
+        let isUserLoggedIn = false;
+        let isUserBlocked = false;   // ব্লক স্ট্যাটাস
+        let currentUserUid = null;
+        let statusListenerAttached = false; // স্ট্যাটাস লিসেনার একবারই আটাচ হবে
+
+        // ========================================
+        // UI UPDATE FUNCTION
+        // ========================================
+        function updateUI(isLoggedIn) {
+            if (isLoggedIn) {
+                document.getElementById('signInBtn').style.display = 'none';
+                document.getElementById('profileBtn').style.display = 'flex';
+            } else {
+                document.getElementById('signInBtn').style.display = 'flex';
+                document.getElementById('profileBtn').style.display = 'none';
+                // লগআউট অবস্থায় ব্লক মোড অফ
+                if (isUserBlocked) {
+                    setBlockedMode(false);
+                }
+            }
+        }
+
+        // ========================================
+        // BLOCKED MODE — পুরো UI পরিবর্তন
+        // ========================================
+        function setBlockedMode(blocked) {
+            isUserBlocked = blocked;
+
+            const allLinks = document.querySelectorAll('.nav-link[data-blockable="true"]');
+            const chatLink = document.querySelector('.nav-link[data-blockable="false"]');
+            const badge = document.getElementById('blockedBadge');
+            const iframe = document.getElementById('main-frame');
+
+            if (blocked) {
+                // ১. টপবারে BLOCKED ব্যাজ দেখাও
+                badge.style.display = 'inline-flex';
+
+                // ২. সব blockable লিংকে nav-blocked ক্লাস যোগ → opacity কমে যাবে, ক্লিক বন্ধ
+                allLinks.forEach(link => {
+                    link.classList.add('nav-blocked');
+                    link.classList.remove('active');
+                });
+
+                // ৩. শুধু Live Chat লিংক অ্যাক্টিভ রাখো (যদি আগে থেকে অ্যাক্টিভ না থাকে তবে এটাকে অ্যাক্টিভ করো)
+                if (chatLink) {
+                    chatLink.classList.remove('nav-blocked');
+                    // কোনো অ্যাক্টিভ লিংক না থাকলে চ্যাটকে অ্যাক্টিভ করো
+                    const anyActive = document.querySelector('.nav-link.active');
+                    if (!anyActive) {
+                        chatLink.classList.add('active');
+                    }
+                }
+
+                // ৪. iframe এ blocked.html লোড করো
+                iframe.src = 'blocked.html';
+
+                // ৫. টোস্ট দেখাও
+                showToast(
+                    "Account Restricted",
+                    "Your account has been blocked by admin. Contact support via Live Chat.",
+                    "fa-solid fa-shield-halved",
+                    true
+                );
+
+            } else {
+                // ব্লক মোড বন্ধ — সব ঠিক করো
+                badge.style.display = 'none';
+
+                allLinks.forEach(link => {
+                    link.classList.remove('nav-blocked');
+                });
+
+                // হোমপেজে ফিরিয়ে দাও
+                const dashboardLink = document.querySelector('.nav-link[data-url="../User/dashboard"]');
+                if (dashboardLink) {
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    dashboardLink.classList.add('active');
+                    iframe.src = '../User/dashboard';
+                } else {
+                    iframe.src = 'homepage';
+                }
+            }
+        }
+
+        // ========================================
+        // REALTIME STATUS LISTENER
+        // ========================================
+        function attachStatusListener(uid) {
+            if (statusListenerAttached) return; // ডুপ্লিকেট লিসেনার প্রতিরোধ
+            statusListenerAttached = true;
+
+            rtdb.ref('users/' + uid + '/status').on('value', (snapshot) => {
+                const status = snapshot.val();
+
+                if (status === 'blocked') {
+                    // ইউজার ব্লক — ব্লকড মোড চালু
+                    if (!isUserBlocked) {
+                        setBlockedMode(true);
+                    }
+                } else {
+                    // ইউজার আনব্লক বা active
+                    if (isUserBlocked) {
+                        setBlockedMode(false);
+                    }
+                }
+            });
+        }
+
+        // ========================================
+        // AUTH STATE — পেজ লোড
+        // ========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('currentUser');
+            
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    isUserLoggedIn = true;
+                    currentUserUid = userData.uid;
+                    updateUI(true);
+
+                    // রিয়েল-টাইম স্ট্যাটাস লিসেনার আটাচ
+                    attachStatusListener(currentUserUid);
+
+                    // Firebase Auth সিঙ্ক
+                    auth.onAuthStateChanged((user) => {
+                        if (!user) {
+                            handleLogout();
+                        } else if (user.uid !== currentUserUid) {
+                            // UID ম্যাচ করছে না — রিফ্রেশ
+                            currentUserUid = user.uid;
+                            localStorage.setItem('currentUser', JSON.stringify({
+                                uid: user.uid,
+                                email: user.email,
+                                displayName: user.displayName || "User",
+                                photoURL: user.photoURL || null
+                            }));
+                            // পুরনো লিসেনার ডিটাচ, নতুন আটাচ
+                            rtdb.ref('users/' + currentUserUid + '/status').off();
+                            statusListenerAttached = false;
+                            attachStatusListener(currentUserUid);
+                        }
+                    });
+
+                } catch (e) {
+                    console.error("Local storage parse error", e);
+                    localStorage.removeItem('currentUser');
+                    updateUI(false);
+                }
+            } else {
+                // লোকাল স্টোরেজে নেই — Firebase Auth চেক
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        const userData = {
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || "User",
+                            photoURL: user.photoURL || null
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(userData));
+                        isUserLoggedIn = true;
+                        currentUserUid = user.uid;
+                        updateUI(true);
+
+                        // রিয়েল-টাইম স্ট্যাটাস লিসেনার আটাচ
+                        attachStatusListener(currentUserUid);
+                    } else {
+                        isUserLoggedIn = false;
+                        updateUI(false);
+                    }
+                });
+            }
+        });
+
+        // ========================================
+        // LOGOUT
+        // ========================================
+        function handleLogout() {
+            // স্ট্যাটাস লিসেনার ডিটাচ
+            if (currentUserUid) {
+                rtdb.ref('users/' + currentUserUid + '/status').off();
+            }
+            statusListenerAttached = false;
+
+            auth.signOut().then(() => {
+                localStorage.removeItem('currentUser');
+                isUserLoggedIn = false;
+                isUserBlocked = false;
+                currentUserUid = null;
+                updateUI(false);
+                document.getElementById('main-frame').src = 'homepage';
+            }).catch((error) => {
+                console.error("Sign out error", error);
+            });
+        }
+        
+        document.getElementById('profileBtn').addEventListener('click', () => {
+            // ব্লকড থাকলে প্রোফাইলে যাওয়া যাবে না
+            if (isUserBlocked) {
+                showToast("Access Denied", "Blocked accounts cannot access settings.", "fa-solid fa-lock", true);
+                return;
+            }
+            document.getElementById('main-frame').src = '../User/profile';
+        });
+
+        // ========================================
+        // TOAST NOTIFICATION
+        // ========================================
+        function showToast(title, subtitle, iconClass, isError) {
+            const container = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg' + (isError ? ' toast-error' : '');
+            toast.innerHTML = `
+                <i class="${iconClass}"></i>
+                <div class="toast-text-container">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-subtitle">${subtitle}</div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
+        // ========================================
+        // NAVIGATION CLICK HANDLER
+        // ========================================
+        const links = document.querySelectorAll('.nav-link');
+        const iframe = document.getElementById('main-frame');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menuBtn');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const signInBtn = document.getElementById('signInBtn');
+
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // --- চেক ১: লগইন আছে কিনা ---
+                if (!isUserLoggedIn) {
+                    showToast("Access Restricted", "Please sign in to continue", "fa-solid fa-lock", false);
+                    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                        toggleSidebar();
+                    }
+                    return;
+                }
+
+                // --- চেক ২: ব্লকড ইউজার কি blockable লিংকে ক্লিক করছে ---
+                const isBlockable = this.getAttribute('data-blockable') === 'true';
+                if (isUserBlocked && isBlockable) {
+                    // ইউজার ব্লক + এটা ব্লকেবল লিংক → ব্লক করো
+                    showToast(
+                        "Access Denied",
+                        "Your account is blocked. Only Live Chat is available.",
+                        "fa-solid fa-ban",
+                        true
+                    );
+                    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                        toggleSidebar();
+                    }
+                    return;
+                }
+
+                // --- চেক ৩: ব্লকড ইউজার যদি Live Chat এ ক্লিক করে ---
+                if (isUserBlocked && !isBlockable) {
+                    // লাইভ চ্যাট — ব্লকড ইউজারের জন্যও অনুমোদিত
+                    links.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    iframe.src = this.getAttribute('data-url');
+                    
+                    if (window.innerWidth <= 768) toggleSidebar();
+                    return;
+                }
+
+                // --- স্বাভাবিক নেভিগেশন (লগইন + আনব্লকড) ---
+                links.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                iframe.src = this.getAttribute('data-url');
+
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Sign In Button
+        signInBtn.addEventListener('click', () => {
+            iframe.src = '../User/login';
+        });
+
+        // ========================================
+        // MOBILE SIDEBAR TOGGLER
+        // ========================================
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('show');
+            
+            if (sidebar.classList.contains('active')) {
+                toggleIcon.className = "fa-solid fa-xmark";
+            } else {
+                toggleIcon.className = "fa-solid fa-bars";
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // ========================================
+        // SECURITY
+        // ========================================
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+    </script>
+</body>
+</html>

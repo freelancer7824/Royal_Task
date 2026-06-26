@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Asset Withdrawal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #090a0f;
+            --panel-card: #121420;
+            --accent-neon: #00ffcc;
+            --accent-hover: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #8a94a6;
+            --card-border: rgba(255, 255, 255, 0.03);
+            --input-bg: #1a1d30;
+            --alert-red: #ff3366;
+            --warning-color: #ffcc00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar { width: 6px; }
+        body::-webkit-scrollbar-track { background: #090a0f; }
+        body::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        body::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+
+        .withdrawal-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1200px;
+        }
+
+        .form-card, .info-card {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i { color: var(--accent-neon); }
+
+        .input-wrapper { margin-bottom: 20px; }
+        .input-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-group {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 16px;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+        }
+        .input-group:focus-within { border-color: rgba(0, 255, 204, 0.3); box-shadow: 0 0 10px rgba(0, 255, 204, 0.05); }
+        .input-group i { color: var(--text-muted); font-size: 16px; }
+        .input-group input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+            font-size: 14px;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .network-option {
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .network-option p { font-size: 14px; font-weight: 600; }
+        .network-option span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+        
+        .network-radio { display: none; }
+        .network-radio:checked + .network-option {
+            border-color: var(--accent-neon);
+            background: rgba(0, 255, 204, 0.03);
+        }
+        .network-radio:checked + .network-option p { color: var(--accent-neon); }
+
+        .max-btn {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--accent-neon);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .max-btn:hover { background: var(--accent-neon); color: #000; }
+
+        .fee-panel {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fee-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); }
+        .fee-row span.highlight { color: var(--text-main); font-weight: 600; }
+
+        .submit-withdraw-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.15);
+        }
+        .submit-withdraw-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0, 255, 204, 0.3); }
+        .submit-withdraw-btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .balance-board {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .balance-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .balance-val { font-size: 32px; font-weight: 700; margin-top: 5px; color: var(--text-main); }
+        .balance-val span { font-size: 16px; color: var(--accent-neon); }
+        
+        .gas-notice {
+            background: rgba(255, 204, 0, 0.05);
+            border: 1px solid rgba(255, 204, 0, 0.15);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: var(--warning-color);
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .gas-notice i { margin-top: 2px; flex-shrink: 0; }
+
+        .security-hints { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+        .security-hints li { font-size: 13px; color: var(--text-muted); line-height: 1.5; display: flex; gap: 10px; }
+        .security-hints li i { color: var(--alert-red); margin-top: 3px; font-size: 14px; }
+
+        /* --- Custom Popups --- */
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 5, 9, 0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .popup-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .popup-box {
+            background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
+            border: 1px solid rgba(0, 255, 204, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 255, 204, 0.05);
+            padding: 32px; border-radius: 24px; width: 90%; max-width: 420px;
+            text-align: center;
+            transform: scale(0.7) translateY(30px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .popup-overlay.show .popup-box { transform: scale(1) translateY(0); }
+
+        .popup-icon-container {
+            width: 70px; height: 70px; background: rgba(0, 255, 204, 0.05);
+            border: 1px dashed var(--accent-neon); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .popup-icon-container i { color: var(--accent-neon); font-size: 30px; }
+        .popup-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .popup-msg { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px; text-align: left; }
+        .popup-msg strong { color: var(--accent-neon); }
+        
+        .popup-close-btn {
+            background: linear-gradient(135deg, #00ffcc 0%, #00b38f 100%);
+            color: #000; border: none; padding: 12px 30px; border-radius: 12px;
+            font-weight: 700; font-size: 14px; cursor: pointer; width: 100%;
+            transition: all 0.3s; box-shadow: 0 5px 15px rgba(0, 255, 204, 0.2);
+        }
+        .popup-close-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .popup-close-btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .error-icon-container { border-color: var(--alert-red); }
+        .error-icon-container i { color: var(--alert-red); }
+        .error-title { color: var(--alert-red) !important; }
+
+        .confirm-actions { display: flex; gap: 12px; }
+        .confirm-actions button { flex: 1; }
+        .btn-cancel {
+            background: rgba(255,255,255,0.05); color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1); padding: 12px;
+            border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer;
+        }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        @media (max-width: 900px) { .withdrawal-container { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) {
+            body { padding: 16px; }
+            .form-card, .info-card { padding: 20px; }
+            .network-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="page-header">
+        <h1>Secure Withdrawal</h1>
+        <p>Transfer your automated network block mining rewards cleanly back into cold wallets.</p>
+    </div>
+
+    <div class="withdrawal-container">
+        
+        <!-- Left: Form -->
+        <div class="form-card">
+            <div class="section-title">
+                <i class="fa-solid fa-money-bill-transfer"></i> Outbound Pipeline Parameters
+            </div>
+
+            <div class="input-wrapper">
+                <label class="input-label">Select Destination Settlement Protocol</label>
+                <div class="network-grid">
+                    <label>
+                        <input type="radio" name="crypto-net" class="network-radio" value="TRC20" checked onchange="updateProcessingFee(1.50)">
+                        <div class="network-option">
+                            <p>USDT (TRC20)</p>
+                            <span>Fee: 1.50 USDT</span>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="crypto-net" class="network-radio" value="BEP20" onchange="updateProcessingFee(0.01)">
+                        <div class="network-option">
+                            <p>USDT (BEP20)</p>
+                            <span>Fee: 0.01 USDT</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="gas-notice">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Minimum withdrawal is <strong>5.00 USDT</strong>. Clicking "Use Max" will automatically deduct the gas fee and set the maximum possible amount you can withdraw.</span>
+            </div>
+
+            <div class="input-wrapper">
+                <label class="input-label">Recipient Vault Address</label>
+                <div class="input-group">
+                    <i class="fa-solid fa-wallet"></i>
+                    <input type="text" id="target-wallet" placeholder="Paste target public routing key address..." autocomplete="off">
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <label class="input-label" style="margin-bottom: 0;">Transfer Asset Volume</label>
+                    <button class="max-btn" onclick="injectMaxVolumeLimit()">Use Max</button>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                    <input type="number" id="withdraw-amount" placeholder="0.00" step="any" min="0" oninput="calculateNetPayoutResult()">
+                </div>
+            </div>
+
+            <div class="fee-panel">
+                <div class="fee-row">
+                    <span>Protocol Gas/Handling Fee:</span>
+                    <span class="highlight"><span id="gas-fee-readout">1.50</span> USDT</span>
+                </div>
+                <div class="fee-row">
+                    <span>Total Deduction (Amount + Fee):</span>
+                    <span class="highlight" style="color: var(--alert-red);"><span id="total-deduction-readout">0.00</span> USDT</span>
+                </div>
+                <div class="fee-row" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Net Expected Distribution:</span>
+                    <span class="highlight" style="color: var(--accent-neon);"><span id="net-payout-readout">0.00</span> USDT</span>
+                </div>
+            </div>
+
+            <button class="submit-withdraw-btn" id="withdraw-action-btn" onclick="initiateSecureWithdrawalPipeline()">
+                <i class="fa-solid fa-shield-halved"></i> Request Settlement Authorization
+            </button>
+        </div>
+
+        <!-- Right: Info -->
+        <div class="info-card">
+            <div class="section-title">
+                <i class="fa-solid fa-vault"></i> Account Allocation Metrics
+            </div>
+
+            <div class="balance-board">
+                <p class="balance-label">Withdrawable Available Reserves</p>
+                <div class="balance-val"><span id="user-live-balance">Loading...</span> <span>USDT</span></div>
+            </div>
+
+            <div class="section-title" style="margin-top: 10px;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Security Compliance Rules
+            </div>
+            
+            <ul class="security-hints">
+                <li>
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><strong>Address Check Disclaimer:</strong> Ensure the recipient address perfectly mirrors your target network. Assets routed onto incorrect networks cannot be recovered.</span>
+                </li>
+                <li>
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><strong>Processing Lifespan:</strong> Outbound queue requests pass via internal smart audit protocol checks, finishing execution sequences within 5-30 minutes.</span>
+                </li>
+                <li>
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span><strong>Minimum Settlement Limit:</strong> The lowest acceptable asset amount allowed out of the network is <strong>5.00 USDT</strong>. Your balance must cover this amount PLUS the network gas fee.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Success / Pending Popup -->
+    <div class="popup-overlay" id="success-popup">
+        <div class="popup-box">
+            <div class="popup-icon-container">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="popup-title">Request Queued Successfully</div>
+            <div class="popup-msg" id="success-msg-text"></div>
+            <button class="popup-close-btn" onclick="closePopup('success-popup')">Acknowledge</button>
+        </div>
+    </div>
+
+    <!-- Error Popup -->
+    <div class="popup-overlay" id="error-popup">
+        <div class="popup-box">
+            <div class="popup-icon-container error-icon-container">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="popup-title error-title">Pipeline Error</div>
+            <div class="popup-msg" id="error-msg-text"></div>
+            <button class="popup-close-btn" onclick="closePopup('error-popup')">Dismiss</button>
+        </div>
+    </div>
+
+    <!-- Confirm Popup -->
+    <div class="popup-overlay" id="confirm-popup">
+        <div class="popup-box">
+            <div class="popup-icon-container">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="popup-title">Authorize Transfer?</div>
+            <div class="popup-msg" id="confirm-msg-text"></div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closePopup('confirm-popup')">Cancel</button>
+                <button class="popup-close-btn" id="confirm-yes-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Config JS File -->
+    <script src="https://cpanel-ebon.vercel.app/Royal%20Task/royaltaskroyaltaskroyaltask.js"></script>
+
+    <script>
+        let internalLiquidityBalance = 0; 
+        let activeSelectedGasFee = 1.50;
+        let currentUserId = null;
+        let currentUsername = null;
+        let database = null;
+        let selectedNetwork = "TRC20";
+        const MIN_WITHDRAW_LIMIT = 5.00; // মিনিমাম উইথড্রয়েবল পরিমাণ
+
+        const balanceDisplayEl = document.getElementById('user-live-balance');
+        const withdrawBtn = document.getElementById('withdraw-action-btn');
+        const confirmYesBtn = document.getElementById('confirm-yes-btn');
+
+        // --- Popup Controls ---
+        function showPopup(id) { document.getElementById(id).classList.add('show'); }
+        function closePopup(id) { document.getElementById(id).classList.remove('show'); }
+        
+        function showError(msg) {
+            document.getElementById('error-msg-text').innerHTML = msg;
+            showPopup('error-popup');
+        }
+
+        // --- ১. Login Check ---
+        function checkLogin() {
+            const loggedInUser = localStorage.getItem('currentUser');
+            if (!loggedInUser) {
+                window.location.href = "login.html";
+                return false;
+            }
+            try {
+                const userData = JSON.parse(loggedInUser);
+                currentUserId = userData.uid;
+                currentUsername = userData.username || "User";
+                return true;
+            } catch (e) {
+                window.location.href = "login.html";
+                return false;
+            }
+        }
+
+        // --- ২. Firebase Init ---
+        function initializeFirebaseApp() {
+            if (typeof firebaseConfig === 'undefined') {
+                showError("Configuration file missing. Please check your connection.");
+                return false;
+            }
+            if (typeof firebase === 'undefined') {
+                showError("Network Error: Secure Gateway SDK failed to load.");
+                return false;
+            }
+            if (!firebase.apps.length) {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                } catch (error) {
+                    showError("System Error: Failed to initialize secure environment.");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // --- Form Logic Controls ---
+        function updateProcessingFee(feeValue) {
+            activeSelectedGasFee = feeValue;
+            document.getElementById('gas-fee-readout').innerText = activeSelectedGasFee.toFixed(2);
+            selectedNetwork = document.querySelector('input[name="crypto-net"]:checked').value;
+            calculateNetPayoutResult();
+        }
+
+        // "Use Max" বাটন লজিক: 
+        // সর্বোচ্চ উইথড্রয়েবল পরিমাণ = মোট ব্যালেন্স - গ্যাস ফি
+        // যদি এই পরিমাণ ৫ USDT এর কম হয়, তাহলে উইথড্র সম্ভব নয়
+        function injectMaxVolumeLimit() {
+            const maxPossibleInput = internalLiquidityBalance - activeSelectedGasFee;
+            
+            if (maxPossibleInput >= MIN_WITHDRAW_LIMIT) {
+                // পর্যাপ্ত ব্যালেন্স আছে, ম্যাক্স পরিমাণ সেট করো
+                document.getElementById('withdraw-amount').value = maxPossibleInput.toFixed(2);
+            } else {
+                // ব্যালেন্স কম; গ্যাস ফি বাদ দিলে ৫ USDT এর নিচে চলে যায়
+                document.getElementById('withdraw-amount').value = "0.00";
+                let requiredBalance = MIN_WITHDRAW_LIMIT + activeSelectedGasFee;
+                showError(`Insufficient balance for maximum withdrawal! To withdraw the minimum (5.00 USDT), you need at least <strong>${requiredBalance.toFixed(2)} USDT</strong> in your balance (including gas fee). Your current balance is <strong>${internalLiquidityBalance.toFixed(2)} USDT</strong>.`);
+            }
+            calculateNetPayoutResult();
+        }
+
+        // নেট পেআউট ও মোট ডেডাকশন ক্যালকুলেশন
+        function calculateNetPayoutResult() {
+            const rawInputVal = parseFloat(document.getElementById('withdraw-amount').value);
+            const payoutDisplayElement = document.getElementById('net-payout-readout');
+            const totalDeductionElement = document.getElementById('total-deduction-readout');
+
+            if (!isNaN(rawInputVal) && rawInputVal > 0) {
+                const totalDeduction = rawInputVal + activeSelectedGasFee;
+                const net = rawInputVal - activeSelectedGasFee;
+                
+                payoutDisplayElement.innerText = net > 0 ? net.toFixed(2) : "0.00";
+                totalDeductionElement.innerText = totalDeduction.toFixed(2);
+            } else {
+                payoutDisplayElement.innerText = "0.00";
+                totalDeductionElement.innerText = "0.00";
+            }
+        }
+
+        // --- Core Withdrawal Logic ---
+        function initiateSecureWithdrawalPipeline() {
+            const targetAddressString = document.getElementById('target-wallet').value.trim();
+            const requestedVolumeValue = parseFloat(document.getElementById('withdraw-amount').value);
+
+            // বেসিক ফিল্ড চেক
+            if (!targetAddressString || isNaN(requestedVolumeValue)) {
+                showError("Please ensure both the target wallet address and transfer amount inputs are complete.");
+                return;
+            }
+
+            // চেক: ইনপুট পরিমাণ কি ন্যূনতম ৫ USDT এর সমান বা বেশি?
+            if (requestedVolumeValue < MIN_WITHDRAW_LIMIT) {
+                showError(`Protocol Violation! Minimum withdrawal amount is <strong>${MIN_WITHDRAW_LIMIT.toFixed(2)} USDT</strong>. You entered <strong>${requestedVolumeValue.toFixed(2)} USDT</strong>.`);
+                return;
+            }
+
+            // চেক: ইউজারের ব্যালেন্সে কি প্রবেশ করা পরিমাণ + গ্যাস ফি আছে?
+            const totalDeduction = requestedVolumeValue + activeSelectedGasFee;
+            if (totalDeduction > internalLiquidityBalance) {
+                showError(`Insufficient balance! You are requesting <strong>${requestedVolumeValue.toFixed(2)} USDT</strong> + Gas Fee <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong> = <strong>${totalDeduction.toFixed(2)} USDT</strong>.<br><br>Your current balance is only <strong>${internalLiquidityBalance.toFixed(2)} USDT</strong>.`);
+                return;
+            }
+
+            // নেট পেআউট ক্যালকুলেশন (যা ইউজার আসলে পেমেন্ট পাবে)
+            const netPayout = requestedVolumeValue - activeSelectedGasFee;
+            const netPayoutStr = netPayout.toFixed(2);
+
+            document.getElementById('confirm-msg-text').innerHTML = `
+                Target Address: <br><span style="font-family:monospace; color:#fff; font-size:12px; word-break:break-all;">${targetAddressString}</span><br><br>
+                Withdrawal Amount: <strong>${requestedVolumeValue.toFixed(2)} USDT</strong><br>
+                Gas Fee: <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong><br>
+                Total Deduction from Balance: <strong style="color:var(--alert-red);">${totalDeduction.toFixed(2)} USDT</strong><br>
+                You Will Receive: <strong style="color:var(--accent-neon);">${netPayoutStr} USDT</strong>
+            `;
+            
+            confirmYesBtn.onclick = function() {
+                closePopup('confirm-popup');
+                executeWithdrawalRequest(targetAddressString, requestedVolumeValue, netPayoutStr);
+            };
+
+            showPopup('confirm-popup');
+        }
+
+        function executeWithdrawalRequest(address, amount, netPayout) {
+            withdrawBtn.disabled = true;
+            confirmYesBtn.disabled = true;
+            withdrawBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Deducting Balance...';
+
+            // মোট যত টাকা কাটবে = উইথড্র পরিমাণ + গ্যাস ফি
+            const totalDeduction = amount + activeSelectedGasFee;
+            const balanceRef = database.ref(`users/${currentUserId}/balance`);
+
+            balanceRef.transaction((currentBalance) => {
+                if (currentBalance === null || currentBalance < totalDeduction) {
+                    return; // ব্যালেন্স কম থাকলে ট্রানজেকশন বাতিল করে দেবে (abort)
+                }
+                return (currentBalance - totalDeduction);
+            })
+            .then((transactionResult) => {
+                if (!transactionResult.committed) {
+                    showError("Transaction failed! Insufficient balance or a concurrent request was detected. Your balance remains unchanged.");
+                    return;
+                }
+
+                // ব্যালেন্স সফলভাবে কাটা হয়ে গেছে, এখন উইথড্র ডাটা সেভ করো
+                const newWithdrawalRef = database.ref('withdrawals').push();
+                const withdrawalData = {
+                    withdrawal_id: newWithdrawalRef.key,
+                    user_id: currentUserId,
+                    username: currentUsername,
+                    network: selectedNetwork,
+                    wallet_address: address,
+                    gross_amount: Number(amount),
+                    fee: Number(activeSelectedGasFee),
+                    net_amount: Number(netPayout),
+                    status: "pending", 
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                return newWithdrawalRef.set(withdrawalData);
+            })
+            .then(() => {
+                document.getElementById('success-msg-text').innerHTML = `
+                    Your withdrawal request has been securely queued.<br><br>
+                    Requested Amount: <strong>${amount.toFixed(2)} USDT</strong><br>
+                    Gas Fee Deducted: <strong>${activeSelectedGasFee.toFixed(2)} USDT</strong><br>
+                    You Will Receive: <strong style="color:var(--accent-neon);">${netPayout} USDT</strong><br>
+                    Network: <strong>${selectedNetwork}</strong><br><br>
+                    Status: <span style="color:var(--warning-color); font-weight:700;"><i class="fa-solid fa-clock"></i> Pending Admin Authorization</span>
+                `;
+                showPopup('success-popup');
+                
+                // ফর্ম রিসেট করো
+                document.getElementById('target-wallet').value = "";
+                document.getElementById('withdraw-amount').value = "";
+                document.getElementById('net-payout-readout').innerText = "0.00";
+                document.getElementById('total-deduction-readout').innerText = "0.00";
+            })
+            .catch((error) => {
+                console.error("Withdrawal Error:", error);
+                showError("Network failure! Could not transmit payload to the blockchain node.");
+            })
+            .finally(() => {
+                withdrawBtn.disabled = false;
+                confirmYesBtn.disabled = false;
+                withdrawBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Request Settlement Authorization';
+            });
+        }
+
+        // --- Init on DOM Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkLogin()) return;
+            if (!initializeFirebaseApp()) return;
+
+            database = firebase.database();
+
+            // রিয়েলটাইম ব্যালেন্স লোড করা হচ্ছে
+            database.ref(`users/${currentUserId}/balance`).on('value', (snapshot) => {
+                if (snapshot.exists() && snapshot.val() !== null) {
+                    internalLiquidityBalance = parseFloat(snapshot.val());
+                    balanceDisplayEl.innerText = internalLiquidityBalance.toFixed(2);
+                } else {
+                    internalLiquidityBalance = 0;
+                    balanceDisplayEl.innerText = "0.00";
+                }
+            }, (error) => {
+                balanceDisplayEl.innerText = "Error";
+                console.error("Balance fetch error:", error);
+            });
+        });
+
+        // --- Security Controls ---
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0) || e.keyCode == 'M'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false;
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claimed Levels</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #07080d;
+            --panel-card: #10121c;
+            --accent-neon: #00ffcc;
+            --accent-dim: #00b38f;
+            --text-main: #f1f3f9;
+            --text-muted: #6b7590;
+            --card-border: rgba(255, 255, 255, 0.04);
+            --vip-gold: #ffaa00;
+            --danger: #ff3366;
+            --success: #00e676;
+            --claim-blue: #3b82f6;
+            --cooldown-purple: #a855f7;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none; user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar { width: 5px; }
+        body::-webkit-scrollbar-track { background: var(--bg-body); }
+        body::-webkit-scrollbar-thumb { background: #1a1d2e; border-radius: 10px; }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 {
+            font-size: 28px; font-weight: 800;
+            letter-spacing: -0.5px; margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--accent-neon), #fff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .page-header p { color: var(--text-muted); font-size: 13.5px; line-height: 1.5; }
+
+        .top-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            max-width: 1200px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: var(--panel-card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+        }
+        .stat-box.balance-box::after { background: linear-gradient(90deg, transparent, var(--accent-neon), transparent); }
+        .stat-box.levels-box::after { background: linear-gradient(90deg, transparent, var(--success), transparent); }
+        .stat-box.earning-box::after { background: linear-gradient(90deg, transparent, var(--vip-gold), transparent); }
+
+        .stat-label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-muted);
+            font-weight: 600; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .stat-label i { font-size: 12px; }
+        .stat-value {
+            font-size: 24px; font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .stat-value.neon { color: var(--accent-neon); }
+        .stat-value.green { color: var(--success); }
+        .stat-value.gold { color: var(--vip-gold); }
+        .stat-unit { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 4px; }
+
+        .claim-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+        }
+
+        .claim-card {
+            background: linear-gradient(160deg, #12141f 0%, #0c0d15 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .claim-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .claim-card.card-locked:hover {
+            transform: none;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .card-strip {
+            height: 4px;
+            width: 100%;
+        }
+        .card-strip.strip-ready {
+            background: linear-gradient(90deg, var(--success), #00c853, var(--success));
+            background-size: 200% 100%;
+            animation: stripFlow 2s linear infinite;
+        }
+        .card-strip.strip-cooldown {
+            background: linear-gradient(90deg, #2a1a3a, var(--cooldown-purple), #2a1a3a);
+        }
+        .card-strip.strip-locked {
+            background: linear-gradient(90deg, #1a1a1a, #2a2a2a, #1a1a1a);
+        }
+        .card-strip.strip-active-glow {
+            background: linear-gradient(90deg, var(--accent-neon), #00ccaa, var(--accent-neon));
+            background-size: 200% 100%;
+            animation: stripFlow 2s linear infinite;
+        }
+
+        @keyframes stripFlow {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .card-body { padding: 22px 24px; display: flex; flex-direction: column; flex-grow: 1; }
+
+        .card-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .card-level-name {
+            font-size: 22px; font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+        .card-status-badge {
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 4px 10px; border-radius: 6px;
+            white-space: nowrap;
+        }
+        .badge-active {
+            background: rgba(0, 255, 204, 0.12);
+            color: var(--accent-neon);
+            border: 1px solid rgba(0, 255, 204, 0.25);
+            animation: badgePulse 2s infinite;
+        }
+        .badge-ready {
+            background: rgba(0, 230, 118, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            animation: badgePulse 2s infinite;
+        }
+        .badge-cooldown {
+            background: rgba(168, 85, 247, 0.1);
+            color: var(--cooldown-purple);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        .badge-locked {
+            background: rgba(255, 255, 255, 0.03);
+            color: #444;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .earning-display {
+            background: rgba(0, 255, 204, 0.04);
+            border: 1px solid rgba(0, 255, 204, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: opacity 0.3s;
+        }
+        .earning-display.dimmed {
+            opacity: 0.25;
+        }
+        .earning-left {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .earning-icon-wrap {
+            width: 36px; height: 36px;
+            background: rgba(0, 255, 204, 0.08);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .earning-icon-wrap i { color: var(--accent-neon); font-size: 15px; }
+        .earning-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .earning-amount { font-size: 20px; font-weight: 800; color: var(--accent-neon); margin-top: 2px; }
+        .earning-amount .unit { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+
+        .cooldown-section { margin-bottom: 16px; }
+        .cooldown-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 8px;
+        }
+        .cooldown-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cooldown-time { font-size: 13px; font-weight: 700; color: var(--cooldown-purple); font-variant-numeric: tabular-nums; }
+        .cooldown-time.ready-text { color: var(--success); }
+
+        .cooldown-bar-bg {
+            width: 100%; height: 6px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px; overflow: hidden;
+        }
+        .cooldown-bar-fill {
+            height: 100%; border-radius: 10px;
+            background: linear-gradient(90deg, var(--cooldown-purple), #c084fc);
+            transition: width 1s linear;
+        }
+        .cooldown-bar-fill.fill-ready {
+            background: linear-gradient(90deg, var(--success), #69f0ae);
+            width: 100% !important;
+        }
+
+        .card-features {
+            display: flex; gap: 16px;
+            margin-bottom: 18px;
+            padding: 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .feat-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted); }
+        .feat-item i { font-size: 10px; color: var(--accent-dim); }
+        .feat-item.feat-dim { color: #333; }
+        .feat-item.feat-dim i { color: #333; }
+
+        .claim-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700; font-size: 13.5px;
+            cursor: pointer; border: none;
+            display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+        .claim-btn.btn-ready {
+            background: linear-gradient(135deg, #00e676, #00c853);
+            color: #000;
+            box-shadow: 0 6px 20px rgba(0, 230, 118, 0.2);
+        }
+        .claim-btn.btn-ready:hover { transform: scale(0.98); box-shadow: 0 8px 25px rgba(0, 230, 118, 0.3); }
+        .claim-btn.btn-ready:active { transform: scale(0.95); }
+
+        .claim-btn.btn-cooldown {
+            background: rgba(168, 85, 247, 0.08);
+            color: var(--cooldown-purple);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .claim-btn.btn-locked {
+            background: rgba(255, 255, 255, 0.02);
+            color: #3a3a3a;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* লকড কার্ডের ওভারলে */
+        .card-locked-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(7, 8, 13, 0.6);
+            border-radius: 20px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .card-locked-overlay .lock-icon {
+            width: 52px; height: 52px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-locked-overlay .lock-icon i { font-size: 20px; color: #333; }
+
+        /* লকড রিজন টুলটিপ */
+        .locked-reason {
+            display: none;
+            position: absolute;
+            bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #1a1020;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            color: var(--cooldown-purple);
+            font-size: 11px; font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 10px;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .locked-reason::after {
+            content: '';
+            position: absolute;
+            top: 100%; left: 50%; transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(168, 85, 247, 0.25);
+        }
+        .claim-card.show-reason .locked-reason { display: block; }
+
+        /* অ্যাক্টিভ কার্ডে বিশেষ গ্লো */
+        .claim-card.card-active {
+            border-color: rgba(0, 255, 204, 0.2);
+        }
+        .claim-card.card-active:hover {
+            border-color: rgba(0, 255, 204, 0.35);
+            box-shadow: 0 16px 40px rgba(0, 255, 204, 0.08);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .empty-icon {
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.06);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .empty-icon i { font-size: 30px; color: #333; }
+        .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+        .empty-state p { font-size: 13px; color: #444; line-height: 1.5; }
+
+        .toast {
+            position: fixed; top: 24px; right: 24px;
+            padding: 16px 24px; border-radius: 14px;
+            font-size: 13.5px; font-weight: 600;
+            z-index: 99999;
+            display: flex; align-items: center; gap: 10px;
+            transform: translateX(130%);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+            max-width: 380px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.toast-success {
+            background: linear-gradient(145deg, #0d2818, #0e1019);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+        .toast.toast-success i { color: var(--success); font-size: 18px; }
+        .toast.toast-error {
+            background: linear-gradient(145deg, #2a0d15, #0e1019);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+        }
+        .toast.toast-error i { color: var(--danger); font-size: 18px; }
+
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 5, 9, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: all 0.35s ease;
+        }
+        .popup-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .popup-box {
+            background: linear-gradient(145deg, #16192b, #0e1019);
+            border: 1px solid rgba(255, 51, 102, 0.2);
+            box-shadow: 0 20px 50px rgba(255, 51, 102, 0.08);
+            padding: 32px; border-radius: 24px;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            transform: scale(0.7) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .popup-overlay.show .popup-box { transform: scale(1) translateY(0); }
+
+        .popup-icon-circle {
+            width: 64px; height: 64px;
+            background: rgba(255, 51, 102, 0.08);
+            border: 1px dashed var(--danger);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+        }
+        .popup-icon-circle i { color: var(--danger); font-size: 28px; }
+        .popup-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+        .popup-text { color: var(--text-muted); font-size: 13.5px; line-height: 1.6; margin-bottom: 24px; }
+        .popup-text strong { color: var(--text-main); }
+        .popup-dismiss-btn {
+            background: linear-gradient(135deg, #ff3366, #cc0044);
+            color: #fff; border: none; padding: 12px 28px;
+            border-radius: 12px; font-weight: 700; font-size: 13.5px;
+            cursor: pointer; width: 100%; transition: all 0.3s;
+        }
+        .popup-dismiss-btn:hover { opacity: 0.9; }
+
+        .confirm-popup .popup-box {
+            border-color: rgba(0, 230, 118, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 230, 118, 0.06);
+        }
+        .confirm-popup .popup-icon-circle {
+            background: rgba(0, 230, 118, 0.08);
+            border-color: var(--success);
+        }
+        .confirm-popup .popup-icon-circle i { color: var(--success); }
+        .confirm-popup .popup-dismiss-btn {
+            background: linear-gradient(135deg, #00e676, #00c853);
+            color: #000;
+        }
+        .confirm-popup .popup-cancel-btn {
+            background: rgba(255,255,255,0.04);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 28px;
+            border-radius: 12px; font-weight: 700; font-size: 13.5px;
+            cursor: pointer; width: 100%; margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        .confirm-popup .popup-cancel-btn:hover { background: rgba(255,255,255,0.06); }
+
+        .bg-glow {
+            position: fixed; top: -200px; right: -200px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(0, 255, 204, 0.03) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+        .bg-glow-2 {
+            position: fixed; bottom: -200px; left: -200px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.02) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+
+        .page-wrapper { position: relative; z-index: 1; }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .top-stats { grid-template-columns: 1fr; gap: 12px; }
+            .claim-grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 20px; }
+            .toast { right: 12px; left: 12px; max-width: none; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
+
+    <div class="page-wrapper">
+        <div class="page-header">
+            <h1>Daily Mining Claims</h1>
+            <p>Collect your active mining node earnings every 24 hours. Only your current active VIP level is claimable.</p>
+        </div>
+
+        <div class="top-stats">
+            <div class="stat-box balance-box">
+                <div class="stat-label"><i class="fa-solid fa-wallet"></i> Wallet Balance</div>
+                <div class="stat-value neon" id="stat-balance">0.00<span class="stat-unit">USDT</span></div>
+            </div>
+            <div class="stat-box levels-box">
+                <div class="stat-label"><i class="fa-solid fa-layer-group"></i> Total Unlocked</div>
+                <div class="stat-value green" id="stat-levels">0<span class="stat-unit">Level${'s'}</span></div>
+            </div>
+            <div class="stat-box earning-box">
+                <div class="stat-label"><i class="fa-solid fa-coins"></i> Active Daily Income</div>
+                <div class="stat-value gold" id="stat-daily">0.00<span class="stat-unit">USDT</span></div>
+            </div>
+        </div>
+
+        <div class="claim-grid" id="claim-grid-container"></div>
+    </div>
+
+    <!-- এরর পপআপ -->
+    <div class="popup-overlay" id="error-popup">
+        <div class="popup-box">
+            <div class="popup-icon-circle">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+            <div class="popup-title" id="error-popup-title">Error</div>
+            <div class="popup-text" id="error-popup-text"></div>
+            <button class="popup-dismiss-btn" id="error-popup-close">Close</button>
+        </div>
+    </div>
+
+    <!-- কনফার্ম পপআপ -->
+    <div class="popup-overlay confirm-popup" id="confirm-popup">
+        <div class="popup-box">
+            <div class="popup-icon-circle">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+            <div class="popup-title">Claim Earnings</div>
+            <div class="popup-text" id="confirm-popup-text"></div>
+            <button class="popup-cancel-btn" id="confirm-popup-cancel">Cancel</button>
+            <button class="popup-dismiss-btn" id="confirm-popup-yes">Confirm Claim</button>
+        </div>
+    </div>
+
+    <!-- টোস্ট -->
+    <div class="toast toast-success" id="toast-success">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-success-msg"></span>
+    </div>
+    <div class="toast toast-error" id="toast-error">
+        <i class="fa-solid fa-circle-xmark"></i>
+        <span id="toast-error-msg"></span>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cpanel-ebon.vercel.app/Royal%20Task/royaltaskroyaltaskroyaltask.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- লগইন চেক ---
+            function checkLogin() {
+                const u = localStorage.getItem('currentUser');
+                if (!u) {
+                    if (window !== window.top) window.top.location.href = "login.html";
+                    else window.location.href = "login.html";
+                    return null;
+                }
+                try { return JSON.parse(u).uid; }
+                catch (e) {
+                    if (window !== window.top) window.top.location.href = "login.html";
+                    else window.location.href = "login.html";
+                    return null;
+                }
+            }
+
+            const uid = checkLogin();
+            if (!uid) return;
+
+            // Firebase Init
+            if (typeof firebaseConfig === 'undefined') { alert("config.js missing!"); return; }
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
+
+            // --- স্টেট ভেরিয়েবল ---
+            let balance = 0;
+            let unlockedVips = [];
+            let activeVipName = null;    // ★ বর্তমান অ্যাক্টিভ VIP
+            let vipSettings = {};
+            let claimTimestamps = {};
+            let pendingClaimLevel = null;
+            let countdownIntervals = {};
+
+            // --- DOM রেফারেন্স ---
+            const gridEl = document.getElementById('claim-grid-container');
+            const statBalance = document.getElementById('stat-balance');
+            const statLevels = document.getElementById('stat-levels');
+            const statDaily = document.getElementById('stat-daily');
+
+            // --- হেল্পার ফাংশন ---
+            function extractNum(name) {
+                const m = name.match(/\d+/);
+                return m ? parseInt(m[0]) : 0;
+            }
+
+            function formatTime(ms) {
+                if (ms <= 0) return '00:00:00';
+                const totalSec = Math.floor(ms / 1000);
+                const h = Math.floor(totalSec / 3600);
+                const m = Math.floor((totalSec % 3600) / 60);
+                const s = totalSec % 60;
+                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+
+            function getCooldownMs(lastClaim) {
+                if (!lastClaim) return 0;
+                const elapsed = Date.now() - lastClaim;
+                const remaining = (24 * 60 * 60 * 1000) - elapsed;
+                return remaining > 0 ? remaining : 0;
+            }
+
+            function isReady(lastClaim) {
+                return getCooldownMs(lastClaim) <= 0;
+            }
+
+            /**
+             * ★ মূল লজিক: কার্ডের স্টেট নির্ধারণ
+             * 
+             * নিয়ম (শুধুমাত্র current_active_vip ক্লেইমযোগ্য):
+             * 
+             * 1. যদি এটাই activeVipName হয় এবং আগে কখনো claim হয়নি → ready
+             * 2. যদি এটাই activeVipName হয় এবং cooldown শেষ → ready
+             * 3. যদি এটাই activeVipName হয় এবং cooldown চলছে → cooldown
+             * 4. যদি এটা activeVipName না হয় → locked
+             */
+            function getCardState(levelName) {
+                const isActive = (activeVipName === levelName);
+
+                if (!isActive) {
+                    return 'locked';
+                }
+
+                const lastClaim = claimTimestamps[levelName] || null;
+                const neverClaimed = !lastClaim;
+                const cooldownDone = lastClaim ? isReady(lastClaim) : false;
+
+                if (neverClaimed || cooldownDone) {
+                    return 'ready';
+                }
+
+                return 'cooldown';
+            }
+
+            // --- টোস্ট ফাংশন ---
+            function showSuccess(msg) {
+                const t = document.getElementById('toast-success');
+                document.getElementById('toast-success-msg').innerText = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3500);
+            }
+            function showError(msg) {
+                const t = document.getElementById('toast-error');
+                document.getElementById('toast-error-msg').innerText = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3500);
+            }
+
+            // --- এরর পপআপ ---
+            const errorPopup = document.getElementById('error-popup');
+            document.getElementById('error-popup-close').onclick = () => errorPopup.classList.remove('show');
+            function showErrorPopup(title, msg) {
+                document.getElementById('error-popup-title').innerText = title;
+                document.getElementById('error-popup-text').innerHTML = msg;
+                errorPopup.classList.add('show');
+            }
+
+            // --- কনফার্ম পপআপ ---
+            const confirmPopup = document.getElementById('confirm-popup');
+            document.getElementById('confirm-popup-cancel').onclick = () => {
+                confirmPopup.classList.remove('show');
+                pendingClaimLevel = null;
+            };
+            document.getElementById('confirm-popup-yes').onclick = () => {
+                confirmPopup.classList.remove('show');
+                if (pendingClaimLevel) executeClaim(pendingClaimLevel);
+                pendingClaimLevel = null;
+            };
+            function showConfirmPopup(levelName, amount) {
+                document.getElementById('confirm-popup-text').innerHTML =
+                    `You are about to claim <strong>${parseFloat(amount).toFixed(2)} USDT</strong> from your active <strong>${levelName}</strong> mining node.<br><br>This amount will be added to your wallet balance.`;
+                confirmPopup.classList.add('show');
+            }
+
+            // --- রিয়েল-টাইম লিসেনার ---
+            function listenUserData() {
+                db.ref('users/' + uid).on('value', snap => {
+                    if (snap.exists()) {
+                        const d = snap.val();
+                        balance = parseFloat(d.balance || 0);
+                        unlockedVips = Array.isArray(d.unlockedVips) ? [...d.unlockedVips] : [];
+                        activeVipName = d.current_vip || null;   // ★ active VIP লোড
+                        claimTimestamps = d.claimTimestamps || {};
+                        updateStats();
+                        renderGrid();
+                    } else {
+                        balance = 0; unlockedVips = []; activeVipName = null; claimTimestamps = {};
+                        updateStats(); renderGrid();
+                    }
+                });
+            }
+
+            function listenVIPSettings() {
+                db.ref('vip_settings').on('value', snap => {
+                    if (snap.exists()) {
+                        vipSettings = snap.val();
+                        renderGrid();
+                        updateStats();
+                    }
+                });
+            }
+
+            // --- স্ট্যাটাস আপডেট ---
+            function updateStats() {
+                statBalance.innerHTML = `${balance.toFixed(2)}<span class="stat-unit">USDT</span>`;
+                statLevels.innerHTML = `${unlockedVips.length}<span class="stat-unit">Level${unlockedVips.length !== 1 ? 's' : ''}</span>`;
+
+                // ★ শুধু active VIP এর daily earning দেখাবে
+                let activeDaily = 0;
+                if (activeVipName) {
+                    const key = Object.keys(vipSettings).find(k => vipSettings[k].level_name === activeVipName);
+                    if (key) activeDaily = parseFloat(vipSettings[key].daily_earning || 0);
+                }
+                statDaily.innerHTML = `${activeDaily.toFixed(2)}<span class="stat-unit">USDT</span>`;
+            }
+
+            // --- গ্রিড রেন্ডার ---
+            function renderGrid() {
+                // পুরানো কাউন্টডাউন ক্লিয়ার
+                Object.values(countdownIntervals).forEach(id => clearInterval(id));
+                countdownIntervals = {};
+
+                if (Object.keys(vipSettings).length === 0 || unlockedVips.length === 0) {
+                    gridEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fa-solid fa-server"></i></div>
+                            <h3>No Unlocked Nodes</h3>
+                            <p>You haven't unlocked any mining levels yet.<br>Go to the VIP panel to activate your first node.</p>
+                        </div>`;
+                    return;
+                }
+
+                gridEl.innerHTML = '';
+
+                // আনলকড VIP গুলো সর্ট করে রেন্ডার
+                const sortedUnlocked = [...unlockedVips].sort((a, b) => extractNum(a) - extractNum(b));
+
+                sortedUnlocked.forEach(levelName => {
+                    const settingKey = Object.keys(vipSettings).find(k => vipSettings[k].level_name === levelName);
+                    if (!settingKey) return;
+
+                    const level = vipSettings[settingKey];
+                    const dailyEarning = parseFloat(level.daily_earning || 0);
+                    const lastClaim = claimTimestamps[levelName] || null;
+
+                    // ★ মূল লজিক: active VIP কি না তার উপর সব নির্ভর করে
+                    const cardState = getCardState(levelName);
+
+                    const cooldownMs = lastClaim ? getCooldownMs(lastClaim) : 0;
+                    const totalCooldown = 24 * 60 * 60 * 1000;
+                    const progressPercent = lastClaim ? Math.min(100, ((totalCooldown - cooldownMs) / totalCooldown) * 100) : 100;
+
+                    const cardId = `card-${levelName.replace(/\s+/g, '-')}`;
+                    const card = document.createElement('div');
+                    
+                    // কার্ড ক্লাস
+                    let cardClasses = 'claim-card';
+                    let stripClass, badgeClass, badgeText, btnClass, btnHtml;
+                    let showLockOverlay = false;
+                    let earningDimmed = false;
+                    let featDimmed = false;
+
+                    if (cardState === 'ready') {
+                        cardClasses += ' card-active';
+                        stripClass = 'strip-active-glow';
+                        badgeClass = 'badge-ready';
+                        badgeText = 'Ready to Claim';
+                        btnClass = 'btn-ready';
+                        btnHtml = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
+                    } else if (cardState === 'cooldown') {
+                        cardClasses += ' card-active';
+                        stripClass = 'strip-cooldown';
+                        badgeClass = 'badge-cooldown';
+                        badgeText = 'Cooldown';
+                        btnClass = 'btn-cooldown';
+                        btnHtml = '<i class="fa-solid fa-hourglass-half"></i> <span class="btn-timer-text">' + formatTime(cooldownMs) + '</span>';
+                    } else {
+                        // locked — active VIP নয়
+                        stripClass = 'strip-locked';
+                        badgeClass = 'badge-locked';
+                        badgeText = 'Inactive';
+                        btnClass = 'btn-locked';
+                        btnHtml = '<i class="fa-solid fa-lock"></i> Not Active';
+                        showLockOverlay = true;
+                        earningDimmed = true;
+                        featDimmed = true;
+                    }
+
+                    card.className = cardClasses;
+                    card.id = cardId;
+
+                    card.innerHTML = `
+                        <div class="card-strip ${stripClass}"></div>
+                        <div class="card-body">
+                            <div class="card-top-row">
+                                <div class="card-level-name">${levelName}</div>
+                                <div class="card-status-badge ${badgeClass}">${badgeText}</div>
+                            </div>
+
+                            <div class="earning-display ${earningDimmed ? 'dimmed' : ''}">
+                                <div class="earning-left">
+                                    <div class="earning-icon-wrap"><i class="fa-solid fa-coins"></i></div>
+                                    <div>
+                                        <div class="earning-label">Daily Earning</div>
+                                        <div class="earning-amount">${dailyEarning.toFixed(2)} <span class="unit">USDT</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cooldown-section">
+                                <div class="cooldown-header">
+                                    <span class="cooldown-label"><i class="fa-regular fa-clock"></i> Next Claim</span>
+                                    <span class="cooldown-time ${cardState === 'ready' ? 'ready-text' : ''}" id="timer-${cardId}">
+                                        ${cardState === 'ready' ? 'Available Now' : (cardState === 'locked' ? 'N/A' : formatTime(cooldownMs))}
+                                    </span>
+                                </div>
+                                <div class="cooldown-bar-bg">
+                                    <div class="cooldown-bar-fill ${cardState === 'ready' ? 'fill-ready' : ''}" id="bar-${cardId}" style="width: ${cardState === 'locked' ? '0' : progressPercent + '%'}"></div>
+                                </div>
+                            </div>
+
+                            <div class="card-features">
+                                <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-microchip"></i> ${cardState === 'locked' ? 'Inactive' : 'Active'}</div>
+                                <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-rotate"></i> 24h Cycle</div>
+                                <div class="feat-item ${featDimmed ? 'feat-dim' : ''}"><i class="fa-solid fa-shield-halved"></i> Secured</div>
+                            </div>
+
+                            <button class="claim-btn ${btnClass}" id="claimbtn-${cardId}" data-level="${levelName}" data-amount="${dailyEarning}">
+                                ${btnHtml}
+                            </button>
+                        </div>
+
+                        ${showLockOverlay ? `
+                        <div class="card-locked-overlay">
+                            <div class="lock-icon"><i class="fa-solid fa-lock"></i></div>
+                        </div>
+                        <div class="locked-reason">This is not your active VIP — switch from VIP panel</div>
+                        ` : ''}
+                    `;
+
+                    gridEl.appendChild(card);
+
+                    // লকড কার্ডে hover করলে রিজন দেখাও
+                    if (showLockOverlay) {
+                        card.classList.add('card-locked');
+                        card.addEventListener('mouseenter', () => card.classList.add('show-reason'));
+                        card.addEventListener('mouseleave', () => card.classList.remove('show-reason'));
+                    }
+
+                    // ক্লেইম বাটন ইভেন্ট (শুধু ready স্টেটে)
+                    if (cardState === 'ready') {
+                        document.getElementById(`claimbtn-${cardId}`).addEventListener('click', function() {
+                            const lvName = this.getAttribute('data-level');
+                            const lvAmount = parseFloat(this.getAttribute('data-amount'));
+                            pendingClaimLevel = { name: lvName, amount: lvAmount };
+                            showConfirmPopup(lvName, lvAmount);
+                        });
+                    }
+
+                    // কাউন্টডাউন টাইমার (শুধু cooldown স্টেটে)
+                    if (cardState === 'cooldown' && cooldownMs > 0) {
+                        startCountdown(cardId, lastClaim, levelName, dailyEarning);
+                    }
+                });
+            }
+
+            // --- কাউন্টডাউন টাইমার ---
+            function startCountdown(cardId, lastClaim, levelName, dailyEarning) {
+                const timerEl = document.getElementById(`timer-${cardId}`);
+                const barEl = document.getElementById(`bar-${cardId}`);
+                const btnEl = document.getElementById(`claimbtn-${cardId}`);
+                const cardEl = document.getElementById(cardId);
+                const totalCooldown = 24 * 60 * 60 * 1000;
+
+                if (!timerEl) return;
+
+                const intervalId = setInterval(() => {
+                    const remaining = getCooldownMs(lastClaim);
+
+                    if (remaining <= 0) {
+                        clearInterval(intervalId);
+                        delete countdownIntervals[cardId];
+
+                        // ডাবল চেক: এখনো কি active VIP আছে?
+                        if (activeVipName === levelName) {
+                            // হ্যাঁ, এখনো active → Ready তে পরিবর্তন
+                            timerEl.innerText = 'Available Now';
+                            timerEl.classList.add('ready-text');
+                            barEl.classList.add('fill-ready');
+                            barEl.style.width = '100%';
+
+                            const strip = cardEl.querySelector('.card-strip');
+                            strip.className = 'card-strip strip-active-glow';
+
+                            const badge = cardEl.querySelector('.card-status-badge');
+                            badge.className = 'card-status-badge badge-ready';
+                            badge.innerText = 'Ready to Claim';
+
+                            btnEl.className = 'claim-btn btn-ready';
+                            btnEl.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i> Claim Now';
+                            btnEl.style.pointerEvents = 'auto';
+                            btnEl.style.cursor = 'pointer';
+
+                            // ফিচার রিয়্যাক্টিভেট
+                            const featItems = cardEl.querySelectorAll('.feat-item');
+                            if (featItems[0]) { featItems[0].classList.remove('feat-dim'); featItems[0].innerHTML = '<i class="fa-solid fa-microchip"></i> Active'; }
+
+                            // ক্লিক ইভেন্ট বাইন্ড
+                            btnEl.addEventListener('click', function() {
+                                pendingClaimLevel = { name: levelName, amount: dailyEarning };
+                                showConfirmPopup(levelName, dailyEarning);
+                            });
+                        } else {
+                            // আর active নয় (VIP সুইচ হয়ে গেছে) → Locked তে পরিবর্তন
+                            timerEl.innerText = 'N/A';
+                            timerEl.classList.remove('ready-text');
+                            barEl.classList.remove('fill-ready');
+                            barEl.style.width = '0%';
+
+                            const strip = cardEl.querySelector('.card-strip');
+                            strip.className = 'card-strip strip-locked';
+
+                            const badge = cardEl.querySelector('.card-status-badge');
+                            badge.className = 'card-status-badge badge-locked';
+                            badge.innerText = 'Inactive';
+
+                            btnEl.className = 'claim-btn btn-locked';
+                            btnEl.innerHTML = '<i class="fa-solid fa-lock"></i> Not Active';
+                            btnEl.style.pointerEvents = 'none';
+
+                            const earnDisp = cardEl.querySelector('.earning-display');
+                            if (earnDisp) earnDisp.classList.add('dimmed');
+
+                            const featItems = cardEl.querySelectorAll('.feat-item');
+                            featItems.forEach(f => f.classList.add('feat-dim'));
+                            if (featItems[0]) featItems[0].innerHTML = '<i class="fa-solid fa-microchip"></i> Inactive';
+
+                            cardEl.classList.remove('card-active');
+                            cardEl.classList.add('card-locked');
+
+                            const overlay = document.createElement('div');
+                            overlay.className = 'card-locked-overlay';
+                            overlay.innerHTML = '<div class="lock-icon"><i class="fa-solid fa-lock"></i></div>';
+                            cardEl.appendChild(overlay);
+
+                            const reason = document.createElement('div');
+                            reason.className = 'locked-reason';
+                            reason.innerText = 'This is not your active VIP — switch from VIP panel';
+                            cardEl.appendChild(reason);
+
+                            cardEl.addEventListener('mouseenter', () => cardEl.classList.add('show-reason'));
+                            cardEl.addEventListener('mouseleave', () => cardEl.classList.remove('show-reason'));
+                        }
+                    } else {
+                        timerEl.innerText = formatTime(remaining);
+                        const pct = Math.min(100, ((totalCooldown - remaining) / totalCooldown) * 100);
+                        barEl.style.width = pct + '%';
+                    }
+                }, 1000);
+
+                countdownIntervals[cardId] = intervalId;
+            }
+
+            // --- ক্লেইম এক্সিকিউট ---
+            function executeClaim(claimData) {
+                const { name, amount } = claimData;
+
+                // ডাবল চেক: এটা কি এখনো active VIP?
+                if (activeVipName !== name) {
+                    showErrorPopup('VIP Changed', `Your active VIP has been changed to <strong>${activeVipName || 'None'}</strong>. You can only claim from your current active VIP.`);
+                    return;
+                }
+
+                // ডাবল চেক: কুলডাউন শেষ হয়েছে কিনা
+                const lastClaim = claimTimestamps[name] || null;
+                if (lastClaim && !isReady(lastClaim)) {
+                    showErrorPopup('Cooldown Active', 'This node is still in cooldown. Please wait before claiming again.');
+                    return;
+                }
+
+                const newBalance = balance + amount;
+                const userRef = db.ref('users/' + uid);
+
+                const updates = {
+                    balance: Number(newBalance.toFixed(4)),
+                    ['claimTimestamps/' + name]: Date.now()
+                };
+
+                userRef.update(updates)
+                    .then(() => {
+                        showSuccess(`${name}: +${amount.toFixed(2)} USDT claimed!`);
+                    })
+                    .catch(err => {
+                        console.error("Claim error:", err);
+                        showErrorPopup('Claim Failed', 'Network error occurred. Please try again.');
+                    });
+            }
+
+            // --- শুরু ---
+            listenUserData();
+            listenVIPSettings();
+        });
+
+        /* --- Security --- */
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+    </script>
+</body>
+</html>
