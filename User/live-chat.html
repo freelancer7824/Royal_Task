@@ -3,87 +3,1114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Maintenance</title>
+    <title>Help Center - Royal Task</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0b0e14;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #16213e;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
         }
 
-        .scene {
+        .help-container {
+            max-width: 900px;
+            width: 100%;
+            background: linear-gradient(145deg, #141a24, #1a212e);
+            border-radius: 32px;
+            padding: 45px 40px 50px;
+            box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 200, 255, 0.10);
+            flex-wrap: wrap;
         }
 
-        /* Animated People */
-        .person {
-            font-size: 70px;
-            animation: bounce 1.5s infinite;
+        .header-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #00c8ff, #0077ff);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 150, 255, 0.30);
+            flex-shrink: 0;
         }
 
-        /* Animated Gear/Quip */
-        .gear {
-            font-size: 50px;
-            animation: spin 3s linear infinite;
+        .header-text h1 {
+            font-size: 30px;
+            font-weight: 700;
+            color: #f0f4fa;
+            letter-spacing: -0.5px;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        .header-text .sub {
+            font-size: 14px;
+            color: #8896a8;
+            font-weight: 400;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-
-        h1 { margin: 10px 0; letter-spacing: 2px; }
-        p { color: #888; }
-
-        .loader {
-            width: 250px;
+        .header-text .sub .live-dot {
+            display: inline-block;
+            width: 8px;
             height: 8px;
-            background: #0f3460;
-            border-radius: 4px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse-dot 1.8s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 0.3; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #b0c4db;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: #66d9ff;
+            width: 18px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            color: #e8edf5;
+            font-size: 15px;
+            transition: 0.3s;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(0, 200, 255, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(0, 200, 255, 0.04);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #4a5a6e;
+        }
+
+        .form-group select option {
+            background: #1a212e;
+            color: #e8edf5;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            width: 100%;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #00c8ff, #0077ff);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 16px rgba(0, 150, 255, 0.20);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 150, 255, 0.30);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== STATUS MESSAGE ===== */
+        .status-message {
             margin-top: 20px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .status-message.success {
+            display: flex;
+            background: rgba(0, 255, 136, 0.06);
+            border: 1px solid rgba(0, 255, 136, 0.08);
+            color: #5dffa0;
+        }
+
+        .status-message.error {
+            display: flex;
+            background: rgba(255, 70, 70, 0.06);
+            border: 1px solid rgba(255, 70, 70, 0.08);
+            color: #ff6b6b;
+        }
+
+        .status-message.loading {
+            display: flex;
+            background: rgba(0, 200, 255, 0.06);
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            color: #66d9ff;
+        }
+
+        .status-message i {
+            font-size: 18px;
+        }
+
+        /* ===== RECENT TICKETS ===== */
+        .tickets-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .tickets-section .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #8896a8;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tickets-section .section-label i {
+            color: #66d9ff;
+        }
+
+        .ticket-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .ticket-item:hover {
+            border-color: rgba(0, 200, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .ticket-item .ticket-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .ticket-item .ticket-subject {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e8edf5;
+        }
+
+        .ticket-item .ticket-status {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 12px;
+            border-radius: 30px;
+            white-space: nowrap;
+        }
+
+        .ticket-item .ticket-status.pending {
+            background: rgba(255, 180, 0, 0.10);
+            color: #ffc44d;
+            border: 1px solid rgba(255, 180, 0, 0.08);
+        }
+
+        .ticket-item .ticket-status.resolved {
+            background: rgba(0, 255, 136, 0.06);
+            color: #5dffa0;
+            border: 1px solid rgba(0, 255, 136, 0.06);
+        }
+
+        .ticket-item .ticket-status.replied {
+            background: rgba(0, 200, 255, 0.06);
+            color: #66d9ff;
+            border: 1px solid rgba(0, 200, 255, 0.06);
+        }
+
+        .ticket-item .ticket-message-preview {
+            font-size: 13px;
+            color: #9aabbd;
+            margin-top: 6px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .loader-fill {
-            height: 100%;
-            background: #e94560;
-            width: 0%;
-            animation: progress 4s linear infinite;
+        .ticket-item .ticket-footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
         }
 
-        @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
+        .ticket-item .ticket-date {
+            font-size: 11px;
+            color: #5e6f82;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ticket-item .ticket-view-btn {
+            font-size: 12px;
+            color: #66d9ff;
+            background: rgba(0, 200, 255, 0.06);
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 200, 255, 0.06);
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ticket-item .ticket-view-btn:hover {
+            background: rgba(0, 200, 255, 0.10);
+            border-color: rgba(0, 200, 255, 0.15);
+        }
+
+        .no-tickets {
+            text-align: center;
+            color: #5e6f82;
+            padding: 30px 20px;
+            font-size: 14px;
+        }
+
+        .no-tickets i {
+            font-size: 36px;
+            color: #3a4a5e;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #1a212e;
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-box .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .modal-box .modal-header .modal-title-area {
+            flex: 1;
+        }
+
+        .modal-box .modal-header h2 {
+            font-size: 18px;
+            color: #e8edf5;
+        }
+
+        .modal-box .modal-header .modal-status {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 12px;
+            border-radius: 30px;
+            white-space: nowrap;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .modal-box .modal-header .modal-status.pending {
+            background: rgba(255, 180, 0, 0.10);
+            color: #ffc44d;
+            border: 1px solid rgba(255, 180, 0, 0.08);
+        }
+
+        .modal-box .modal-header .modal-status.resolved {
+            background: rgba(0, 255, 136, 0.06);
+            color: #5dffa0;
+            border: 1px solid rgba(0, 255, 136, 0.06);
+        }
+
+        .modal-box .modal-header .modal-status.replied {
+            background: rgba(0, 200, 255, 0.06);
+            color: #66d9ff;
+            border: 1px solid rgba(0, 200, 255, 0.06);
+        }
+
+        .modal-box .modal-header .close-btn {
+            background: none;
+            border: none;
+            color: #5e6f82;
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.3s;
+            padding: 0 5px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .modal-box .modal-header .close-btn:hover {
+            color: #e8edf5;
+            transform: rotate(90deg);
+        }
+
+        .modal-box .modal-body {
+            margin-bottom: 10px;
+        }
+
+        .modal-box .modal-body .detail-row {
+            margin-bottom: 14px;
+        }
+
+        .modal-box .modal-body .detail-row .label {
+            font-size: 12px;
+            color: #5e6f82;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .modal-box .modal-body .detail-row .value {
+            font-size: 15px;
+            color: #e8edf5;
+            line-height: 1.5;
+        }
+
+        .modal-box .modal-body .detail-row .value.email {
+            color: #66d9ff;
+        }
+
+        .modal-box .modal-body .detail-row .value.message {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 3px solid #00c8ff;
+            font-size: 14px;
+        }
+
+        .modal-box .modal-body .detail-row .value.reply {
+            background: rgba(0, 200, 255, 0.04);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 3px solid #66d9ff;
+            font-size: 14px;
+            color: #b0c4db;
+        }
+
+        .modal-box .modal-body .detail-row .value.reply .reply-label {
+            font-size: 11px;
+            color: #66d9ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            flex-wrap: wrap;
+        }
+
+        .modal-box .modal-actions button {
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            flex: 1;
+        }
+
+        .modal-box .modal-actions .btn-close-modal {
+            background: rgba(255, 255, 255, 0.03);
+            color: #8896a8;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .modal-box .modal-actions .btn-close-modal:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e8edf5;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .help-container {
+                padding: 30px 20px 35px;
+                border-radius: 24px;
+            }
+
+            .header-text h1 {
+                font-size: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .ticket-item .ticket-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-box {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .help-container {
+                padding: 20px 14px 25px;
+                border-radius: 18px;
+            }
+
+            .header {
+                gap: 12px;
+            }
+
+            .header-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+
+            .header-text h1 {
+                font-size: 20px;
+            }
+
+            .header-text .sub {
+                font-size: 12px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 14px;
+                padding: 12px 14px;
+            }
+
+            .btn-primary {
+                font-size: 15px;
+                padding: 14px 20px;
+            }
+
+            .modal-box .modal-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="scene">
-        <div class="person">👨‍💻</div>
-        <div class="gear">⚙️</div>
-        <div class="person">👨‍🔧</div>
+    <div class="help-container">
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="header-text">
+                <h1>🆘 Help Center</h1>
+                <div class="sub">
+                    <span class="live-dot"></span>
+                    Support System
+                    <span style="color:#3a4a5e;">•</span>
+                    <span style="color:#66d9ff;font-weight:500;">
+                        <i class="fas fa-clock"></i> Response within 24h
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== FORM ===== -->
+        <form id="helpForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Your Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="userEmail" placeholder="Enter your email" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Category</label>
+                <select id="category">
+                    <option value="technical">🛠️ Technical Issue</option>
+                    <option value="withdrawal">💰 Withdrawal Problem</option>
+                    <option value="deposit">📥 Deposit Issue</option>
+                    <option value="referral">👥 Referral Related</option>
+                    <option value="account">🔐 Account Problem</option>
+                    <option value="other">❓ Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-heading"></i> Subject</label>
+                <input type="text" id="subject" placeholder="Brief subject of your issue" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-message"></i> Your Message</label>
+                <textarea id="message" placeholder="Describe your issue in detail..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </form>
+
+        <!-- ===== STATUS MESSAGE ===== -->
+        <div class="status-message" id="statusMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="statusText">Your message sent successfully!</span>
+        </div>
+
+        <!-- ===== RECENT TICKETS ===== -->
+        <div class="tickets-section" id="ticketsSection">
+            <div class="section-label">
+                <i class="fas fa-history"></i> Your Recent Tickets
+            </div>
+            <div id="ticketList">
+                <div class="no-tickets">
+                    <i class="fas fa-inbox"></i>
+                    No tickets yet. Submit your first request above.
+                </div>
+            </div>
+        </div>
     </div>
 
-    <h1>SYSTEM MAINTENANCE</h1>
-    <p>Our team is currently optimizing the server. We'll be back shortly.</p>
-
-    <div class="loader">
-        <div class="loader-fill"></div>
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <h2 id="modalSubject">Ticket Subject</h2>
+                    <span class="modal-status pending" id="modalStatus">Pending</span>
+                </div>
+                <button class="close-btn" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-row">
+                    <div class="label">From</div>
+                    <div class="value" id="modalUserName">User Name</div>
+                    <div class="value email" id="modalUserEmail">user@email.com</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Category</div>
+                    <div class="value" id="modalCategory">Technical</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Your Message</div>
+                    <div class="value message" id="modalMessage">Ticket message content here...</div>
+                </div>
+                <div class="detail-row" id="replyRow" style="display:none;">
+                    <div class="label">Admin Reply</div>
+                    <div class="value reply" id="modalReply">
+                        <span class="reply-label"><i class="fas fa-reply"></i> Reply from Support</span>
+                        <span id="modalReplyText">Reply content here...</span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Submitted</div>
+                    <div class="value" id="modalDate" style="color:#5e6f82;font-size:13px;">--</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-close-modal" id="modalCloseBtn2">Close</button>
+            </div>
+        </div>
     </div>
+
+    <!-- ===== FIREBASE CONFIG ===== -->
+    <script src="https://cpanel-ebon.vercel.app/Royal%20Task/royaltaskroyaltaskroyaltask.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // ========================================
+        // FIREBASE INIT
+        // ========================================
+        let db = null;
+        let currentUser = null;
+        let allUserTickets = [];
+
+        if (typeof firebaseConfig !== 'undefined') {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            auth = firebase.auth();
+
+            // Get current user
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('userEmail').value = user.email || '';
+                    document.getElementById('userName').value = user.displayName || '';
+                    
+                    // If name is empty, try to get from database
+                    if (!user.displayName) {
+                        db.ref('users/' + user.uid + '/name').once('value').then(snap => {
+                            const name = snap.val();
+                            if (name) {
+                                document.getElementById('userName').value = name;
+                            }
+                        });
+                    }
+                    
+                    loadUserTickets(user.uid);
+                }
+            });
+        } else {
+            console.warn('Firebase config not loaded. Running in demo mode.');
+            // Load demo tickets from localStorage
+            loadDemoTickets();
+        }
+
+        // ========================================
+        // DOM ELEMENTS
+        // ========================================
+        const form = document.getElementById('helpForm');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const category = document.getElementById('category');
+        const subject = document.getElementById('subject');
+        const message = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const statusText = document.getElementById('statusText');
+        const ticketList = document.getElementById('ticketList');
+
+        // Modal elements
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const modalCloseBtn2 = document.getElementById('modalCloseBtn2');
+        const modalSubject = document.getElementById('modalSubject');
+        const modalStatus = document.getElementById('modalStatus');
+        const modalUserName = document.getElementById('modalUserName');
+        const modalUserEmail = document.getElementById('modalUserEmail');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalReply = document.getElementById('modalReply');
+        const modalReplyText = document.getElementById('modalReplyText');
+        const modalDate = document.getElementById('modalDate');
+        const replyRow = document.getElementById('replyRow');
+
+        // ========================================
+        // DEMO TICKETS
+        // ========================================
+        function loadDemoTickets() {
+            const tickets = JSON.parse(localStorage.getItem('helpTickets') || '[]');
+            const userTickets = tickets.filter(t => t.email === (currentUser?.email || 'user@example.com'));
+            allUserTickets = userTickets;
+            displayTickets(userTickets);
+        }
+
+        // ========================================
+        // SHOW STATUS
+        // ========================================
+        function showStatus(text, type) {
+            statusMessage.className = `status-message ${type}`;
+            statusText.textContent = text;
+            statusMessage.style.display = 'flex';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 6000);
+        }
+
+        // ========================================
+        // SAVE TICKET TO FIREBASE
+        // ========================================
+        function saveTicket(ticketData) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    // Demo mode - save to localStorage
+                    const tickets = JSON.parse(localStorage.getItem('helpTickets') || '[]');
+                    ticketData.id = Date.now().toString();
+                    ticketData.createdAt = Date.now();
+                    tickets.push(ticketData);
+                    localStorage.setItem('helpTickets', JSON.stringify(tickets));
+                    resolve(ticketData);
+                    return;
+                }
+
+                const ticketRef = db.ref('helpTickets').push();
+                const data = {
+                    ...ticketData,
+                    id: ticketRef.key,
+                    createdAt: Date.now(),
+                    status: 'pending'
+                };
+                ticketRef.set(data).then(() => {
+                    resolve(data);
+                }).catch(reject);
+            });
+        }
+
+        // ========================================
+        // LOAD USER TICKETS
+        // ========================================
+        function loadUserTickets(uid) {
+            if (!db) {
+                loadDemoTickets();
+                return;
+            }
+
+            db.ref('helpTickets').orderByChild('uid').equalTo(uid).once('value').then(snap => {
+                const tickets = [];
+                snap.forEach(child => {
+                    tickets.push(child.val());
+                });
+                allUserTickets = tickets;
+                displayTickets(tickets);
+            }).catch(err => {
+                console.error('Error loading tickets:', err);
+                loadDemoTickets();
+            });
+
+            // Real-time listener
+            db.ref('helpTickets').orderByChild('uid').equalTo(uid).on('value', snap => {
+                const tickets = [];
+                snap.forEach(child => {
+                    tickets.push(child.val());
+                });
+                allUserTickets = tickets;
+                displayTickets(tickets);
+            });
+        }
+
+        // ========================================
+        // DISPLAY TICKETS
+        // ========================================
+        function displayTickets(tickets) {
+            if (!tickets || tickets.length === 0) {
+                ticketList.innerHTML = `
+                    <div class="no-tickets">
+                        <i class="fas fa-inbox"></i>
+                        No tickets yet. Submit your first request above.
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by newest first
+            tickets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            let html = '';
+            tickets.slice(0, 5).forEach(ticket => {
+                const statusMap = {
+                    'pending': 'pending',
+                    'resolved': 'resolved',
+                    'replied': 'replied'
+                };
+                const statusClass = statusMap[ticket.status] || 'pending';
+                const statusLabel = ticket.status ? ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) : 'Pending';
+                
+                const date = ticket.createdAt ? new Date(ticket.createdAt) : new Date();
+                const dateStr = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                const hasReply = ticket.reply && ticket.reply.trim().length > 0;
+
+                html += `
+                    <div class="ticket-item" onclick="openTicketModal('${ticket.id}')">
+                        <div class="ticket-top">
+                            <div class="ticket-subject">${ticket.subject || 'No subject'}</div>
+                            <span class="ticket-status ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div class="ticket-message-preview">${ticket.message || ''}</div>
+                        <div class="ticket-footer-info">
+                            <div class="ticket-date">
+                                <i class="far fa-calendar-alt"></i>
+                                ${dateStr}
+                                <span style="margin-left:8px;color:#4a5a6e;">•</span>
+                                <span style="color:#4a5a6e;">${ticket.category || 'Other'}</span>
+                                ${hasReply ? `<span style="margin-left:8px;color:#66d9ff;">• <i class="fas fa-reply"></i> Replied</span>` : ''}
+                            </div>
+                            <span class="ticket-view-btn"><i class="fas fa-eye"></i> View</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            ticketList.innerHTML = html;
+        }
+
+        // ========================================
+        // OPEN TICKET MODAL
+        // ========================================
+        function openTicketModal(ticketId) {
+            const ticket = allUserTickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+
+            // Set modal data
+            modalSubject.textContent = ticket.subject || 'No subject';
+            
+            const statusMap = {
+                'pending': 'pending',
+                'resolved': 'resolved',
+                'replied': 'replied'
+            };
+            const statusClass = statusMap[ticket.status] || 'pending';
+            const statusLabel = ticket.status ? ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1) : 'Pending';
+            modalStatus.className = `modal-status ${statusClass}`;
+            modalStatus.textContent = statusLabel;
+
+            modalUserName.textContent = ticket.name || 'Unknown';
+            modalUserEmail.textContent = ticket.email || 'No email';
+            
+            const categoryMap = {
+                'technical': '🛠️ Technical Issue',
+                'withdrawal': '💰 Withdrawal Problem',
+                'deposit': '📥 Deposit Issue',
+                'referral': '👥 Referral Related',
+                'account': '🔐 Account Problem',
+                'other': '❓ Other'
+            };
+            modalCategory.textContent = categoryMap[ticket.category] || ticket.category || 'Other';
+            modalMessage.textContent = ticket.message || 'No message';
+
+            // Show reply if exists
+            if (ticket.reply && ticket.reply.trim().length > 0) {
+                replyRow.style.display = 'block';
+                modalReplyText.textContent = ticket.reply;
+            } else {
+                replyRow.style.display = 'none';
+            }
+
+            const date = ticket.createdAt ? new Date(ticket.createdAt) : new Date();
+            modalDate.textContent = date.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            modalOverlay.classList.add('active');
+        }
+
+        // Make function global for onclick
+        window.openTicketModal = openTicketModal;
+
+        // ========================================
+        // CLOSE MODAL
+        // ========================================
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalCloseBtn2.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ========================================
+        // FORM SUBMIT
+        // ========================================
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Validate
+            if (!userName.value.trim()) {
+                showStatus('Please enter your name.', 'error');
+                return;
+            }
+            if (!userEmail.value.trim()) {
+                showStatus('Please enter your email.', 'error');
+                return;
+            }
+            if (!subject.value.trim()) {
+                showStatus('Please enter a subject.', 'error');
+                return;
+            }
+            if (!message.value.trim()) {
+                showStatus('Please describe your issue.', 'error');
+                return;
+            }
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            showStatus('Sending your message...', 'loading');
+
+            const ticketData = {
+                name: userName.value.trim(),
+                email: userEmail.value.trim(),
+                category: category.value,
+                subject: subject.value.trim(),
+                message: message.value.trim(),
+                uid: currentUser ? currentUser.uid : null
+            };
+
+            try {
+                const saved = await saveTicket(ticketData);
+                showStatus('✅ Your message sent successfully! We\'ll respond within 24 hours.', 'success');
+                
+                // Reset form
+                form.reset();
+                
+                // Reload tickets
+                if (currentUser) {
+                    loadUserTickets(currentUser.uid);
+                } else {
+                    loadDemoTickets();
+                }
+
+            } catch (error) {
+                console.error('Error saving ticket:', error);
+                showStatus('❌ Error sending message. Please try again.', 'error');
+            }
+        });
+
+        // ========================================
+        // AUTO-FILL FROM LOCALSTORAGE
+        // ========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    if (userData.email) {
+                        document.getElementById('userEmail').value = userData.email;
+                    }
+                    if (userData.displayName) {
+                        document.getElementById('userName').value = userData.displayName;
+                    }
+                } catch (e) {}
+            }
+        });
+
+        // ========================================
+        // SECURITY
+        // ========================================
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+    </script>
 
 </body>
 </html>
