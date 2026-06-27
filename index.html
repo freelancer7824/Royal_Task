@@ -144,6 +144,53 @@
             transform: translateX(3px);
         }
 
+        /* ===== NOTIFICATION / NOTICE ICON ===== */
+        .notice-icon-wrapper {
+            position: relative;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            border-radius: 50%;
+            background: rgba(0, 255, 204, 0.05);
+            border: 1.5px solid rgba(0, 255, 204, 0.15);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .notice-icon-wrapper:hover {
+            background: rgba(0, 255, 204, 0.10);
+            border-color: rgba(0, 255, 204, 0.3);
+            transform: scale(1.05);
+        }
+
+        .notice-icon-wrapper i {
+            font-size: 18px;
+            color: var(--accent-glow);
+        }
+
+        /* Live red dot on notification icon */
+        .notice-live-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 10px;
+            height: 10px;
+            background: #ff3355;
+            border-radius: 50%;
+            border: 2px solid var(--panel-dark);
+            animation: livePulse 1.5s infinite ease-in-out;
+            box-shadow: 0 0 12px rgba(255, 51, 85, 0.6);
+        }
+
+        @keyframes livePulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.6; }
+        }
+
         .profile-icon-btn {
             display: none;
             width: 40px;
@@ -413,6 +460,19 @@
             .blocked-badge {
                 display: none !important;
             }
+            .notice-icon-wrapper {
+                width: 36px;
+                height: 36px;
+            }
+            .notice-icon-wrapper i {
+                font-size: 16px;
+            }
+            .notice-live-dot {
+                width: 8px;
+                height: 8px;
+                top: 4px;
+                right: 4px;
+            }
         }
 
         ::-webkit-scrollbar { width: 4px; }
@@ -440,6 +500,12 @@
             <span class="blocked-badge" id="blockedBadge">
                 <i class="fa-solid fa-ban" style="margin-right:4px;"></i> ACCOUNT BLOCKED
             </span>
+
+            <!-- ===== NOTICE / NOTIFICATION ICON ===== -->
+            <a href="#" class="notice-icon-wrapper" id="noticeIcon" title="View Notices">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notice-live-dot"></span>
+            </a>
 
             <button class="login-btn" id="signInBtn">
                 <span>Sign In</span>
@@ -541,12 +607,17 @@
         // UI UPDATE FUNCTION
         // ========================================
         function updateUI(isLoggedIn) {
+            const noticeIcon = document.getElementById('noticeIcon');
+            
             if (isLoggedIn) {
                 document.getElementById('signInBtn').style.display = 'none';
                 document.getElementById('profileBtn').style.display = 'flex';
+                // লগইন থাকলে নোটিফিকেশন আইকন দেখাও
+                noticeIcon.style.display = 'flex';
             } else {
                 document.getElementById('signInBtn').style.display = 'flex';
                 document.getElementById('profileBtn').style.display = 'none';
+                noticeIcon.style.display = 'none';
                 // লগআউট অবস্থায় ব্লক মোড অফ
                 if (isUserBlocked) {
                     setBlockedMode(false);
@@ -735,6 +806,36 @@
                 return;
             }
             document.getElementById('main-frame').src = '../User/profile';
+        });
+
+        // ========================================
+        // NOTICE ICON CLICK — IFrame এ notice.html লোড
+        // ========================================
+        document.getElementById('noticeIcon').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // লগইন চেক
+            if (!isUserLoggedIn) {
+                showToast("Access Restricted", "Please sign in to view notices", "fa-solid fa-lock", false);
+                return;
+            }
+            
+            // ব্লকড ইউজার চেক
+            if (isUserBlocked) {
+                showToast("Access Denied", "Your account is blocked. Cannot view notices.", "fa-solid fa-ban", true);
+                return;
+            }
+            
+            // notice.html লোড করো
+            document.getElementById('main-frame').src = '../User/notice';
+            
+            // সাইডবারের অ্যাক্টিভ ক্লাস রিমুভ করো (নোটিশ পেজ আলাদা)
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            // মোবাইলে সাইডবার বন্ধ করো
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                toggleSidebar();
+            }
         });
 
         // ========================================
