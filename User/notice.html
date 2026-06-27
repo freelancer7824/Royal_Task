@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📢 Notice Board</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ===== GLOBAL RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0b0e14;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ===== FULL SCREEN NOTICE BOARD ===== */
+        .notice-board {
+            max-width: 1200px;
+            width: 100%;
+            min-height: 85vh;
+            background: linear-gradient(145deg, #141a24, #1a212e);
+            border-radius: 32px;
+            padding: 50px 45px 55px;
+            box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 200, 255, 0.10);
+            flex-wrap: wrap;
+        }
+
+        .header-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #00c8ff, #0077ff);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 150, 255, 0.30);
+            flex-shrink: 0;
+        }
+
+        .header-text h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #f0f4fa;
+            letter-spacing: -0.5px;
+        }
+
+        .header-text .sub {
+            font-size: 15px;
+            color: #8896a8;
+            font-weight: 400;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .header-text .sub .live-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse-dot 1.8s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 0.3; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .header-text .sub .badge-live {
+            background: rgba(0, 200, 255, 0.10);
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: #66d9ff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-text .sub .badge-live i {
+            font-size: 11px;
+        }
+
+        /* ===== NOTICE CONTAINER ===== */
+        .notice-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        /* ===== SINGLE NOTICE CARD ===== */
+        .notice-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 28px;
+            padding: 40px 45px;
+            width: 100%;
+            max-width: 900px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .notice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, #00c8ff, #0077ff);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .notice-card:hover {
+            border-color: rgba(0, 200, 255, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== NOTICE CONTENT ===== */
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .notice-title-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .notice-title-icon {
+            font-size: 28px;
+            color: #66d9ff;
+            background: rgba(0, 200, 255, 0.06);
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notice-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e8edf5;
+            line-height: 1.3;
+        }
+
+        .notice-badge {
+            flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: rgba(0, 200, 255, 0.10);
+            color: #66d9ff;
+            border: 1px solid rgba(0, 200, 255, 0.08);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .notice-badge.high {
+            background: rgba(255, 70, 70, 0.10);
+            color: #ff6b6b;
+            border-color: rgba(255, 70, 70, 0.08);
+        }
+
+        .notice-badge.update {
+            background: rgba(0, 255, 136, 0.06);
+            color: #5dffa0;
+            border-color: rgba(0, 255, 136, 0.06);
+        }
+
+        .notice-badge.maintenance {
+            background: rgba(255, 180, 0, 0.08);
+            color: #ffc44d;
+            border-color: rgba(255, 180, 0, 0.06);
+        }
+
+        .notice-badge.offer {
+            background: rgba(255, 0, 200, 0.08);
+            color: #ff66d9;
+            border-color: rgba(255, 0, 200, 0.06);
+        }
+
+        .notice-body {
+            margin: 18px 0 22px;
+            padding-left: 10px;
+        }
+
+        .notice-description {
+            font-size: 18px;
+            color: #b0c4db;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+        .notice-description strong {
+            color: #dce6f2;
+            font-weight: 600;
+        }
+
+        .notice-description .highlight {
+            color: #66d9ff;
+            font-weight: 500;
+        }
+
+        .notice-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            margin-top: 6px;
+        }
+
+        .notice-footer .date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #5e6f82;
+        }
+
+        .notice-footer .date i {
+            color: #4a5a6e;
+            font-size: 14px;
+        }
+
+        .notice-footer .action-link {
+            color: #66d9ff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 30px;
+            background: rgba(0, 200, 255, 0.04);
+            border: 1px solid rgba(0, 200, 255, 0.04);
+        }
+
+        .notice-footer .action-link:hover {
+            background: rgba(0, 200, 255, 0.08);
+            border-color: rgba(0, 200, 255, 0.10);
+            gap: 10px;
+            color: #99e6ff;
+        }
+
+        .notice-footer .action-link i {
+            font-size: 13px;
+        }
+
+        /* ===== LOADING STATE ===== */
+        .loading-state {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #8896a8;
+        }
+
+        .loading-state i {
+            font-size: 40px;
+            color: #66d9ff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-state p {
+            margin-top: 12px;
+            font-size: 15px;
+        }
+
+        /* ===== FOOTER ===== */
+        .board-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            width: 100%;
+            max-width: 900px;
+            align-self: center;
+        }
+
+        .board-footer .total {
+            font-size: 14px;
+            color: #5e6f82;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .board-footer .total i {
+            font-size: 14px;
+        }
+
+        .board-footer .total span {
+            color: #b0c4db;
+            font-weight: 600;
+        }
+
+        .board-footer .status {
+            font-size: 13px;
+            color: #4a5a6e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .board-footer .status i {
+            color: #00ff88;
+            font-size: 12px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .notice-board {
+                padding: 30px 20px 35px;
+                min-height: 90vh;
+                border-radius: 24px;
+            }
+
+            .header-text h1 {
+                font-size: 26px;
+            }
+
+            .notice-card {
+                padding: 30px 22px;
+            }
+
+            .notice-title {
+                font-size: 22px;
+            }
+
+            .notice-title-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+
+            .notice-description {
+                font-size: 16px;
+            }
+
+            .notice-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .notice-board {
+                padding: 20px 12px 25px;
+                border-radius: 18px;
+            }
+
+            .header {
+                gap: 12px;
+            }
+
+            .header-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
+            }
+
+            .header-text h1 {
+                font-size: 22px;
+            }
+
+            .header-text .sub {
+                font-size: 13px;
+            }
+
+            .notice-card {
+                padding: 22px 16px;
+                border-radius: 18px;
+            }
+
+            .notice-title {
+                font-size: 18px;
+            }
+
+            .notice-title-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+
+            .notice-description {
+                font-size: 14px;
+            }
+
+            .notice-badge {
+                font-size: 10px;
+                padding: 4px 12px;
+            }
+
+            .notice-footer .action-link {
+                font-size: 13px;
+                padding: 6px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="notice-board">
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <div class="header-text">
+                <h1>📢 Notice Board</h1>
+                <div class="sub">
+                    <span class="live-dot"></span> Live Updates
+                    <span style="color:#3a4a5e;">•</span>
+                    <span id="currentTime">--:--</span>
+                    <span class="badge-live" id="connectionStatus">
+                        <i class="fas fa-link"></i> Connected
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== NOTICE CONTAINER ===== -->
+        <div class="notice-container">
+            <!-- ===== LOADING STATE ===== -->
+            <div class="loading-state" id="loadingState">
+                <i class="fas fa-spinner"></i>
+                <p>Loading notice...</p>
+            </div>
+
+            <!-- ===== SINGLE NOTICE CARD ===== -->
+            <div class="notice-card" id="noticeCard" style="display: none;">
+                <div class="notice-header">
+                    <div class="notice-title-area">
+                        <div class="notice-title-icon" id="noticeIcon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="notice-title" id="noticeTitle">Loading...</div>
+                    </div>
+                    <span class="notice-badge update" id="noticeBadge">
+                        <i class="fas fa-arrow-up"></i> Update
+                    </span>
+                </div>
+
+                <div class="notice-body">
+                    <div class="notice-description" id="noticeDescription">
+                        Loading notice content...
+                    </div>
+                </div>
+
+                <div class="notice-footer">
+                    <div class="date">
+                        <i class="far fa-calendar-alt"></i>
+                        <span id="noticeDate">--</span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="board-footer">
+            <div class="total">
+                <i class="far fa-file-alt"></i>
+                Total <span id="noticeCount">1</span> Notice
+            </div>
+            <div class="status">
+                <i class="fas fa-circle"></i>
+                Last Update: <span id="lastUpdate">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONFIG.JS ===== -->
+    <script src="config.js"></script>
+    
+    <!-- ===== FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ===== INIT FIREBASE FROM CONFIG =====
+        function initFirebase() {
+            if (typeof firebaseConfig !== 'undefined') {
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                        console.log('✅ Firebase initialized from config.js');
+                        document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-link"></i> Connected';
+                        return true;
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('Firebase init error:', error);
+                    document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                    return false;
+                }
+            } else {
+                console.warn('⚠️ config.js not loaded. Using local mode.');
+                document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-wifi"></i> Local Mode';
+                return false;
+            }
+        }
+
+        // ===== TIME UPDATE =====
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = h + ':' + m;
+        }
+        updateClock();
+        setInterval(updateClock, 30000);
+
+        // ===== DOM ELEMENTS =====
+        const noticeCard = document.getElementById('noticeCard');
+        const loadingState = document.getElementById('loadingState');
+        const noticeTitle = document.getElementById('noticeTitle');
+        const noticeDescription = document.getElementById('noticeDescription');
+        const noticeDate = document.getElementById('noticeDate');
+        const noticeBadge = document.getElementById('noticeBadge');
+        const noticeIcon = document.getElementById('noticeIcon').querySelector('i');
+        const noticeCount = document.getElementById('noticeCount');
+        const lastUpdate = document.getElementById('lastUpdate');
+
+        // ===== BADGE MAP =====
+        const badgeMap = {
+            'high': { label: 'Urgent', icon: 'fa-exclamation-circle', class: 'high' },
+            'update': { label: 'Update', icon: 'fa-arrow-up', class: 'update' },
+            'maintenance': { label: 'Maintenance', icon: 'fa-tools', class: 'maintenance' },
+            'offer': { label: 'Offer', icon: 'fa-gift', class: 'offer' }
+        };
+
+        // ===== DEFAULT NOTICE (FALLBACK) =====
+        const defaultNotice = {
+            title: 'Welcome to Royal Task Network',
+            description: '<strong>Royal Task</strong> — Next-gen cloud mining platform is now <span class="highlight">live</span>. Start mining and earn USDT rewards.',
+            badge: 'update',
+            icon: 'fa-rocket',
+            date: new Date().toISOString().split('T')[0]
+        };
+
+        // ===== UPDATE NOTICE UI =====
+        function updateNoticeUI(data) {
+            const notice = data || defaultNotice;
+
+            // Title
+            noticeTitle.textContent = notice.title || 'No Title';
+
+            // Description
+            noticeDescription.innerHTML = notice.description || 'No description available.';
+
+            // Badge
+            const badgeInfo = badgeMap[notice.badge] || badgeMap['update'];
+            noticeBadge.className = `notice-badge ${badgeInfo.class}`;
+            noticeBadge.innerHTML = `<i class="fas ${badgeInfo.icon}"></i> ${badgeInfo.label}`;
+
+            // Icon
+            noticeIcon.className = `fas ${notice.icon || 'fa-bolt'}`;
+
+            // Date
+            if (notice.date) {
+                const dateObj = new Date(notice.date);
+                if (!isNaN(dateObj.getTime())) {
+                    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                    const day = dateObj.getDate();
+                    const month = months[dateObj.getMonth()];
+                    const year = dateObj.getFullYear();
+                    noticeDate.textContent = `${day} ${month} ${year}`;
+                } else {
+                    noticeDate.textContent = notice.date;
+                }
+            } else {
+                noticeDate.textContent = '--';
+            }
+
+            // Count
+            noticeCount.textContent = '1';
+
+            // Last Update Time
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            lastUpdate.textContent = `${h}:${m}`;
+
+            // Show card, hide loading
+            loadingState.style.display = 'none';
+            noticeCard.style.display = 'block';
+        }
+
+        // ===== LOAD NOTICE FROM FIREBASE =====
+        function loadNoticeFromFirebase() {
+            try {
+                // Check if Firebase is available
+                if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                    console.warn('Firebase not initialized. Using default notice.');
+                    updateNoticeUI(defaultNotice);
+                    return;
+                }
+
+                const db = firebase.database();
+                const noticeRef = db.ref('noticeBoard/currentNotice');
+
+                // Show loading
+                loadingState.style.display = 'block';
+                noticeCard.style.display = 'none';
+
+                // Get notice data
+                noticeRef.once('value').then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        updateNoticeUI(data);
+                    } else {
+                        // No data in Firebase, use default
+                        updateNoticeUI(defaultNotice);
+                    }
+                }).catch((error) => {
+                    console.error('Error loading notice:', error);
+                    updateNoticeUI(defaultNotice);
+                });
+
+                // Listen for real-time updates
+                noticeRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        updateNoticeUI(data);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Firebase error:', error);
+                updateNoticeUI(defaultNotice);
+            }
+        }
+
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase from config
+            if (initFirebase()) {
+                // Wait a bit then load notice
+                setTimeout(() => {
+                    loadNoticeFromFirebase();
+                }, 500);
+            } else {
+                // No Firebase, use default
+                setTimeout(() => {
+                    updateNoticeUI(defaultNotice);
+                }, 500);
+            }
+        });
+
+        // ===== RETRY IF NOT LOADED =====
+        setTimeout(() => {
+            if (loadingState.style.display !== 'none') {
+                console.log('Retrying notice load...');
+                if (initFirebase()) {
+                    loadNoticeFromFirebase();
+                } else {
+                    updateNoticeUI(defaultNotice);
+                }
+            }
+        }, 3000);
+    </script>
+
+</body>
+</html>
