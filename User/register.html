@@ -6,15 +6,15 @@
     <title>Royal Task - Sign Up</title>
     
     <meta property="og:title" content="Royal Task - Best Mining for Referral & Daily Earning">
-<meta property="og:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities. Invite friends, grow your network, complete tasks, and maximize your daily crypto earnings with our easy-to-use platform.">
-<meta property="og:image" content="https://royal-task.vercel.app/image.png">
-<meta property="og:url" content="https://royal-task.vercel.app">
-<meta property="og:type" content="website">
+    <meta property="og:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities.">
+    <meta property="og:image" content="https://royal-task.vercel.app/image.png">
+    <meta property="og:url" content="https://royal-task.vercel.app">
+    <meta property="og:type" content="website">
 
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Royal Task - Best Mining for Referral & Daily Earning">
-<meta name="twitter:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities.">
-<meta name="twitter:image" content="https://royal-task.vercel.app/image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Royal Task - Best Mining for Referral & Daily Earning">
+    <meta name="twitter:description" content="Join Royal Task and start earning daily rewards through referrals and mining activities.">
+    <meta name="twitter:image" content="https://royal-task.vercel.app/image.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -257,6 +257,29 @@
             .auth-container { padding: 24px; border-radius: 20px; }
             .auth-header h1 { font-size: 20px; }
         }
+
+        /* Device ID Display */
+        .device-id-display {
+            background: rgba(0, 255, 204, 0.05);
+            border: 1px solid rgba(0, 255, 204, 0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            word-break: break-all;
+        }
+        .device-id-display i {
+            color: var(--accent-neon);
+            font-size: 14px;
+        }
+        .device-id-display span {
+            color: var(--text-main);
+            font-weight: 500;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -334,6 +357,13 @@
                 </div>
             </div>
 
+            <!-- Device ID Display (Read-Only) -->
+            <div class="device-id-display">
+                <i class="fa-solid fa-fingerprint"></i>
+                <span>Device ID:</span>
+                <span id="device-id-value">Loading...</span>
+            </div>
+
             <button type="submit" class="submit-auth-btn" id="signup-btn">
                 <i class="fa-solid fa-user-check"></i> <span id="btn-text">Initialize Network Registry</span>
             </button>
@@ -345,7 +375,7 @@
 
     </div>
 
-    <!-- Firebase SDKs (Realtime Database for consistency) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -365,11 +395,39 @@
                 firebase.initializeApp(firebaseConfig);
             }
             const auth = firebase.auth();
-            const rtdb = firebase.database(); // Realtime Database Initialization
+            const rtdb = firebase.database();
+
+            // --- Generate Unique Device ID ---
+            function generateDeviceId() {
+                const screenData = `${screen.width}x${screen.height}`;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const language = navigator.language;
+                const platform = navigator.platform;
+                const userAgent = navigator.userAgent;
+                
+                // Create a unique fingerprint
+                const fingerprint = `${screenData}|${timezone}|${language}|${platform}|${userAgent}`;
+                
+                // Simple hash function
+                let hash = 0;
+                for (let i = 0; i < fingerprint.length; i++) {
+                    const char = fingerprint.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                
+                return `DEV-${Math.abs(hash).toString(16).padStart(8, '0')}`;
+            }
+
+            const deviceId = generateDeviceId();
+            document.getElementById('device-id-value').textContent = deviceId;
+
+            // Store device ID in localStorage for persistence
+            localStorage.setItem('deviceId', deviceId);
 
             // --- Auto-Fill Referral Link Logic ---
             const urlParams = new URLSearchParams(window.location.search);
-            const referralCode = urlParams.get('ref'); // URL tracking param '?ref='
+            const referralCode = urlParams.get('ref');
             if (referralCode) {
                 document.getElementById('user-referral').value = referralCode;
             }
@@ -421,11 +479,66 @@
                 }
             };
 
+            // --- Check if device already has an account ---
+            function checkDeviceRegistration() {
+                return new Promise((resolve, reject) => {
+                    const deviceRef = rtdb.ref('deviceRegistrations/' + deviceId);
+                    deviceRef.once('value')
+                        .then((snapshot) => {
+                            if (snapshot.exists()) {
+                                resolve(snapshot.val());
+                            } else {
+                                resolve(null);
+                            }
+                        })
+                        .catch((error) => {
+                            reject(error);
+                        });
+                });
+            }
+
+            // --- Register device in the database ---
+            function registerDevice(uid) {
+                const deviceRef = rtdb.ref('deviceRegistrations/' + deviceId);
+                return deviceRef.set({
+                    uid: uid,
+                    registeredAt: firebase.database.ServerValue.TIMESTAMP,
+                    deviceId: deviceId
+                });
+            }
+
+            // --- Check if email is already registered on any device ---
+            function checkEmailExists(email) {
+                return new Promise((resolve, reject) => {
+                    const usersRef = rtdb.ref('users');
+                    usersRef.orderByChild('email').equalTo(email).once('value')
+                        .then((snapshot) => {
+                            resolve(snapshot.exists());
+                        })
+                        .catch((error) => {
+                            reject(error);
+                        });
+                });
+            }
+
             // --- Core Signup Logic ---
             const signupForm = document.getElementById('signup-form-pipeline');
             
-            signupForm.addEventListener('submit', (e) => {
+            signupForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // First, check if this device already has a registered account
+                try {
+                    const existingDevice = await checkDeviceRegistration();
+                    if (existingDevice) {
+                        showToast("This device already has a registered account. One account per device is allowed.", "error");
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Device check error:", error);
+                    showToast("Error checking device registration", "error");
+                    return;
+                }
 
                 const fullName = document.getElementById('user-fullname').value.trim();
                 const address = document.getElementById('user-address').value.trim();
@@ -447,6 +560,19 @@
                     return;
                 }
 
+                // Check if email is already registered
+                try {
+                    const emailExists = await checkEmailExists(email);
+                    if (emailExists) {
+                        showToast("This email is already registered in the system.", "error");
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Email check error:", error);
+                    showToast("Error checking email availability", "error");
+                    return;
+                }
+
                 setLoading(true);
 
                 // 1. Firebase Auth Step
@@ -454,41 +580,39 @@
                     .then((userCredential) => {
                         const user = userCredential.user;
                         
-                        // 2. Database Mapping Step (Saving profile data to Realtime Database)
-                        // যদি রেফারেল কোড দেওয়া থাকে তবে সেটি সেভ হবে, না হলে "none"
-                        const referredBy = referral || "none";
+                        // 2. Register device first (critical for one-account-per-device)
+                        return registerDevice(user.uid).then(() => {
+                            // 3. Database Mapping Step
+                            const referredBy = referral || "none";
 
-                        const userData = {
-                            uid: user.uid,
-                            fullName: fullName,
-                            address: address,
-                            phone: phone,
-                            email: email,
-                            referredBy: referredBy,
-                            balance: 0,
-                            current_vip: "VIP 0",
-                            referralCount: 0,
-                            activeReferrals: 0,
-                            referralEarnings: 0,
-                            createdAt: firebase.database.ServerValue.TIMESTAMP
-                        };
+                            const userData = {
+                                uid: user.uid,
+                                fullName: fullName,
+                                address: address,
+                                phone: phone,
+                                email: email,
+                                referredBy: referredBy,
+                                deviceId: deviceId,
+                                balance: 0,
+                                current_vip: "VIP 0",
+                                referralCount: 0,
+                                activeReferrals: 0,
+                                referralEarnings: 0,
+                                createdAt: firebase.database.ServerValue.TIMESTAMP
+                            };
 
-                        // ইউজার ডাটা সেভ করা হচ্ছে
-                        return rtdb.ref('users/' + user.uid).set(userData);
+                            return rtdb.ref('users/' + user.uid).set(userData);
+                        });
                     })
                     .then(() => {
-                        // 3. Referral Count Increment Logic
-                        // যদি রেফারেল কোড দেওয়া থাকে, তবে রেফারারের কাউন্ট বাড়ানোর প্রসেস
+                        // 4. Referral Count Increment Logic
                         const referralInput = document.getElementById('user-referral').value.trim();
                         
                         if (referralInput) {
-                            // রেফারারের পথ রেফারেন্স নেওয়া হচ্ছে
                             const referrerRef = rtdb.ref('users/' + referralInput);
                             
-                            // ট্রানজেকশন ব্যবহার করা হচ্ছে যাতে ডাটা লস না হয়
                             referrerRef.transaction((currentData) => {
                                 if (currentData) {
-                                    // referralCount বাড়ানো হচ্ছে (যদি আগে থেকে না থাকে তবে 1 দিয়ে শুরু হবে)
                                     currentData.referralCount = (currentData.referralCount || 0) + 1;
                                     return currentData;
                                 }
@@ -496,11 +620,9 @@
                                 if (error) {
                                     console.error("Referral count update failed:", error);
                                 }
-                                // এখানে কলব্যাক শেষ, ইউজারকে রিডাইরেক্ট করা যাবে
                             });
                         }
 
-                        // All Success
                         showToast("Operator Record Created. Redirecting to terminal...", "success");
                         signupForm.reset();
                         
