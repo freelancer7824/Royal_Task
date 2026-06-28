@@ -265,7 +265,7 @@
                 <div class="rule-number">02</div>
                 <div class="rule-content">
                     <h3>Referral Commission</h3>
-                    <p>Each active referral earns you 0.20 USDT. Go to the Referral page to claim your earnings manually.</p>
+                    <p>Each active referral earns you 0.50 USDT. Go to the Referral page to claim your earnings manually.</p>
                 </div>
             </div>
             <div class="rule-item">
@@ -362,7 +362,7 @@
                 // claimedReferrals অবজেক্টে যতগুলো key আছে, ততগুলো * 0.20 = টোটাল ক্লেমড আয়
                 const claimedReferrals = data.claimedReferrals || {};
                 const claimedCount = Object.keys(claimedReferrals).length;
-                const totalClaimedEarnings = claimedCount * 0.20;
+                const totalClaimedEarnings = claimedCount * 0.50;
 
                 updateUI('referral-balance', totalClaimedEarnings.toFixed(2));
 
