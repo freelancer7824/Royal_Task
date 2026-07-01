@@ -413,7 +413,7 @@
                             </div>
                         </div>
                         <div class="bonus-status">
-                            <span class="bonus-amount">0.20 <span class="unit">USDT</span></span>
+                            <span class="bonus-amount">0.05 <span class="unit">USDT</span></span>
                             <span class="status-badge ${dailyStatus}">
                                 ${dailyAvailable ? '<i class="fa-regular fa-clock"></i> ready' : '<i class="fa-regular fa-circle-check"></i> claimed today'}
                             </span>
@@ -443,7 +443,7 @@
             // --- claim logic ---
             function claimBonus(type, btnElement) {
                 const isSignup = (type === 'signup');
-                const amount = isSignup ? 1.00 : 0.20;
+                const amount = isSignup ? 1.00 : 0.05;
                 const updateKey = isSignup ? 'signupClaimed' : 'dailyClaimed';
                 const dateKey = isSignup ? null : 'dailyLastDate';
 
