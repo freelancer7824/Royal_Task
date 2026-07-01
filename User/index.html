@@ -418,8 +418,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -444,31 +444,46 @@
             width: 90%;
             text-align: center;
             position: relative;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 255, 204, 0.05);
+            animation: popupSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popupSlideIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .daily-bonus-popup .close-btn {
             position: absolute;
             top: 15px;
             right: 20px;
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             color: var(--text-muted);
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
         }
 
         .daily-bonus-popup .close-btn:hover {
             color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
         }
 
         .daily-bonus-popup .bonus-icon {
             font-size: 60px;
-            color: #ffd700;
             margin-bottom: 15px;
             display: block;
             animation: bounce 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
         }
 
         @keyframes bounce {
@@ -490,12 +505,14 @@
             font-weight: 800;
             color: var(--accent-glow);
             margin: 15px 0;
+            text-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
         }
 
         .daily-bonus-popup .bonus-amount span {
             font-size: 20px;
             color: var(--text-muted);
             font-weight: 400;
+            text-shadow: none;
         }
 
         .daily-bonus-popup p {
@@ -518,17 +535,23 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 4px 25px rgba(0, 255, 204, 0.3);
         }
 
         .daily-bonus-popup .claim-btn:hover {
-            transform: scale(0.98);
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(0, 255, 204, 0.4);
+        }
+
+        .daily-bonus-popup .claim-btn:active {
+            transform: translateY(0);
         }
 
         .daily-bonus-popup .claim-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .daily-bonus-popup .already-claimed {
@@ -552,6 +575,31 @@
             color: var(--text-muted);
             margin-top: 12px;
             display: none;
+        }
+
+        /* Claim success animation */
+        .claim-success-effect {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 24px;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .claim-success-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(0, 255, 204, 0.1), transparent, rgba(0, 255, 204, 0.05), transparent);
+            animation: successSpin 2s ease-out forwards;
+        }
+
+        @keyframes successSpin {
+            from { transform: rotate(0deg); opacity: 1; }
+            to { transform: rotate(360deg); opacity: 0; }
         }
 
         /* --- RESPONSIVE CSS STYLING --- */
@@ -644,10 +692,11 @@
 
     <!-- Daily Bonus Popup Overlay -->
     <div class="daily-bonus-overlay" id="dailyBonusOverlay">
-        <div class="daily-bonus-popup">
+        <div class="daily-bonus-popup" id="dailyBonusPopup">
             <button class="close-btn" id="closeBonusPopup" title="Close">
                 <i class="fa-solid fa-xmark"></i>
             </button>
+            <div class="claim-success-effect" id="claimSuccessEffect" style="display:none;"></div>
             <span class="bonus-icon">🎁</span>
             <h2>Daily Bonus</h2>
             <div class="bonus-amount">
@@ -716,6 +765,11 @@
             <a class="nav-link" data-url="../User/vip-level-up" data-blockable="true">
                 <i class="fa-solid fa-crown"></i> Vip Level Up
             </a>
+            
+            <a class="nav-link" data-url="../User/daily-bonus" data-blockable="true">
+    <i class="fa-solid fa-calendar-check"></i> Daily Bonus
+</a>
+            
             <a class="nav-link" data-url="../User/level-claim" data-blockable="true">
                 <i class="fa-solid fa-gift"></i> Daily Claimed
             </a>
@@ -779,27 +833,64 @@
         let isUserBlocked = false;
         let currentUserUid = null;
         let statusListenerAttached = false;
-        let dailyBonusData = null;
+        let dailyBonusConfig = null;
+        let bonusConfigReady = false;
         let bonusTimerInterval = null;
+        let isPopupShowing = false;
+        let pendingPopupRequest = false;
 
         // ========================================
-        // DAILY BONUS SYSTEM
+        // DAILY BONUS CONFIG
         // ========================================
-        const DAILY_BONUS_KEY = 'daily_bonus_config';
+        rtdb.ref('admin/daily_bonus').on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                dailyBonusConfig = snapshot.val();
+            } else {
+                dailyBonusConfig = {
+                    enabled: true,
+                    amount: 10,
+                    message: 'Claim your daily reward! Come back tomorrow for more.'
+                };
+            }
+            bonusConfigReady = true;
 
-        function getDailyBonusConfig() {
+            if (pendingPopupRequest) {
+                pendingPopupRequest = false;
+                showDailyBonusPopup();
+            }
+
+            console.log('[Bonus] Config loaded:', dailyBonusConfig);
+        }, (error) => {
+            console.error('[Bonus] Config read error:', error);
+            dailyBonusConfig = {
+                enabled: true,
+                amount: 10,
+                message: 'Claim your daily reward! Come back tomorrow for more.'
+            };
+            bonusConfigReady = true;
+
+            if (pendingPopupRequest) {
+                pendingPopupRequest = false;
+                showDailyBonusPopup();
+            }
+        });
+
+        // ========================================
+        // CHECK DAILY BONUS ELIGIBILITY
+        // ========================================
+        function checkDailyBonusEligibility(uid) {
             return new Promise((resolve, reject) => {
-                rtdb.ref('admin/daily_bonus').on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        const config = snapshot.val();
-                        resolve(config);
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayTimestamp = todayStart.getTime();
+
+                rtdb.ref('users/' + uid + '/dailyBonus/lastClaim').once('value', (snapshot) => {
+                    const lastClaim = snapshot.val() || 0;
+
+                    if (lastClaim >= todayTimestamp) {
+                        resolve({ eligible: false, claimed: true, lastClaim: lastClaim });
                     } else {
-                        // Default config if admin hasn't set
-                        resolve({
-                            enabled: true,
-                            amount: 10,
-                            message: 'Claim your daily reward! Come back tomorrow for more.'
-                        });
+                        resolve({ eligible: true, claimed: false, lastClaim: lastClaim });
                     }
                 }, (error) => {
                     reject(error);
@@ -807,54 +898,51 @@
             });
         }
 
-        function checkDailyBonusEligibility(uid) {
-            return new Promise((resolve, reject) => {
-                const userBonusRef = rtdb.ref('users/' + uid + '/dailyBonus');
-                userBonusRef.once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        const lastClaim = data.lastClaim || 0;
-                        const today = new Date().setHours(0, 0, 0, 0);
-                        
-                        // Check if claimed today
-                        if (lastClaim >= today) {
-                            resolve({ eligible: false, claimed: true, data: data });
-                        } else {
-                            resolve({ eligible: true, claimed: false, data: data });
-                        }
-                    } else {
-                        resolve({ eligible: true, claimed: false, data: null });
-                    }
-                }).catch(reject);
-            });
-        }
-
+        // ========================================
+        // CLAIM DAILY BONUS
+        // ========================================
         function claimDailyBonus(uid, bonusAmount) {
             return new Promise((resolve, reject) => {
-                const today = new Date().setHours(0, 0, 0, 0);
-                const userBonusRef = rtdb.ref('users/' + uid + '/dailyBonus');
-                const userRef = rtdb.ref('users/' + uid);
-                
-                // Update bonus record and balance in a transaction
-                userRef.transaction((currentData) => {
-                    if (currentData) {
-                        // Add bonus to balance
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const todayTimestamp = todayStart.getTime();
+
+                rtdb.ref('users/' + uid + '/dailyBonus/lastClaim').once('value', (snap) => {
+                    const existing = snap.val() || 0;
+                    if (existing >= todayTimestamp) {
+                        reject(new Error('ALREADY_CLAIMED_TODAY'));
+                        return;
+                    }
+
+                    rtdb.ref('users/' + uid).transaction((currentData) => {
+                        if (currentData === null) return currentData;
+
+                        const existingClaim = (currentData.dailyBonus && currentData.dailyBonus.lastClaim) || 0;
+                        if (existingClaim >= todayTimestamp) {
+                            return;
+                        }
+
                         currentData.balance = (currentData.balance || 0) + bonusAmount;
-                        currentData.dailyBonus = {
-                            lastClaim: today,
-                            amount: bonusAmount,
-                            claimedAt: firebase.database.ServerValue.TIMESTAMP
-                        };
-                    }
-                    return currentData;
-                }, (error, committed, snapshot) => {
-                    if (error) {
-                        reject(error);
-                    } else if (committed) {
-                        resolve(snapshot.val());
-                    } else {
-                        reject(new Error('Transaction not committed'));
-                    }
+                        
+                        if (!currentData.dailyBonus) {
+                            currentData.dailyBonus = {};
+                        }
+                        currentData.dailyBonus.lastClaim = todayTimestamp;
+                        currentData.dailyBonus.amount = bonusAmount;
+                        currentData.dailyBonus.claimedAt = firebase.database.ServerValue.TIMESTAMP;
+
+                        return currentData;
+                    }, (error, committed, snapshot) => {
+                        if (error) {
+                            reject(error);
+                        } else if (!committed) {
+                            reject(new Error('ALREADY_CLAIMED_TODAY'));
+                        } else {
+                            resolve(snapshot.val());
+                        }
+                    });
+                }, (error) => {
+                    reject(error);
                 });
             });
         }
@@ -863,99 +951,106 @@
         // SHOW DAILY BONUS POPUP
         // ========================================
         function showDailyBonusPopup() {
+            if (isPopupShowing) return;
+            if (!isUserLoggedIn || !currentUserUid) return;
+            if (isUserBlocked) return;
+
+            if (!bonusConfigReady) {
+                console.log('[Bonus] Config not ready, setting pending...');
+                pendingPopupRequest = true;
+                return;
+            }
+
+            const config = dailyBonusConfig;
+            if (!config || !config.enabled) {
+                console.log('[Bonus] Disabled by admin, skipping popup');
+                return;
+            }
+
             const overlay = document.getElementById('dailyBonusOverlay');
             const claimBtn = document.getElementById('claimBonusBtn');
             const alreadyClaimed = document.getElementById('alreadyClaimed');
             const timerText = document.getElementById('timerText');
             const bonusAmountSpan = document.getElementById('bonusAmount');
             const bonusMessage = document.getElementById('bonusMessage');
-            const closeBtn = document.getElementById('closeBonusPopup');
-
-            // Reset UI
-            claimBtn.style.display = 'flex';
+            const successEffect = document.getElementById('claimSuccessEffect');
+            
+            claimBtn.style.display = 'inline-flex';
             alreadyClaimed.style.display = 'none';
             timerText.style.display = 'none';
+            successEffect.style.display = 'none';
             claimBtn.disabled = false;
+            claimBtn.classList.remove('loading');
             claimBtn.innerHTML = '<i class="fa-solid fa-gift"></i> Claim Now';
 
-            // Get config and check eligibility
-            getDailyBonusConfig().then((config) => {
-                // Check if bonus is enabled
-                if (!config.enabled) {
-                    // Bonus disabled, don't show popup
-                    return;
+            bonusAmountSpan.textContent = config.amount || 10;
+            bonusMessage.textContent = config.message || 'Claim your daily reward! Come back tomorrow for more.';
+
+            console.log('[Bonus] Checking eligibility for:', currentUserUid);
+
+            checkDailyBonusEligibility(currentUserUid).then((result) => {
+                console.log('[Bonus] Eligibility result:', result);
+
+                if (result.eligible) {
+                    claimBtn.style.display = 'inline-flex';
+                    alreadyClaimed.style.display = 'none';
+                    timerText.style.display = 'none';
+                } else {
+                    claimBtn.style.display = 'none';
+                    alreadyClaimed.style.display = 'block';
+                    timerText.style.display = 'block';
+
+                    const lastClaim = result.lastClaim || 0;
+                    const nextClaim = new Date(lastClaim);
+                    nextClaim.setDate(nextClaim.getDate() + 1);
+                    nextClaim.setHours(0, 0, 0, 0);
+                    updateTimerDisplay(nextClaim.getTime());
                 }
 
-                bonusAmountSpan.textContent = config.amount || 10;
-                bonusMessage.textContent = config.message || 'Claim your daily reward! Come back tomorrow for more.';
-
-                // Store config for later use
-                dailyBonusData = config;
-
-                // Check if user is logged in
-                if (!isUserLoggedIn || !currentUserUid) {
-                    // User not logged in, don't show
-                    return;
-                }
-
-                // Check eligibility
-                checkDailyBonusEligibility(currentUserUid).then((result) => {
-                    if (result.eligible) {
-                        // Show popup with claim button
-                        overlay.classList.add('active');
-                        claimBtn.style.display = 'flex';
-                        alreadyClaimed.style.display = 'none';
-                        timerText.style.display = 'none';
-                        claimBtn.disabled = false;
-                        claimBtn.innerHTML = '<i class="fa-solid fa-gift"></i> Claim Now';
-                    } else {
-                        // Already claimed today
-                        claimBtn.style.display = 'none';
-                        alreadyClaimed.style.display = 'block';
-                        timerText.style.display = 'block';
-                        
-                        // Calculate time until next bonus
-                        const lastClaim = result.data?.lastClaim || 0;
-                        const nextClaim = new Date(lastClaim);
-                        nextClaim.setDate(nextClaim.getDate() + 1);
-                        nextClaim.setHours(0, 0, 0, 0);
-                        
-                        updateTimerDisplay(nextClaim.getTime());
-                        
-                        // Show popup with claimed status
-                        overlay.classList.add('active');
-                    }
-                }).catch((error) => {
-                    console.error('Error checking bonus eligibility:', error);
-                });
+                isPopupShowing = true;
+                overlay.classList.add('active');
 
             }).catch((error) => {
-                console.error('Error getting bonus config:', error);
+                console.error('[Bonus] Eligibility check error:', error);
             });
-
-            // Close button handler
-            closeBtn.onclick = function() {
-                overlay.classList.remove('active');
-                if (bonusTimerInterval) {
-                    clearInterval(bonusTimerInterval);
-                    bonusTimerInterval = null;
-                }
-            };
-
-            // Click outside to close
-            overlay.onclick = function(e) {
-                if (e.target === overlay) {
-                    overlay.classList.remove('active');
-                    if (bonusTimerInterval) {
-                        clearInterval(bonusTimerInterval);
-                        bonusTimerInterval = null;
-                    }
-                }
-            };
         }
 
         // ========================================
-        // UPDATE TIMER DISPLAY
+        // CLOSE POPUP
+        // ========================================
+        function closeBonusPopup() {
+            const overlay = document.getElementById('dailyBonusOverlay');
+            overlay.classList.remove('active');
+            isPopupShowing = false;
+            if (bonusTimerInterval) {
+                clearInterval(bonusTimerInterval);
+                bonusTimerInterval = null;
+            }
+        }
+
+        document.getElementById('closeBonusPopup').addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeBonusPopup();
+        });
+
+        document.getElementById('dailyBonusOverlay').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        document.getElementById('dailyBonusPopup').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isPopupShowing) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        // ========================================
+        // TIMER DISPLAY
         // ========================================
         function updateTimerDisplay(nextClaimTime) {
             const timerSpan = document.getElementById('nextBonusTimer');
@@ -974,11 +1069,6 @@
                         clearInterval(bonusTimerInterval);
                         bonusTimerInterval = null;
                     }
-                    // Refresh popup to show claim button
-                    setTimeout(() => {
-                        document.getElementById('dailyBonusOverlay').classList.remove('active');
-                        setTimeout(showDailyBonusPopup, 500);
-                    }, 1000);
                     return;
                 }
 
@@ -986,7 +1076,7 @@
                 const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
                 const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
 
-                timerSpan.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                timerSpan.textContent = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
             }
 
             updateTimer();
@@ -994,9 +1084,11 @@
         }
 
         // ========================================
-        // CLAIM BONUS BUTTON HANDLER
+        // 🔥🔥🔥 CLAIM BUTTON HANDLER — FIXED 🔥🔥🔥
         // ========================================
-        document.getElementById('claimBonusBtn').addEventListener('click', function() {
+        document.getElementById('claimBonusBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+
             if (!isUserLoggedIn || !currentUserUid) {
                 showToast("Access Denied", "Please sign in to claim bonus", "fa-solid fa-lock", true);
                 return;
@@ -1008,53 +1100,80 @@
             }
 
             const btn = this;
+            const bonusAmount = parseInt(dailyBonusConfig?.amount || 10);
+
             btn.disabled = true;
+            btn.classList.add('loading');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Claiming...';
 
-            const bonusAmount = parseInt(dailyBonusData?.amount || 10);
-
             claimDailyBonus(currentUserUid, bonusAmount).then((userData) => {
-                showToast("🎉 Bonus Claimed!", `You received ${bonusAmount} coins!`, "fa-solid fa-gift", false);
-                
-                // Update UI
+                const successEffect = document.getElementById('claimSuccessEffect');
+                successEffect.style.display = 'block';
+                setTimeout(() => { successEffect.style.display = 'none'; }, 2000);
+
+                showToast("Bonus Claimed!", "You received " + bonusAmount + " coins!", "fa-solid fa-gift", false);
+
                 btn.style.display = 'none';
                 document.getElementById('alreadyClaimed').style.display = 'block';
                 document.getElementById('timerText').style.display = 'block';
-                
-                // Update balance display if visible in the page
-                if (userData && userData.balance !== undefined) {
-                    const balanceElements = document.querySelectorAll('.balance-display');
-                    balanceElements.forEach(el => {
-                        el.textContent = userData.balance;
-                    });
-                }
 
-                // Calculate next claim time
                 const nextClaim = new Date();
                 nextClaim.setDate(nextClaim.getDate() + 1);
                 nextClaim.setHours(0, 0, 0, 0);
                 updateTimerDisplay(nextClaim.getTime());
 
-                // Update daily bonus data in localStorage for next load
-                const today = new Date().setHours(0, 0, 0, 0);
-                localStorage.setItem('dailyBonusClaimed', JSON.stringify({
-                    date: today,
-                    amount: bonusAmount
-                }));
+                console.log('[Bonus] Successfully claimed! Data saved in: users/' + currentUserUid + '/dailyBonus');
+                console.log('[Bonus] New balance:', userData.balance);
 
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-gift"></i> Claim Now';
+                // ============================================================
+                // 🔥🔥🔥 SEND MESSAGE TO IFRAME (DASHBOARD) 🔥🔥🔥
+                // ============================================================
+                const iframe = document.getElementById('main-frame');
+                if (iframe && iframe.contentWindow) {
+                    console.log('[Bonus] 📨 Sending DAILY_BONUS_CLAIMED message to iframe...');
+                    try {
+                        iframe.contentWindow.postMessage({ 
+                            type: 'DAILY_BONUS_CLAIMED',
+                            amount: bonusAmount,
+                            newBalance: userData.balance 
+                        }, '*');
+                        console.log('[Bonus] ✅ Message sent successfully!');
+                    } catch (err) {
+                        console.error('[Bonus] Failed to send message:', err);
+                    }
+                } else {
+                    console.warn('[Bonus] ⚠️ Iframe not found or not ready');
+                }
+
+                // লোকাল স্টোরেজ সেট করুন (অন্য ট্যাবের জন্য)
+                localStorage.setItem('dailyBonusClaimed', Date.now().toString());
 
             }).catch((error) => {
-                console.error('Claim bonus error:', error);
-                showToast("Error", "Failed to claim bonus: " + error.message, "fa-solid fa-circle-exclamation", true);
+                console.error('[Bonus] Claim error:', error);
+                
+                if (error.message === 'ALREADY_CLAIMED_TODAY') {
+                    btn.style.display = 'none';
+                    document.getElementById('alreadyClaimed').style.display = 'block';
+                    document.getElementById('timerText').style.display = 'block';
+                    
+                    const nextClaim = new Date();
+                    nextClaim.setDate(nextClaim.getDate() + 1);
+                    nextClaim.setHours(0, 0, 0, 0);
+                    updateTimerDisplay(nextClaim.getTime());
+
+                    showToast("Already Claimed", "You have already claimed today's bonus", "fa-solid fa-circle-info", true);
+                } else {
+                    showToast("Error", "Failed to claim bonus: " + error.message, "fa-solid fa-circle-exclamation", true);
+                }
+
                 btn.disabled = false;
+                btn.classList.remove('loading');
                 btn.innerHTML = '<i class="fa-solid fa-gift"></i> Claim Now';
             });
         });
 
         // ========================================
-        // UI UPDATE FUNCTION
+        // UI UPDATE AFTER LOGIN/LOGOUT
         // ========================================
         function updateUI(isLoggedIn) {
             const noticeIcon = document.getElementById('noticeIcon');
@@ -1064,45 +1183,23 @@
                 document.getElementById('profileBtn').style.display = 'flex';
                 noticeIcon.style.display = 'flex';
                 
-                // Show daily bonus popup after login with a slight delay
                 setTimeout(() => {
-                    // Check if we should show the popup
-                    const today = new Date().setHours(0, 0, 0, 0);
-                    const claimedData = localStorage.getItem('dailyBonusClaimed');
-                    let shouldShow = true;
-                    
-                    if (claimedData) {
-                        try {
-                            const parsed = JSON.parse(claimedData);
-                            if (parsed.date === today) {
-                                shouldShow = false; // Already claimed today
-                            }
-                        } catch (e) {}
-                    }
-                    
-                    if (shouldShow) {
-                        showDailyBonusPopup();
-                    } else {
-                        // Still check with server to be sure
-                        if (currentUserUid) {
-                            checkDailyBonusEligibility(currentUserUid).then((result) => {
-                                if (result.eligible) {
-                                    showDailyBonusPopup();
-                                }
-                            }).catch(() => {});
-                        }
-                    }
+                    showDailyBonusPopup();
                 }, 1500);
                 
             } else {
                 document.getElementById('signInBtn').style.display = 'flex';
                 document.getElementById('profileBtn').style.display = 'none';
                 noticeIcon.style.display = 'none';
+                
+                if (isPopupShowing) {
+                    closeBonusPopup();
+                }
+                pendingPopupRequest = false;
+
                 if (isUserBlocked) {
                     setBlockedMode(false);
                 }
-                // Clear daily bonus localStorage on logout
-                localStorage.removeItem('dailyBonusClaimed');
             }
         }
 
@@ -1139,6 +1236,9 @@
                     "fa-solid fa-shield-halved",
                     true
                 );
+
+                if (isPopupShowing) closeBonusPopup();
+                pendingPopupRequest = false;
 
             } else {
                 badge.style.display = 'none';
@@ -1196,6 +1296,7 @@
                         if (!user) {
                             handleLogout();
                         } else if (user.uid !== currentUserUid) {
+                            const oldUid = currentUserUid;
                             currentUserUid = user.uid;
                             localStorage.setItem('currentUser', JSON.stringify({
                                 uid: user.uid,
@@ -1203,9 +1304,17 @@
                                 displayName: user.displayName || "User",
                                 photoURL: user.photoURL || null
                             }));
-                            rtdb.ref('users/' + currentUserUid + '/status').off();
+
+                            if (oldUid) {
+                                rtdb.ref('users/' + oldUid + '/status').off();
+                            }
                             statusListenerAttached = false;
                             attachStatusListener(currentUserUid);
+
+                            if (isPopupShowing) closeBonusPopup();
+                            setTimeout(() => {
+                                showDailyBonusPopup();
+                            }, 1000);
                         }
                     });
 
@@ -1247,10 +1356,11 @@
 
             auth.signOut().then(() => {
                 localStorage.removeItem('currentUser');
-                localStorage.removeItem('dailyBonusClaimed');
                 isUserLoggedIn = false;
                 isUserBlocked = false;
                 currentUserUid = null;
+                dailyBonusConfig = null;
+                bonusConfigReady = false;
                 updateUI(false);
                 document.getElementById('main-frame').src = 'homepage';
             }).catch((error) => {
@@ -1298,13 +1408,12 @@
             
             const toast = document.createElement('div');
             toast.className = 'toast-msg' + (isError ? ' toast-error' : '');
-            toast.innerHTML = `
-                <i class="${iconClass}"></i>
-                <div class="toast-text-container">
-                    <div class="toast-title">${title}</div>
-                    <div class="toast-subtitle">${subtitle}</div>
-                </div>
-            `;
+            toast.innerHTML = 
+                '<i class="' + iconClass + '"></i>' +
+                '<div class="toast-text-container">' +
+                    '<div class="toast-title">' + title + '</div>' +
+                    '<div class="toast-subtitle">' + subtitle + '</div>' +
+                '</div>';
             
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 50);
@@ -1390,15 +1499,6 @@
 
         menuBtn.addEventListener('click', toggleSidebar);
         overlay.addEventListener('click', toggleSidebar);
-
-        // ========================================
-        // SECURITY
-        // ========================================
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123) return false;
-            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-        };
     </script>
 </body>
 </html>
