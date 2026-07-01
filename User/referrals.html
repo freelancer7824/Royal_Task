@@ -17,6 +17,7 @@
             --text-muted: #8a94a6;
             --card-border: rgba(255, 255, 255, 0.03);
             --input-bg: #1a1d30;
+            --inactive-bonus-color: #ffaa00;
         }
 
         * {
@@ -47,6 +48,8 @@
             letter-spacing: 0.5px; margin-bottom: 5px;
         }
         .page-header p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+        .page-header p .highlight-active { color: var(--accent-neon); font-weight: 600; }
+        .page-header p .highlight-inactive { color: var(--inactive-bonus-color); font-weight: 600; }
 
         .referral-share-box {
             background: linear-gradient(145deg, #121420 0%, #0e1019 100%);
@@ -99,7 +102,7 @@
         .copy-icon-btn:hover { color: var(--accent-neon); }
 
         .ref-stats-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
+            display: grid; grid-template-columns: repeat(4, 1fr);
             gap: 20px; margin-bottom: 24px; max-width: 1100px;
         }
         .ref-card {
@@ -135,6 +138,17 @@
             font-size: 12px; color: var(--text-muted);
             text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
         }
+        .ref-card.inactive-card .ref-card-icon {
+            color: var(--inactive-bonus-color);
+            background: rgba(255, 170, 0, 0.05);
+        }
+        .ref-card.inactive-card:hover .ref-card-icon {
+            background: rgba(255, 170, 0, 0.12);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.15);
+        }
+        .ref-card.inactive-card h3 .usdt-unit {
+            color: var(--inactive-bonus-color);
+        }
 
         .claim-section {
             max-width: 1100px; margin-bottom: 30px;
@@ -158,20 +172,31 @@
             border: 1px solid rgba(0, 255, 204, 0.15);
             border-radius: 14px; display: flex; align-items: center;
             justify-content: center; font-size: 22px; color: var(--accent-neon);
+            transition: all 0.3s ease;
         }
         .claim-info h3 { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; }
         .claim-amount {
             font-size: 28px; font-weight: 700; color: var(--text-main);
             display: flex; align-items: baseline; gap: 6px;
+            flex-wrap: wrap;
         }
         .claim-amount .unit {
             font-size: 13px; font-weight: 500; color: var(--accent-neon);
         }
+        .claim-amount .breakdown {
+            font-size: 13px; font-weight: 400; color: var(--text-muted);
+            margin-left: 4px;
+        }
+        .claim-amount .breakdown .active-amount { color: var(--accent-neon); }
+        .claim-amount .breakdown .inactive-amount { color: var(--inactive-bonus-color); }
         .claim-sub {
             font-size: 11px; color: var(--text-muted); margin-top: 4px;
             display: flex; align-items: center; gap: 5px;
+            flex-wrap: wrap;
         }
         .claim-sub i { color: var(--accent-neon); font-size: 10px; }
+        .claim-sub .badge-active { color: var(--accent-neon); }
+        .claim-sub .badge-inactive { color: var(--inactive-bonus-color); }
         .claim-right { z-index: 1; }
 
         .claim-btn {
@@ -233,12 +258,17 @@
         .table-header {
             font-size: 16px; font-weight: 600; margin-bottom: 20px;
             display: flex; align-items: center; gap: 10px;
+            flex-wrap: wrap;
         }
         .table-header i { color: var(--accent-neon); }
         .table-header .count-badge {
             background: rgba(0, 255, 204, 0.1); color: var(--accent-neon);
             font-size: 12px; font-weight: 600; padding: 2px 10px;
             border-radius: 20px; margin-left: 4px;
+        }
+        .table-header .count-badge.inactive-badge {
+            background: rgba(255, 170, 0, 0.1);
+            color: var(--inactive-bonus-color);
         }
         .responsive-table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
@@ -255,6 +285,7 @@
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
         .badge.active { background: rgba(0, 255, 102, 0.1); color: #00ff66; }
         .badge.inactive { background: rgba(255, 255, 255, 0.05); color: #8a94a6; }
+        .badge.inactive-bonus { background: rgba(255, 170, 0, 0.1); color: var(--inactive-bonus-color); }
         .badge.branch-broken { background: rgba(255, 170, 0, 0.1); color: #ffaa00; }
         .earn-col {
             display: flex; align-items: center; gap: 6px;
@@ -262,6 +293,7 @@
         }
         .earn-col.pending { color: #ffaa00; }
         .earn-col.zero { color: var(--text-muted); font-weight: 400; }
+        .earn-col.inactive-bonus { color: var(--inactive-bonus-color); }
 
         @keyframes rowSlideIn {
             from { opacity: 0; transform: translateY(8px); }
@@ -301,25 +333,9 @@
             to { opacity: 0; transform: translateX(40px); }
         }
 
-        .level-note {
-            max-width: 1100px; margin-bottom: 24px;
-            background: rgba(255, 255, 255, 0.01);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 12px; padding: 14px 18px;
-            display: flex; align-items: flex-start; gap: 10px;
-            font-size: 12px; color: var(--text-muted); line-height: 1.7;
+        @media (max-width: 992px) {
+            .ref-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        .level-note i { color: var(--accent-neon); font-size: 14px; min-width: 18px; text-align: center; margin-top: 2px; }
-        .level-note strong { color: var(--text-main); font-weight: 600; }
-        .level-note .example-row {
-            display: flex; gap: 6px; align-items: center; margin-top: 2px;
-        }
-        .level-note .tag { 
-            font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600; 
-        }
-        .level-note .tag.yes { background: rgba(0,255,102,0.12); color: #00ff66; }
-        .level-note .tag.no { background: rgba(255,68,68,0.12); color: #ff4444; }
-
         @media (max-width: 768px) {
             .ref-stats-grid { grid-template-columns: 1fr; gap: 14px; }
             .link-input-group { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
@@ -329,6 +345,8 @@
             .claim-left { flex-direction: column; }
             .claim-right { display: flex; justify-content: center; }
             .claim-btn { width: 100%; justify-content: center; }
+            .claim-amount { justify-content: center; }
+            .claim-sub { justify-content: center; }
         }
         @media (max-width: 480px) {
             body { padding: 16px; }
@@ -337,7 +355,6 @@
             .claim-amount { font-size: 24px; }
             .toast-container { top: 12px; right: 12px; left: 12px; }
             .toast { min-width: auto; }
-            .level-note { flex-direction: column; text-align: center; align-items: center; }
         }
     </style>
 </head>
@@ -347,26 +364,10 @@
 
     <div class="page-header">
         <h1>Global Referral Network</h1>
-        <p>Earn <strong style="color:var(--accent-neon)">0.50 USDT</strong> for every active referral in your unbroken referral chain, no depth limit.</p>
-    </div>
-
-    <div style="display:none" class="level-note">
-        <i class="fa-solid fa-shield-halved"></i>
-        <div style="display:none">
-            <strong>Unbroken Chain Rule:</strong> You earn from anyone in your referral tree — BUT every person in the path from you to them must have deposited.
-            <div class="example-row">
-                You <i class="fa-solid fa-arrow-right" style="font-size:9px;color:var(--text-muted)"></i> 
-                A <span class="tag yes">Deposited</span> <i class="fa-solid fa-arrow-right" style="font-size:9px;color:var(--text-muted)"></i> 
-                B <span class="tag yes">Deposited</span> 
-                = You earn from <strong>both A and B</strong>
-            </div>
-            <div class="example-row">
-                You <i class="fa-solid fa-arrow-right" style="font-size:9px;color:var(--text-muted)"></i> 
-                A <span class="tag no">No Deposit</span> <i class="fa-solid fa-arrow-right" style="font-size:9px;color:var(--text-muted)"></i> 
-                B <span class="tag yes">Deposited</span> 
-                = You earn from <strong>neither</strong>. B's count goes under A's line, not yours.
-            </div>
-        </div>
+        <p>
+            Earn <span class="highlight-active">0.50 USDT</span> for every active referral (deposited) AND 
+            <span class="highlight-inactive">0.10 USDT</span> for every inactive referral (no deposit) in your unbroken referral chain!
+        </p>
     </div>
 
     <div class="referral-share-box">
@@ -400,7 +401,14 @@
             <div class="ref-card-icon"><i class="fa-solid fa-bolt"></i></div>
             <div class="ref-card-info">
                 <h3 id="active-ref"><div class="skeleton" style="width: 40px;"></div></h3>
-                <p>Active (Earning)</p>
+                <p>Active (0.50 USDT)</p>
+            </div>
+        </div>
+        <div class="ref-card inactive-card">
+            <div class="ref-card-icon"><i class="fa-solid fa-user-slash"></i></div>
+            <div class="ref-card-info">
+                <h3 id="inactive-ref"><div class="skeleton" style="width: 40px;"></div></h3>
+                <p>Inactive (0.10 USDT)</p>
             </div>
         </div>
         <div class="ref-card">
@@ -422,6 +430,7 @@
                 <div class="claim-amount">
                     <span id="unclaimed-amount"><div class="skeleton" style="width: 80px; height: 28px;"></div></span>
                     <span class="unit">USDT</span>
+                    <span class="breakdown" id="claim-breakdown"></span>
                 </div>
                 <div class="claim-sub" id="claim-sub">
                     <i class="fa-solid fa-circle-info"></i>
@@ -441,6 +450,7 @@
         <div class="table-header">
             <i class="fa-solid fa-user-group"></i> Direct Referrals List
             <span class="count-badge" id="table-count-badge" style="display:none;">0</span>
+            <span class="count-badge inactive-badge" id="table-inactive-badge" style="display:none;">0 Inactive</span>
         </div>
         <div class="responsive-table-wrapper">
             <table>
@@ -480,10 +490,11 @@
             }
 
             const database = firebase.database();
-            const PER_REFERRAL_EARNING = 0.50;
-            const MAX_DEPTH = 50; // ইনফিনিট লুপ প্রতিরোধে সীমা
+            const ACTIVE_BONUS = 0.50;
+            const INACTIVE_BONUS = 0.10;
+            const MAX_DEPTH = 50;
 
-            /* ====== Toast ====== */
+            // ====== Toast ======
             function showToast(message, type = 'info') {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
@@ -497,7 +508,7 @@
                 }, 3500);
             }
 
-            /* ====== Login Check ====== */
+            // ====== Login Check ======
             function checkLogin() {
                 const loggedInUser = localStorage.getItem('currentUser');
                 if (!loggedInUser) {
@@ -516,7 +527,7 @@
             const currentUserId = checkLogin();
             if (!currentUserId) return;
 
-            /* ====== Referral Link & Code ====== */
+            // ====== Referral Link & Code ======
             (function setupReferralData(uid) {
                 const origin = window.location.origin;
                 const refLink = `${origin}/../User/register?ref=${uid}`;
@@ -551,40 +562,20 @@
                 };
             })(currentUserId);
 
-            /* ============================================================
-               মূল লজিক — Unbroken Chain Traversal
-               ============================================================
-               উদাহরণ:
-               Me → A (deposited) → B (deposited) → C (deposited)
-               Me → D (no deposit) → E (deposited) → F (deposited)
-
-               আমার কাছে:
-               - A: Active, আমি 0.20 পাবো
-               - B: Active, আমি 0.20 পাবো  
-               - C: Active, আমি 0.20 পাবো
-               - D: Inactive, আমি কিছু পাবো না
-               - E: আমার কাছে দেখাবে না (D inactive তাই chain ভাঙ্গে)
-               - F: আমার কাছে দেখাবে না
-               
-               কিন্তু D এর পেজে দেখাবে:
-               - E: Active, D পাবে 0.20
-               - F: Active, D পাবে 0.20
-            ============================================================ */
-
-            // ক্যাশে — deposits: { uid: totalApprovedAmount }
+            // ====== Main Logic ======
             let depositsCache = {};
             let depositsReady = false;
-
-            // ক্যাশে — claimedReferrals
-            let cachedClaimedReferrals = {};
-
-            // ক্লেইম লক
+            let cachedClaimedActive = {};
+            let cachedClaimedInactive = {};
             let isClaiming = false;
+            let prevDBState = { 
+                referralCount: -1, 
+                activeReferrals: -1, 
+                inactiveReferrals: -1,
+                referralEarnings: -1 
+            };
 
-            // আগের স্টেটস
-            let prevDBState = { referralCount: -1, activeReferrals: -1, referralEarnings: -1 };
-
-            /* ====== Step 1: Deposits ক্যাশে ====== */
+            // ====== Step 1: Deposits Cache ======
             database.ref('deposits').on('value', (snap) => {
                 const temp = {};
                 if (snap.exists()) {
@@ -601,24 +592,24 @@
                 depositsReady = true;
             });
 
-            /* ====== Step 2: আমার ডাটা ====== */
+            // ====== Step 2: My Data ======
             const myUserRef = database.ref('users/' + currentUserId);
             let myDataReady = false;
 
             myUserRef.on('value', (snap) => {
                 if (!snap.exists()) return;
-                cachedClaimedReferrals = snap.val().claimedReferrals || {};
+                const data = snap.val();
+                cachedClaimedActive = data.claimedActiveReferrals || {};
+                cachedClaimedInactive = data.claimedInactiveReferrals || {};
                 myDataReady = true;
             });
 
-            /* ====== Step 3: মূল ক্যালকুলেশন ====== */
+            // ====== Step 3: Main Calculation ======
             database.ref('users').on('value', (usersSnap) => {
                 if (!myDataReady || !depositsReady) return;
 
-                // সব ইউজার ম্যাপ করি
                 const usersMap = {};
-                // referredBy ইনডেক্স — কে কাকে রেফার করেছে
-                const childrenOf = {}; // { parentUid: [childUid1, childUid2, ...] }
+                const childrenOf = {};
 
                 if (usersSnap.exists()) {
                     usersSnap.forEach((child) => {
@@ -634,130 +625,96 @@
                     });
                 }
 
-                /*
-                 * রিকার্সিভ ফাংশন: একটা ইউজারের নিচে সব ডাউনলাইন খুঁজে বের করে
-                 * শুধুমাত্র "Unbroken Active Chain" এ থাকা ইউজারদের রিটার্ন করে।
-                 * 
-                 * @param {string} startUid - যার নিচে খুঁজবো
-                 * @param {boolean} parentActive - উপরের সব পূর্বপুরুষ কি Active?
-                 * @param {number} depth - গভীরতা (ইনফিনিট লুপ গার্ড)
-                 * @returns {string[]} - আমার earning-eligible ইউজারদের UID array
-                 */
-                function collectEarningNodes(startUid, parentActive, depth) {
-                    if (depth > MAX_DEPTH) return [];
+                // Collect all earning nodes (both active and inactive)
+                function collectAllNodes(startUid, parentActive, depth) {
+                    if (depth > MAX_DEPTH) return { active: [], inactive: [] };
                     
                     const myChildren = childrenOf[startUid] || [];
-                    const result = [];
+                    const activeResult = [];
+                    const inactiveResult = [];
 
                     for (let i = 0; i < myChildren.length; i++) {
                         const childUid = myChildren[i];
                         const childDeposit = depositsCache[childUid] || 0;
                         const childIsActive = childDeposit > 0;
 
-                        // যদি প্যারেন্ট চেইন Active থাকে এবং এই চাইল্ডও Active হয়
                         if (parentActive && childIsActive) {
-                            result.push(childUid); // আমি এর জন্য 0.20 পাবো
-                            
-                            // এই চাইল্ডের নিচেও খুঁজবো — কারণ chain ভাঙ্গেনি
-                            const deeper = collectEarningNodes(childUid, true, depth + 1);
-                            for (let j = 0; j < deeper.length; j++) {
-                                result.push(deeper[j]);
+                            activeResult.push(childUid);
+                            const deeper = collectAllNodes(childUid, true, depth + 1);
+                            for (let j = 0; j < deeper.active.length; j++) {
+                                activeResult.push(deeper.active[j]);
                             }
-                        } else if (!childIsActive) {
-                            // চাইল্ড Inactive — এর নিচে যারা আছে তারা আমার কাছে দেখাবে না
-                            // কিন্তু এই চাইল্ডের পেজে তারা দেখাবে (যদি তাদের নিচের chain active হয়)
-                            // তাই আমরা এখানে থামি — রিকার্সন চালাই না
-                            // result তে কিছু যোগ করি না
-                        } else {
-                            // parentActive === false — উপরেই chain ভাঙ্গে গেছে
-                            // এর নিচেও খুঁজবো না
+                            for (let j = 0; j < deeper.inactive.length; j++) {
+                                inactiveResult.push(deeper.inactive[j]);
+                            }
+                        } else if (parentActive && !childIsActive) {
+                            inactiveResult.push(childUid);
+                            // For inactive users, check their downline for inactive bonuses too
+                            const deeper = collectAllNodes(childUid, true, depth + 1);
+                            for (let j = 0; j < deeper.inactive.length; j++) {
+                                inactiveResult.push(deeper.inactive[j]);
+                            }
                         }
+                        // If parentActive is false, skip everything
                     }
 
-                    return result;
+                    return { active: activeResult, inactive: inactiveResult };
                 }
 
-                // আমার থেকে শুরু করে সব eligible নোড বের করি
-                // আমি নিজেই শুরু বিন্দু, তাই parentActive = true
-                const allEarningUids = collectEarningNodes(currentUserId, true, 0);
+                const allNodes = collectAllNodes(currentUserId, true, 0);
+                const allActiveUids = allNodes.active;
+                const allInactiveUids = allNodes.inactive;
 
-                // --- এখন Direct রেফারদের জন্য টেবিল ডাটা তৈরি করি ---
-                const myDirectChildren = childrenOf[currentUserId] || [];
-                const directList = [];
-                let totalDirect = myDirectChildren.length;
-
-                for (let i = 0; i < myDirectChildren.length; i++) {
-                    const uid = myDirectChildren[i];
-                    const user = usersMap[uid];
-                    if (!user) continue;
-
-                    const depTotal = depositsCache[uid] || 0;
-                    const isActive = depTotal > 0;
-                    const isClaimed = cachedClaimedReferrals[uid] === true;
-
-                    // এই ডাইরেক্ট রেফারের নিচে কতজন eligible (আমার earning হিসেবে)
-                    // collectEarningNodes দিয়ে এর সাব-ট্রি বের করি
-                    const subTreeEarning = collectEarningNodes(uid, isActive, 0);
-                    const subTreeCount = subTreeEarning.length;
-
-                    let earningState = 'none';
-                    if (isActive) {
-                        if (!isClaimed) {
-                            earningState = 'pending';
-                        } else {
-                            earningState = 'claimed';
-                        }
-                    }
-
-                    directList.push({
-                        uid: uid,
-                        name: user.fullName || user.username || "Unknown",
-                        date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
-                        depositTotal: depTotal,
-                        isActive: isActive,
-                        earning: earningState,
-                        subTreeCount: subTreeCount, // এর নিচে আমার কতজন eligible
-                        branchBroken: !isActive && subTreeCount > 0 // inactive কিন্তু নিচে active আছে
-                    });
-                }
-
-                // --- Stats ক্যালকুলেশন ---
-                // Active = যাদের থেকে আমি টাকা পাচ্ছি (allEarningUids)
-                const totalActive = allEarningUids.length;
-
-                // Unclaimed = active যাদের এখনো claimed না
-                let unclaimedCount = 0;
-                let unclaimedTotal = 0;
-
-                for (let i = 0; i < allEarningUids.length; i++) {
-                    if (!cachedClaimedReferrals[allEarningUids[i]]) {
-                        unclaimedCount++;
-                        unclaimedTotal += PER_REFERRAL_EARNING;
+                // Calculate unclaimed
+                let unclaimedActiveCount = 0;
+                let unclaimedActiveTotal = 0;
+                for (let i = 0; i < allActiveUids.length; i++) {
+                    if (!cachedClaimedActive[allActiveUids[i]]) {
+                        unclaimedActiveCount++;
+                        unclaimedActiveTotal += ACTIVE_BONUS;
                     }
                 }
 
-                // Total Earned
-                const claimedCount = Object.keys(cachedClaimedReferrals).length;
-                const totalEarned = (claimedCount * PER_REFERRAL_EARNING) + unclaimedTotal;
+                let unclaimedInactiveCount = 0;
+                let unclaimedInactiveTotal = 0;
+                for (let i = 0; i < allInactiveUids.length; i++) {
+                    if (!cachedClaimedInactive[allInactiveUids[i]]) {
+                        unclaimedInactiveCount++;
+                        unclaimedInactiveTotal += INACTIVE_BONUS;
+                    }
+                }
+
+                const totalUnclaimed = unclaimedActiveTotal + unclaimedInactiveTotal;
+                const totalActive = allActiveUids.length;
+                const totalInactive = allInactiveUids.length;
+                const totalRefs = (childrenOf[currentUserId] || []).length;
+
+                // Calculate total earned
+                const claimedActiveCount = Object.keys(cachedClaimedActive).length;
+                const claimedInactiveCount = Object.keys(cachedClaimedInactive).length;
+                const totalEarned = (claimedActiveCount * ACTIVE_BONUS) + (claimedInactiveCount * INACTIVE_BONUS) + totalUnclaimed;
 
                 // --- UI: Stats Cards ---
-                updateStatCard('total-ref', String(totalDirect));
+                updateStatCard('total-ref', String(totalRefs));
                 updateStatCard('active-ref', String(totalActive));
+                updateStatCard('inactive-ref', String(totalInactive));
                 updateStatCard('earned-ref', `${totalEarned.toFixed(2)} <span class="usdt-unit">USDT</span>`);
 
                 // --- UI: Claim Section ---
-                updateClaimUI(unclaimedTotal, unclaimedCount);
+                updateClaimUI(totalUnclaimed, unclaimedActiveCount, unclaimedActiveTotal, unclaimedInactiveCount, unclaimedInactiveTotal);
 
                 // --- DB Update ---
                 const newState = {
-                    referralCount: totalDirect,
+                    referralCount: totalRefs,
                     activeReferrals: totalActive,
-                    referralEarnings: unclaimedTotal
+                    inactiveReferrals: totalInactive,
+                    referralEarnings: totalUnclaimed
                 };
 
                 if (
                     newState.referralCount !== prevDBState.referralCount ||
                     newState.activeReferrals !== prevDBState.activeReferrals ||
+                    newState.inactiveReferrals !== prevDBState.inactiveReferrals ||
                     Math.abs(newState.referralEarnings - prevDBState.referralEarnings) > 0.001
                 ) {
                     myUserRef.update(newState).catch(err => console.error("DB sync error:", err));
@@ -765,10 +722,10 @@
                 }
 
                 // --- UI: Table ---
-                renderTable(directList);
+                renderTable(childrenOf[currentUserId] || [], usersMap);
             });
 
-            /* ====== Claim Function ====== */
+            // ====== Claim Function ======
             document.getElementById('claim-btn').addEventListener('click', () => {
                 if (isClaiming) return;
                 isClaiming = true;
@@ -776,9 +733,9 @@
                 const btn = document.getElementById('claim-btn');
                 const label = btn.querySelector('.btn-label');
                 const origHTML = label.innerHTML;
-                const snapshotUnclaimed = prevDBState.referralEarnings;
+                const snapshotTotal = prevDBState.referralEarnings;
 
-                if (snapshotUnclaimed <= 0) {
+                if (snapshotTotal <= 0) {
                     isClaiming = false;
                     showToast('No claimable earnings right now.', 'info');
                     return;
@@ -787,106 +744,142 @@
                 btn.classList.add('loading');
                 btn.disabled = true;
 
-                myUserRef.transaction((currentData) => {
-                    if (currentData === null) return currentData;
-                    const unclaimed = parseFloat(currentData.referralEarnings || 0);
-                    const mainBal = parseFloat(currentData.balance || 0);
-                    if (unclaimed <= 0) return undefined;
-                    return {
-                        ...currentData,
-                        balance: mainBal + unclaimed,
-                        referralEarnings: 0
-                    };
-                })
-                .then((result) => {
-                    btn.classList.remove('loading');
-
-                    if (result.committed) {
-                        btn.classList.add('success-pulse');
-                        label.innerHTML = '<i class="fa-solid fa-check"></i> Claimed!';
-                        btn.style.background = 'linear-gradient(135deg, #00ff66, #00b340)';
-                        showToast(`Successfully claimed ${snapshotUnclaimed.toFixed(2)} USDT to your balance!`, 'success');
-
-                        // সব eligible active নোডকে claimed মার্ক করি
-                        // আমরা users আর deposits এর ক্যাশে আছি, তাই আবার ক্যালকুলেট করি
-                        database.ref('users').once('value').then((snap) => {
-                            const usersMap = {};
-                            const childrenOf = {};
-                            if (snap.exists()) {
-                                snap.forEach((child) => {
-                                    const uid = child.key;
-                                    usersMap[uid] = child.val();
-                                    const refBy = child.val().referredBy;
-                                    if (refBy) {
-                                        if (!childrenOf[refBy]) childrenOf[refBy] = [];
-                                        childrenOf[refBy].push(uid);
-                                    }
-                                });
+                // Recalculate unclaimed amounts for this claim
+                database.ref('users').once('value').then((snap) => {
+                    const childrenOf = {};
+                    if (snap.exists()) {
+                        snap.forEach((child) => {
+                            const uid = child.key;
+                            const refBy = child.val().referredBy;
+                            if (refBy) {
+                                if (!childrenOf[refBy]) childrenOf[refBy] = [];
+                                childrenOf[refBy].push(uid);
                             }
+                        });
+                    }
 
-                            // একই collectEarningNodes লজিক রিপিট
-                            function collectNodes(startUid, parentActive, depth) {
-                                if (depth > MAX_DEPTH) return [];
-                                const kids = childrenOf[startUid] || [];
-                                const res = [];
-                                for (let i = 0; i < kids.length; i++) {
-                                    const dep = depositsCache[kids[i]] || 0;
-                                    const active = dep > 0;
-                                    if (parentActive && active) {
-                                        res.push(kids[i]);
-                                        const deeper = collectNodes(kids[i], true, depth + 1);
-                                        for (let j = 0; j < deeper.length; j++) res.push(deeper[j]);
-                                    }
-                                }
-                                return res;
+                    function collectNodes(startUid, parentActive, depth) {
+                        if (depth > MAX_DEPTH) return { active: [], inactive: [] };
+                        const kids = childrenOf[startUid] || [];
+                        const activeRes = [];
+                        const inactiveRes = [];
+                        for (let i = 0; i < kids.length; i++) {
+                            const dep = depositsCache[kids[i]] || 0;
+                            const active = dep > 0;
+                            if (parentActive && active) {
+                                activeRes.push(kids[i]);
+                                const deeper = collectNodes(kids[i], true, depth + 1);
+                                for (let j = 0; j < deeper.active.length; j++) activeRes.push(deeper.active[j]);
+                                for (let j = 0; j < deeper.inactive.length; j++) inactiveRes.push(deeper.inactive[j]);
+                            } else if (parentActive && !active) {
+                                inactiveRes.push(kids[i]);
+                                const deeper = collectNodes(kids[i], true, depth + 1);
+                                for (let j = 0; j < deeper.inactive.length; j++) inactiveRes.push(deeper.inactive[j]);
                             }
+                        }
+                        return { active: activeRes, inactive: inactiveRes };
+                    }
 
-                            const eligible = collectNodes(currentUserId, true, 0);
-                            const newClaimed = { ...cachedClaimedReferrals };
+                    const nodes = collectNodes(currentUserId, true, 0);
+                    const eligibleActive = nodes.active.filter(uid => !cachedClaimedActive[uid]);
+                    const eligibleInactive = nodes.inactive.filter(uid => !cachedClaimedInactive[uid]);
+
+                    const activeAmount = eligibleActive.length * ACTIVE_BONUS;
+                    const inactiveAmount = eligibleInactive.length * INACTIVE_BONUS;
+                    const totalAmount = activeAmount + inactiveAmount;
+
+                    if (totalAmount <= 0) {
+                        isClaiming = false;
+                        btn.classList.remove('loading');
+                        btn.disabled = false;
+                        showToast('No new claimable earnings.', 'info');
+                        return;
+                    }
+
+                    // Perform transaction
+                    myUserRef.transaction((currentData) => {
+                        if (currentData === null) return currentData;
+                        const mainBal = parseFloat(currentData.balance || 0);
+                        return {
+                            ...currentData,
+                            balance: mainBal + totalAmount,
+                            referralEarnings: 0
+                        };
+                    })
+                    .then((result) => {
+                        btn.classList.remove('loading');
+
+                        if (result.committed) {
+                            btn.classList.add('success-pulse');
+                            label.innerHTML = '<i class="fa-solid fa-check"></i> Claimed!';
+                            btn.style.background = 'linear-gradient(135deg, #00ff66, #00b340)';
+                            
+                            let msg = `Claimed ${totalAmount.toFixed(2)} USDT`;
+                            if (activeAmount > 0 && inactiveAmount > 0) {
+                                msg += ` (${activeAmount.toFixed(2)} active + ${inactiveAmount.toFixed(2)} inactive)`;
+                            } else if (activeAmount > 0) {
+                                msg += ` from ${eligibleActive.length} active referrals`;
+                            } else if (inactiveAmount > 0) {
+                                msg += ` from ${eligibleInactive.length} inactive referrals`;
+                            }
+                            showToast(msg, 'success');
+
+                            // Update claimed records
+                            const newClaimedActive = { ...cachedClaimedActive };
+                            const newClaimedInactive = { ...cachedClaimedInactive };
                             let changed = false;
 
-                            for (let i = 0; i < eligible.length; i++) {
-                                if (!newClaimed[eligible[i]]) {
-                                    newClaimed[eligible[i]] = true;
+                            for (let i = 0; i < eligibleActive.length; i++) {
+                                if (!newClaimedActive[eligibleActive[i]]) {
+                                    newClaimedActive[eligibleActive[i]] = true;
+                                    changed = true;
+                                }
+                            }
+                            for (let i = 0; i < eligibleInactive.length; i++) {
+                                if (!newClaimedInactive[eligibleInactive[i]]) {
+                                    newClaimedInactive[eligibleInactive[i]] = true;
                                     changed = true;
                                 }
                             }
 
                             if (changed) {
-                                cachedClaimedReferrals = newClaimed;
-                                myUserRef.child('claimedReferrals').set(newClaimed)
-                                    .then(() => console.log('claimedReferrals synced.'))
-                                    .catch(err => console.error('claimedReferrals error:', err));
+                                cachedClaimedActive = newClaimedActive;
+                                cachedClaimedInactive = newClaimedInactive;
+                                myUserRef.update({
+                                    claimedActiveReferrals: newClaimedActive,
+                                    claimedInactiveReferrals: newClaimedInactive
+                                }).catch(err => console.error('Claimed update error:', err));
                             }
-                        });
 
-                        updateClaimUI(0, 0);
+                            updateClaimUI(0, 0, 0, 0, 0);
 
-                        setTimeout(() => {
-                            btn.style.background = '';
-                            label.innerHTML = origHTML;
-                            btn.classList.remove('success-pulse');
+                            setTimeout(() => {
+                                btn.style.background = '';
+                                label.innerHTML = origHTML;
+                                btn.classList.remove('success-pulse');
+                                isClaiming = false;
+                            }, 2200);
+
+                        } else {
                             isClaiming = false;
-                        }, 2200);
-
-                    } else {
+                            btn.disabled = false;
+                            showToast('Nothing to claim right now.', 'info');
+                        }
+                    })
+                    .catch((error) => {
+                        btn.classList.remove('loading');
                         isClaiming = false;
-                        updateClaimUI(0, 0);
-                        showToast('Nothing to claim right now.', 'info');
-                    }
-                })
-                .catch((error) => {
-                    btn.classList.remove('loading');
-                    isClaiming = false;
-                    label.innerHTML = '<i class="fa-solid fa-xmark"></i> Failed';
-                    btn.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
-                    showToast('Claim failed. Please try again.', 'error');
-                    console.error("Claim error:", error);
-                    setTimeout(() => { btn.style.background = ''; label.innerHTML = origHTML; }, 2000);
+                        btn.disabled = false;
+                        label.innerHTML = '<i class="fa-solid fa-xmark"></i> Failed';
+                        btn.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
+                        showToast('Claim failed. Please try again.', 'error');
+                        console.error("Claim error:", error);
+                        setTimeout(() => { btn.style.background = ''; label.innerHTML = origHTML; }, 2000);
+                    });
                 });
             });
 
-            /* ====== UI Helpers ====== */
+            // ====== UI Helpers ======
             function updateStatCard(elementId, rawHTML) {
                 const el = document.getElementById(elementId);
                 if (!el) return;
@@ -902,12 +895,13 @@
                 }
             }
 
-            function updateClaimUI(amount, count) {
+            function updateClaimUI(total, activeCount, activeAmount, inactiveCount, inactiveAmount) {
                 const el = document.getElementById('unclaimed-amount');
                 const btn = document.getElementById('claim-btn');
                 const sub = document.getElementById('claim-sub');
+                const breakdown = document.getElementById('claim-breakdown');
                 const hasSkeleton = el.querySelector('.skeleton');
-                const amountStr = amount.toFixed(2);
+                const amountStr = total.toFixed(2);
 
                 if (hasSkeleton) {
                     el.textContent = amountStr;
@@ -918,64 +912,124 @@
                     el.classList.add('value-update');
                 }
 
-                if (count > 0) {
-                    sub.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${count} active referral${count > 1 ? 's' : ''} in your chain ready to claim (${(count * PER_REFERRAL_EARNING).toFixed(2)} USDT)</span>`;
-                } else {
-                    sub.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>No new claimable earnings</span>`;
+                // Breakdown
+                let breakdownHTML = '';
+                if (activeCount > 0 && inactiveCount > 0) {
+                    breakdownHTML = `<span class="active-amount">${activeCount}×${ACTIVE_BONUS.toFixed(2)}</span> + <span class="inactive-amount">${inactiveCount}×${INACTIVE_BONUS.toFixed(2)}</span>`;
+                } else if (activeCount > 0) {
+                    breakdownHTML = `<span class="active-amount">${activeCount}×${ACTIVE_BONUS.toFixed(2)}</span>`;
+                } else if (inactiveCount > 0) {
+                    breakdownHTML = `<span class="inactive-amount">${inactiveCount}×${INACTIVE_BONUS.toFixed(2)}</span>`;
                 }
+                breakdown.innerHTML = breakdownHTML;
 
-                btn.disabled = !(amount > 0 && !isClaiming);
+                // Sub text
+                let subHTML = '';
+                if (activeCount > 0 && inactiveCount > 0) {
+                    subHTML = `<i class="fa-solid fa-circle-info"></i><span><span class="badge-active">${activeCount} active</span> + <span class="badge-inactive">${inactiveCount} inactive</span> = ${total.toFixed(2)} USDT</span>`;
+                } else if (activeCount > 0) {
+                    subHTML = `<i class="fa-solid fa-circle-info"></i><span><span class="badge-active">${activeCount} active referrals</span> (${activeAmount.toFixed(2)} USDT)</span>`;
+                } else if (inactiveCount > 0) {
+                    subHTML = `<i class="fa-solid fa-circle-info"></i><span><span class="badge-inactive">${inactiveCount} inactive referrals</span> (${inactiveAmount.toFixed(2)} USDT)</span>`;
+                } else {
+                    subHTML = `<i class="fa-solid fa-circle-info"></i><span>No new claimable earnings</span>`;
+                }
+                sub.innerHTML = subHTML;
+
+                btn.disabled = !(total > 0 && !isClaiming);
             }
 
-            function renderTable(list) {
+            function renderTable(directChildren, usersMap) {
                 const tbody = document.getElementById('referral-table-body');
                 const countBadge = document.getElementById('table-count-badge');
+                const inactiveBadge = document.getElementById('table-inactive-badge');
                 tbody.innerHTML = '';
 
-                if (list.length > 0) {
+                if (directChildren.length > 0) {
                     countBadge.style.display = 'inline';
-                    countBadge.textContent = list.length;
+                    countBadge.textContent = directChildren.length;
+
+                    let inactiveCount = 0;
+                    const list = [];
+
+                    for (let i = 0; i < directChildren.length; i++) {
+                        const uid = directChildren[i];
+                        const user = usersMap[uid];
+                        if (!user) continue;
+
+                        const depTotal = depositsCache[uid] || 0;
+                        const isActive = depTotal > 0;
+                        const isActiveClaimed = cachedClaimedActive[uid] === true;
+                        const isInactiveClaimed = cachedClaimedInactive[uid] === true;
+
+                        if (!isActive) inactiveCount++;
+
+                        let earningState = 'none';
+                        let earningAmount = 0;
+                        if (isActive) {
+                            earningAmount = ACTIVE_BONUS;
+                            if (!isActiveClaimed) {
+                                earningState = 'pending-active';
+                            } else {
+                                earningState = 'claimed-active';
+                            }
+                        } else {
+                            earningAmount = INACTIVE_BONUS;
+                            if (!isInactiveClaimed) {
+                                earningState = 'pending-inactive';
+                            } else {
+                                earningState = 'claimed-inactive';
+                            }
+                        }
+
+                        list.push({
+                            uid: uid,
+                            name: user.fullName || user.username || "Unknown",
+                            date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+                            depositTotal: depTotal,
+                            isActive: isActive,
+                            earningState: earningState,
+                            earningAmount: earningAmount
+                        });
+                    }
+
+                    if (inactiveCount > 0) {
+                        inactiveBadge.style.display = 'inline';
+                        inactiveBadge.textContent = `${inactiveCount} Inactive`;
+                    } else {
+                        inactiveBadge.style.display = 'none';
+                    }
 
                     list.forEach((member, index) => {
                         const tr = document.createElement('tr');
                         tr.classList.add('row-animate');
                         tr.style.animationDelay = `${index * 0.05}s`;
 
-                        // Status badge
                         let statusHTML = '';
                         if (member.isActive) {
                             statusHTML = `<span class="badge active"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Active</span>`;
-                        } else if (member.branchBroken) {
-                            statusHTML = `<span class="badge branch-broken"><i class="fa-solid fa-link-slash" style="font-size:9px;"></i> Inactive (Chain Broken)</span>`;
                         } else {
-                            statusHTML = `<span class="badge inactive"><i class="fa-regular fa-circle" style="font-size:6px;"></i> Inactive</span>`;
+                            statusHTML = `<span class="badge inactive-bonus"><i class="fa-regular fa-circle" style="font-size:6px;"></i> Inactive (0.10)</span>`;
                         }
 
-                        // Earning column
                         let earningHTML = '';
-                        if (member.earning === 'pending') {
-                            earningHTML = `<span class="earn-col pending"><i class="fa-solid fa-clock"></i> +${PER_REFERRAL_EARNING.toFixed(2)}</span>`;
-                        } else if (member.earning === 'claimed') {
-                            earningHTML = `<span class="earn-col"><i class="fa-solid fa-check-double"></i> +${PER_REFERRAL_EARNING.toFixed(2)}</span>`;
+                        if (member.earningState === 'pending-active') {
+                            earningHTML = `<span class="earn-col pending"><i class="fa-solid fa-clock"></i> +${ACTIVE_BONUS.toFixed(2)}</span>`;
+                        } else if (member.earningState === 'claimed-active') {
+                            earningHTML = `<span class="earn-col"><i class="fa-solid fa-check-double"></i> +${ACTIVE_BONUS.toFixed(2)}</span>`;
+                        } else if (member.earningState === 'pending-inactive') {
+                            earningHTML = `<span class="earn-col inactive-bonus pending"><i class="fa-solid fa-clock"></i> +${INACTIVE_BONUS.toFixed(2)}</span>`;
+                        } else if (member.earningState === 'claimed-inactive') {
+                            earningHTML = `<span class="earn-col inactive-bonus"><i class="fa-solid fa-check-double"></i> +${INACTIVE_BONUS.toFixed(2)}</span>`;
                         } else {
                             earningHTML = `<span class="earn-col zero">--</span>`;
-                        }
-
-                        // Downline count
-                        let downlineHTML = '';
-                        if (member.isActive) {
-                            downlineHTML = `<span style="color:var(--accent-neon);font-weight:600;">${member.subTreeCount}</span>`;
-                        } else if (member.branchBroken) {
-                            downlineHTML = `<span style="color:#ffaa00;font-weight:500;" title="Deposited users under this inactive referral, not counted for you">${member.subTreeCount} <i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i></span>`;
-                        } else {
-                            downlineHTML = `<span style="color:var(--text-muted);">0</span>`;
                         }
 
                         tr.innerHTML = `
                             <td style="font-weight:500;">${member.name}</td>
                             <td>${member.date}</td>
                             <td>${member.depositTotal.toFixed(2)} USDT</td>
-                            <td>${downlineHTML}</td>
+                            <td>0</td>
                             <td>${earningHTML}</td>
                             <td>${statusHTML}</td>
                         `;
@@ -983,6 +1037,7 @@
                     });
                 } else {
                     countBadge.style.display = 'none';
+                    inactiveBadge.style.display = 'none';
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="6">
@@ -998,7 +1053,7 @@
 
         });
 
-        /* --- Security --- */
+        // ====== Security ======
         document.onkeydown = function(e) {
             if (e.keyCode == 123) return false; 
             if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
